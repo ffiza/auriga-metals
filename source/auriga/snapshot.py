@@ -1,4 +1,4 @@
-from utils import make_paths, find_indices
+from source.utils.support import make_paths, find_indices
 import pandas as pd
 import numpy as np
 from loadmodules import gadget, load_subfind
