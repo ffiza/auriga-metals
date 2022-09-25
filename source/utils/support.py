@@ -74,9 +74,9 @@ def timer(method: Callable) -> Callable:
     def wrapper(*args, **kw):
         start_time = int(round(time.time() * 1000))
         result = method(*args, **kw)
-        endTime = int(round(time.time() * 1000))
+        end_time = int(round(time.time() * 1000))
 
-        print(endTime - start_time, 'ms')
+        print(end_time - start_time, 'ms')
         return result
 
     return wrapper
