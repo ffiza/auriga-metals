@@ -92,11 +92,11 @@ class Snapshot:
         sf.calc_sf_indizes(sf=sb)
 
         self.rotation_matrix = np.loadtxt(
-            f'{self._paths.data}/' +
-            'rotation_matrices.npy')[self.snapnum].reshape((3, 3))
+            f'{self._paths.data}' +
+            'rotation_matrices.csv')[self.snapnum].reshape((3, 3))
 
         self.subhalo_vel = np.loadtxt(
-            f'{self._paths.data}subhalo_vel.csv')[self.snapnum]
+            f'{self._paths.data}subhalo_vels.csv')[self.snapnum]
 
         pos = (self.rotation_matrix @ (sf.pos - sb.data['spos'][0]
                                        / sf.hubbleparam).T).T * 1E3
@@ -127,6 +127,12 @@ class Snapshot:
         formation_time = np.nan * np.ones(sf.mass.shape[0])
         formation_time[sf.type == 4] = sf.age
         self.df['StellarFormationTime'] = formation_time
+
+    def keep_only_feats(self, feats: list) -> None:
+        drop_feats = self.df.columns.to_list()
+        for feat in feats:
+            drop_feats.remove(feat)
+        self.df.drop(columns=drop_feats, inplace=True)
 
     def calc_circularity(self) -> None:
         """
