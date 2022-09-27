@@ -108,11 +108,11 @@ class RotationMatrices:
             mass = sf.mass * 1E10  # Msun
 
             r = np.linalg.norm(pos, axis=1)  # ckpc
-            isInner = r < self._distance
+            is_inner = r < self._distance
 
-            pos = pos[isInner]
-            vel = vel[isInner]
-            mass = mass[isInner]
+            pos = pos[is_inner]
+            vel = vel[is_inner]
+            mass = mass[is_inner]
 
             # Inertia matrix.
             inertia_tensor = np.nan * np.ones((3, 3), dtype='float64')

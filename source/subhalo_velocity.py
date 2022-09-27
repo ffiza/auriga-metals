@@ -109,15 +109,16 @@ class SubhaloVelocities:
 
             r = np.linalg.norm(pos, axis=1)  # ckpc
 
-            isMainInnerStar = (age > 0) & (r < self._distance) & \
-                              (sf.halo == 0) & (sf.subhalo == 0)
+            is_main_inner_star = (age > 0) & (r < self._distance) & \
+                                 (sf.halo == 0) & (sf.subhalo == 0)
 
-            if isMainInnerStar.sum() == 0:
+            if is_main_inner_star.sum() == 0:
                 # No stars were found with the condition (early snapshots).
                 return np.array([np.nan, np.nan, np.nan])
             else:
-                vel_cm = mass[isMainInnerStar].T @ vel[isMainInnerStar] / \
-                    mass[isMainInnerStar].sum()  # km/s
+                vel_cm = \
+                    mass[is_main_inner_star].T @ vel[is_main_inner_star] / \
+                    mass[is_main_inner_star].sum()  # km/s
                 return vel_cm
 
     def save_data(self) -> None:
