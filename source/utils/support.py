@@ -1,7 +1,6 @@
 import numpy as np
 import time
 from typing import Callable
-import os
 
 
 def find_indices(a: np.array, b: np.array,
