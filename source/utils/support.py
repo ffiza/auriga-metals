@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from typing import Callable
+import os
 
 
 def find_indices(a: np.array, b: np.array,
@@ -45,16 +46,34 @@ def snapshot_path(galaxy: int, rerun: bool, resolution: int) -> str:
         A bool to indicate if this is a original run or a rerun.
     resolution : int
         The resolution level of the simulation.
+
+    Returns
+    -------
+    str
+        The path to the snapshot files.
     """
 
-    if rerun:
-        dir_name = 'Original'
-    else:
-        dir_name = 'RerunsHighFreqStellarSnaps'
+    if os.uname()[1] == 'virgo':
+        if rerun:
+            dir_name = 'RerunsHighFreqStellarSnaps'
+        else:
+            dir_name = 'Original'
 
-    snapshot_path = f'/virgotng/mpa/Auriga/level{resolution}/' + \
-        f'{dir_name}/halo_{galaxy}/output/'
-    return snapshot_path
+        snapshot_path = f'/virgotng/mpa/Auriga/level{resolution}/' + \
+            f'{dir_name}/halo_{galaxy}/output/'
+        return snapshot_path
+    elif os.uname()[1] == 'neuromancer':
+        if rerun:
+            rerun_text = '_rerun'
+        else:
+            rerun_text = ''
+
+        if (galaxy != 6) or (resolution != 4):
+            raise Exception('Only halo 6 with resolution 4 is stored locally.')
+
+        snapshot_path = '/media/federico/Elements1/Simulations/' + \
+            f'au{galaxy}{rerun_text}/'
+        return snapshot_path
 
 
 def timer(method: Callable) -> Callable:
@@ -72,11 +91,11 @@ def timer(method: Callable) -> Callable:
         A wrapper.
     """
     def wrapper(*args, **kw):
-        start_time = int(round(time.time() * 1000))
+        start_time = int(round(time.time()))
         result = method(*args, **kw)
-        end_time = int(round(time.time() * 1000))
+        end_time = int(round(time.time()))
 
-        print(end_time - start_time, 'ms')
+        print(f'Timer: {end_time-start_time} s.')
         return result
 
     return wrapper
