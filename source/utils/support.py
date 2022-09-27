@@ -16,7 +16,7 @@ def find_indices(a: np.array, b: np.array,
         An array in which to search.
     b : np.array
         An array that contains the values to be searched for.
-    invalid_specifier : optional
+    invalid_specifier : int, optional
         A value to use in case the element is not found.
 
     Returns
@@ -38,7 +38,7 @@ def timer(method: Callable) -> Callable:
 
     Parameters
     ----------
-    method : func
+    method : Callable
         A method to decorate.
 
     Returns
