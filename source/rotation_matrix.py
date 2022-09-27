@@ -170,7 +170,7 @@ class RotationMatrices:
         This method saves the data.
         """
 
-        np.savetxt(f'{self._paths.data}rotation_matrix.csv',
+        np.savetxt(f'{self._paths.data}rotation_matrices.csv',
                    self._rotation_matrices)
 
 
