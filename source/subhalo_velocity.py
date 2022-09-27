@@ -75,7 +75,7 @@ class SubhaloVelocities:
 
         snapnums = [i for i in range(self._n_snapshots)]
         self._subhalo_velocities = np.array(
-            Pool().map(self._calculate_subhalo_velocity, snapnums))
+            Pool(2).map(self._calculate_subhalo_velocity, snapnums))
 
     def _calculate_subhalo_velocity(self, snapnum: int) -> None:
         """
@@ -90,7 +90,7 @@ class SubhaloVelocities:
 
         settings = Settings()
 
-        if snapnum <= settings.first_snap:
+        if snapnum < settings.first_snap:
             return np.array([np.nan, np.nan, np.nan])
         else:
             sf = gadget_readsnap(snapshot=snapnum,

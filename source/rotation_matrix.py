@@ -75,7 +75,7 @@ class RotationMatrices:
 
         snapnums = [i for i in range(self._n_snapshots)]
         self._rotation_matrices = np.array(
-            Pool().map(self._calculate_rotation_matrix, snapnums))
+            Pool(2).map(self._calculate_rotation_matrix, snapnums))
 
     def _calculate_rotation_matrix(self, snapnum: int) -> np.ndarray:
         """
@@ -89,7 +89,7 @@ class RotationMatrices:
         """
 
         settings = Settings()
-        if snapnum <= settings.first_snap:
+        if snapnum < settings.first_snap:
             return np.nan * np.ones((9,))
         else:
             subhalo_vel = np.loadtxt(f'{self._paths.data}/subhalo_vels.csv')
