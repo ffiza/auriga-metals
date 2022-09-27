@@ -22,7 +22,7 @@ class Settings:
 
     def __init__(self) -> None:
         self.repo_name = 'auriga-metals'
-        self.first_snap = 15
+        self.first_snap = 20
         self.galaxies = [i for i in range(1, 31)]
         self.reruns = [5, 6, 9, 13, 17, 23, 24, 26, 28]
 
