@@ -1,4 +1,4 @@
-from typing import Optional, Type
+from typing import Optional
 from loadmodules import gadget_readsnap, load_subfind
 from utils.paths import Paths
 from multiprocessing import Pool
@@ -22,13 +22,11 @@ class RotationMatrices:
         The snapshot in which to start the analysis.
     _rerun : bool
         A bool to indicate if this is a original run or a rerun.
-    _rerun_text : str
-        A string to use in the data path for each galaxy.
     _resolution : int
         The resolution level of the simulation.
     _distance : float
         The distance to consider stars for inertia matrix calculation.
-    _paths : Type[Paths]
+    _paths : Paths
         An instance of the Paths class.
     _n_snapshots : int
         The total amount of snapshots in this simulation.
@@ -64,7 +62,6 @@ class RotationMatrices:
 
         self._galaxy = galaxy
         self._rerun = rerun
-        self._rerun_text = '_rerun' if self._rerun else ''
         self._n_snapshots = 252 if self._rerun else 128
         self._resolution = resolution
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
