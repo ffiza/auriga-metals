@@ -16,6 +16,8 @@ class Settings:
         The window length used in the Savitzky-Golay filter for smoothing.
     polyorder : ing
         The order of the polynomial used in the Savitzky-Golay filter.
+    n_track_dm_parts : int
+        The number of dark matter particles to use in the galaxy tracker.
     """
 
     def __init__(self) -> None:
@@ -27,3 +29,6 @@ class Settings:
         # Smoothing configuration.
         self.window_length = 9
         self.polyorder = 1
+
+        # Galaxy tracker configuration.
+        self.n_track_dm_parts = 16
