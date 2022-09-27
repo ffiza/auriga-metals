@@ -1,7 +1,7 @@
-from multiprocessing import Pool
-from utils.support import snapshot_path
+from multiprocessing import Pool, Type
 from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
+from utils.paths import Paths
 from typing import Optional
 import os
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -21,16 +21,12 @@ class SubhaloVelocities:
         The snapshot in which to start the analysis.
     _rerun : bool
         A bool to indicate if this is a original run or a rerun.
-    _rerun_text : str
-        A string to use in the data path for each galaxy.
     _resolution : int
         The resolution level of the simulation.
     _distance : float
         The distance to consider stars for velocity calculation.
-    -snapshot_path : str
-        The snapshot path.
-    _data_path : str
-        The path to the data directory.
+    _paths : Type[Paths]
+        An instance of the Paths class.
     _n_snapshots : int
         The total amount of snapshots in this simulation.
     _subhalo_velocities : np.ndarray
@@ -66,11 +62,9 @@ class SubhaloVelocities:
 
         self._galaxy = galaxy
         self._rerun = rerun
-        self._rerun_text = '_rerun' if self._rerun else ''
         self._n_snapshots = 252 if self._rerun else 128
         self._resolution = resolution
-        self._snapshot_path = snapshot_path(galaxy, rerun, resolution)
-        self._data_path = f'data/au{self._galaxy}{self._rerun_text}/'
+        self._paths = Paths(galaxy, rerun, resolution)
         self._distance = distance
 
     def calculate_subhalo_velocities(self) -> None:
@@ -87,6 +81,11 @@ class SubhaloVelocities:
         """
         This method calculates the velocity of the main subhalo in this
         snapshot.
+
+        Parameters
+        ----------
+        snapnum : int
+            The snapshot number to analyze.
         """
 
         settings = Settings()
@@ -95,11 +94,11 @@ class SubhaloVelocities:
             return np.array([np.nan, np.nan, np.nan])
         else:
             sf = gadget_readsnap(snapshot=snapnum,
-                                 snappath=self._snapshot_path,
+                                 snappath=self._paths.snapshots,
                                  loadonlytype=[4], lazy_load=True,
                                  cosmological=False,
                                  applytransformationfacs=False)
-            sb = load_subfind(id=snapnum, dir=self._snapshot_path,
+            sb = load_subfind(id=snapnum, dir=self._paths.snapshots,
                               cosmological=False)
             sf.calc_sf_indizes(sf=sb)
 
@@ -126,7 +125,7 @@ class SubhaloVelocities:
         This method saves the data.
         """
 
-        np.savetxt(f'{self._data_path}subhalo_vels.csv',
+        np.savetxt(f'{self._paths.data}subhalo_vels.csv',
                    self._subhalo_velocities)
 
 
