@@ -1,5 +1,5 @@
 source/__pycache__
 source/auriga/__pycache__
-.vscode
+.vscode/
 source/utils/__pycache__
 images/level*/au*/density_maps.png
