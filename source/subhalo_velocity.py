@@ -1,4 +1,4 @@
-from multiprocessing import Pool, Type
+from multiprocessing import Pool
 from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
 from utils.paths import Paths
@@ -25,7 +25,7 @@ class SubhaloVelocities:
         The resolution level of the simulation.
     _distance : float
         The distance to consider stars for velocity calculation.
-    _paths : Type[Paths]
+    _paths : Paths
         An instance of the Paths class.
     _n_snapshots : int
         The total amount of snapshots in this simulation.
