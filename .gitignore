@@ -2,3 +2,4 @@ source/__pycache__
 source/auriga/__pycache__
 .vscode
 source/utils/__pycache__
+images/level*/au*/density_maps.png
