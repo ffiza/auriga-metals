@@ -1,13 +1,14 @@
-from source.utils.support import make_paths, find_indices
 import pandas as pd
 import numpy as np
-from loadmodules import gadget, load_subfind
-from source.auriga.cosmology import Cosmology
-from source.auriga.simulation import Simulation
-from source.auriga.settings import Settings
+import warnings
+from loadmodules import gadget_readsnap, load_subfind
+from auriga.cosmology import Cosmology
+from auriga.simulation import Simulation
+from auriga.physics import Physics
+from utils.paths import Paths
 
 
-class SnapshotData:
+class Snapshot:
     """
     A class to manage both the global properties of snapshots and particle
     data.
@@ -25,10 +26,6 @@ class SnapshotData:
         The resolution level of the simulation.
     snapnum : int
         The snapshot number.
-    snapshot_path : str
-        The snapshot path.
-    data_path : str
-        The path to the data directory.
     rotation_matrix : np.array
         The rotation matrix of this snapshot.
     subhalo_vel : np.array
@@ -39,10 +36,8 @@ class SnapshotData:
         The expansion factor of this snapshot.
     time : float
         The age of the universe of this snapshot.
-    rd : float
-        The radius of the stellar disc at this time.
-    hd : float
-        The height of the stellar disc at this time.
+    _paths : Paths
+        An instance of the Paths class.
 
     Methods
     -------
@@ -55,17 +50,9 @@ class SnapshotData:
         Remove all stellar particles with negative formation time.
     calc_extra_coordinates()
         Calculate the cylindrical and spherical radius for each particle.
-    tag_disc_particles()
-        Add a new feature in the data frame with a boolean that indicates if
-        the particle is in the stellar disc or not.
     calc_birth_snapnum()
         Calculate the snapshot number in which every star appears for the
         first time.
-    tag_ex_situ_stars()
-        Add a new feature in the data frame with a boolean that indicates if
-        the star particle was outside (True) or inside (False) the disc when
-        it first appears in the simulation. Keep in mind that this analysis
-        can take some time to run.
     """
 
     def __init__(self, galaxy: int, rerun: bool, resolution: int,
@@ -88,28 +75,25 @@ class SnapshotData:
         self.galaxy = galaxy
         self.rerun = rerun
         self.resolution = resolution
+        self._paths = Paths(self.galaxy, self.rerun, self.resolution)
         self.snapnum = snapnum
 
-        self.snapshot_path, self.data_path, _ = make_paths(self.galaxy,
-                                                           self.rerun,
-                                                           self.resolution)
-
-        sf = gadget.gadget_readsnap(snapshot=self.snapnum,
-                                    snappath=self.snapshot_path,
-                                    lazy_load=True,
-                                    cosmological=False,
-                                    applytransformationfacs=False)
+        sf = gadget_readsnap(snapshot=self.snapnum,
+                             snappath=self._paths.snapshots,
+                             lazy_load=True,
+                             cosmological=False,
+                             applytransformationfacs=False)
         sb = load_subfind(id=self.snapnum,
-                          dir=self.snapshot_path,
+                          dir=self._paths.snapshots,
                           cosmological=False)
         sf.calc_sf_indizes(sf=sb)
 
-        self.rotation_matrix = np.load(f'{self.data_path}/rmatrix/snap_'
-                                       f'{str(int(self.snapnum)).zfill(3)}'
-                                       f'.npy')
+        self.rotation_matrix = np.loadtxt(
+            f'{self._paths.data}/' +
+            'rotation_matrices.npy')[self.snapnum].reshape((3, 3))
 
         self.subhalo_vel = np.loadtxt(
-            f'{self.data_path}subhalo_vel.csv')[self.snapnum]
+            f'{self._paths.data}subhalo_vel.csv')[self.snapnum]
 
         pos = (self.rotation_matrix @ (sf.pos - sb.data['spos'][0]
                                        / sf.hubbleparam).T).T * 1E3
@@ -131,7 +115,7 @@ class SnapshotData:
         self.df['zVelocities'] = vel[:, 2]  # km/s
         self.df['PartTypes'] = sf.type
         self.df['ParticleIDs'] = sf.id
-        self.df['Potential'] = sf.pot  # TODO: Check units.
+        self.df['Potential'] = sf.pot / self.expansion_factor  # (km/s)^2
         self.df['Masses'] = sf.mass * 1E10  # Msun
         self.df['Halo'] = sf.halo
         self.df['Subhalo'] = sf.subhalo
@@ -141,9 +125,56 @@ class SnapshotData:
         formation_time[sf.type == 4] = sf.age
         self.df['StellarFormationTime'] = formation_time
 
-        # Size of the disc.
-        self.rd = np.loadtxt(f'{self.data_path}disc_radius.csv')[self.snapnum]
-        self.hd = np.loadtxt(f'{self.data_path}disc_height.csv')[self.snapnum]
+    def calc_circularity(self) -> None:
+        # TODO: Document this function.
+
+        physics = Physics()
+
+        # Check if all particles are loaded in the data frame.
+        for include_type in [0, 1, 2, 3, 4, 5]:
+            if include_type not in self.df.PartTypes:
+                raise ValueError(f'Type {include_type} particles/cells not'
+                                 f'loaded.')
+
+        # Check if spherical coordinates were calculated.
+        if 'rCoordinates' not in self.df.columns.values:
+            self.calc_extra_coordinates()
+
+        pos = self.df[['xCoordinates', 'yCoordinates',
+                       'zCoordinates']].to_numpy()
+        vel = self.df[['xVelocity', 'yVelocity', 'zVelocity']].to_numpy()
+        jz = np.cross(pos, vel)[:, 2] * self.expansion_factor  # kpc km/s
+        del pos, vel
+
+        is_galaxy = (self.df.Halo == 0) & (self.df.Subhalo == 0)
+        is_star = (self.df.PartTypes == 4) & (self.df.StellarFormationTime > 0)
+
+        bins = np.asarray([0] + list(np.sort(self.df.rCoordinates[is_galaxy &
+                                                                  is_star])))
+        ii = self.df.rCoordinates[is_galaxy & is_star].argsort().argsort()
+        enclosed_mass = np.add.accumulate(
+            np.histogram(self.df.rCoordinates,
+                         weights=self.df.Masses, bins=bins)[0])[ii]
+        del bins, ii
+
+        with warnings.catch_warnings():
+            # Ignore RuntimeWarnings due to division by zero.
+            warnings.simplefilter('ignore', RuntimeWarning)
+            jc = self.df.rCoordinates[is_galaxy & is_star] * \
+                self.expansion_factor * \
+                np.sqrt(physics.gravitational_constant * enclosed_mass /
+                        (1E3 * self.df.rCoordinates[is_galaxy & is_star] *
+                            self.expansion_factor))  # kpc km/s
+        del enclosed_mass
+
+        # Calculate circularity parameter.
+        eps = np.nan * np.ones(self.df.Masses.shape[0])
+        with warnings.catch_warnings():
+            # Ignore RuntimeWarnings due to division by zero.
+            warnings.simplefilter('ignore', RuntimeWarning)
+            eps[is_galaxy & is_star] = jz[is_galaxy & is_star] / jc
+        del jz, jc, is_galaxy, is_star
+        self.df['Circularity'] = eps
 
     def keep_only_halo(self, halo: int, subhalo: int) -> None:
         """
@@ -185,18 +216,6 @@ class SnapshotData:
         self.df['rxyCoordinates'] = np.linalg.norm(pos[:, 0:2], axis=1)
         self.df['rCoordinates'] = np.linalg.norm(pos, axis=1)
 
-    def tag_disc_particles(self) -> None:
-        """
-        This method adds a feature in the data frame that indicates if
-        particles belong to the disc or not.
-        """
-        # Check if cylindrical coordinates are in data frame.
-        if 'rxyCoordinates' not in self.df.columns.values:
-            self.calc_extra_coordinates()
-
-        self.df['isDisc'] = (self.df.rxyCoordinates <= self.rd) \
-            & (np.abs(self.df.zCoordinates) <= self.hd)
-
     def calc_birth_snapnum(self) -> None:
         """
         This method calculates the snapshot number in which the stars appear
@@ -212,38 +231,3 @@ class SnapshotData:
                                   & (exp_fact_diff > 0)] = i
             exp_fact_diff = new_exp_fact_diff
         self.df['StellarFormationSnapshotNumber'] = stellar_birth_snapnum
-
-    def tag_ex_situ_stars(self) -> None:
-        """
-        This method adds a tag for each star particle in the disc of the
-        current snapshot. The tag indicates if the star was found inside the
-        disc when it is first detected (False) or not (True).
-        """
-
-        # TODO: Add warning because this function takes some time to run.
-
-        settings = Settings()
-        if 'isDisc' not in self.df.columns.values:
-            self.tag_disc_particles()
-        if 'StellarFormationSnapshotNumber' not in self.df.columns.values:
-            self.calc_birth_snapnum()
-        self.df['isExSituStar'] = np.nan * np.ones(self.df.Masses.shape[0])
-        for snapnum in range(settings.first_snapshot, self.snapnum):
-            target_s = SnapshotData(self.galaxy, self.rerun, self.resolution,
-                                    snapnum)
-            target_s.drop_types([0, 1, 2, 3, 5])
-            target_s.df.drop(
-                columns=['xVelocities', 'yVelocities', 'zVelocities',
-                         'Potential'], inplace=True)
-            target_s.tag_disc_particles()
-
-            # Select the ParticleIDs in the present of the stars born in this
-            # snapshot.
-            target_ids = self.df.ParticleIDs[
-                self.df.isDisc & (self.df.StellarFormationSnapshotNumber
-                                  == snapnum)].to_numpy()
-
-            idx = find_indices(target_s.df.ParticleIDs.to_numpy(),
-                               target_ids,
-                               invalid_specifier=-1)
-            self.df.isExSituStar = target_s.df.isDisc.iloc[idx]
