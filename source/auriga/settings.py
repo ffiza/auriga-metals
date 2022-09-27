@@ -1,5 +1,3 @@
-
-
 class Settings:
     """
     A class to manage several configuration variables.
@@ -10,9 +8,6 @@ class Settings:
         The name of the respository for this project.
     first_snap : int
         The first snapshot to consider in all analysis.
-    processes : int
-        A (maybe used) variable that has the amount of processes to use when
-        calling Pool() from the multiprocessing package.
     galaxies : list
         A list of all galaxies.
     reruns : list
@@ -21,11 +16,6 @@ class Settings:
         The window length used in the Savitzky-Golay filter for smoothing.
     polyorder : ing
         The order of the polynomial used in the Savitzky-Golay filter.
-
-    Methods
-    -------
-    snapshot_path(galaxy, rerun, resolution)
-        Return the path to the snapshots.
     """
 
     def __init__(self) -> None:
