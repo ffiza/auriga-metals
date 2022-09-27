@@ -56,6 +56,9 @@ class Snapshot:
     calc_circularity()
         This method calculates the circularity parameter for the stellar
         particles in the main halo/subhalo.
+    keep_only_feats(feats)
+        This method removes all feats from the data frame, keeping only those
+        specified in the argument.
     """
 
     def __init__(self, galaxy: int, rerun: bool, resolution: int,
@@ -129,6 +132,16 @@ class Snapshot:
         self.df['StellarFormationTime'] = formation_time
 
     def keep_only_feats(self, feats: list) -> None:
+        """
+        This method removes all feats from the data frame, keeping only those
+        specified in the argument.
+
+        Parameters
+        ----------
+        feats : list
+            A list of features to keep in the data frame.
+        """
+
         drop_feats = self.df.columns.to_list()
         for feat in feats:
             drop_feats.remove(feat)
