@@ -33,6 +33,9 @@ class SubhaloVelocities:
         The path to the data directory.
     _n_snapshots : int
         The total amount of snapshots in this simulation.
+    _subhalo_velocities : np.Array
+        An array with the subhalo velocity for each snapshot of this
+        simulation.
 
     Methods
     -------
