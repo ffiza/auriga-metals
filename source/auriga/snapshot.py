@@ -29,7 +29,7 @@ class Snapshot:
     rotation_matrix : np.array
         The rotation matrix of this snapshot.
     subhalo_vel : np.array
-        The velocity of the main subhalo.
+        The velocity of the main subhalo of this snapshot.
     redshift : float
         The redshift of this snapshot.
     expansion_factor : float
@@ -53,6 +53,9 @@ class Snapshot:
     calc_birth_snapnum()
         Calculate the snapshot number in which every star appears for the
         first time.
+    calc_circularity()
+        This method calculates the circularity parameter for the stellar
+        particles in the main halo/subhalo.
     """
 
     def __init__(self, galaxy: int, rerun: bool, resolution: int,
@@ -126,7 +129,10 @@ class Snapshot:
         self.df['StellarFormationTime'] = formation_time
 
     def calc_circularity(self) -> None:
-        # TODO: Document this function.
+        """
+        This method calculates the circularity parameter for the stellar
+        particles in the main halo/subhalo.
+        """
 
         physics = Physics()
 
@@ -149,12 +155,13 @@ class Snapshot:
         is_galaxy = (self.df.Halo == 0) & (self.df.Subhalo == 0)
         is_star = (self.df.PartTypes == 4) & (self.df.StellarFormationTime > 0)
 
-        bins = np.asarray([0] + list(np.sort(self.df.rCoordinates[is_galaxy &
-                                                                  is_star])))
+        bins = np.asarray(
+            [0] + list(np.sort(self.df.rCoordinates[is_galaxy & is_star])))
         ii = self.df.rCoordinates[is_galaxy & is_star].argsort().argsort()
         enclosed_mass = np.add.accumulate(
-            np.histogram(self.df.rCoordinates,
-                         weights=self.df.Masses, bins=bins)[0])[ii]
+            np.histogram(
+                self.df.rCoordinates,
+                weights=self.df.Masses, bins=bins)[0])[ii]
         del bins, ii
 
         with warnings.catch_warnings():
