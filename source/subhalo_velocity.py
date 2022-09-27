@@ -4,7 +4,7 @@ from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
 from typing import Optional
 import os
-os.environ["MKL_NUM_THREADS"] = "1"  # Limits threads in Numpy
+os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
