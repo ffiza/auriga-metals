@@ -126,7 +126,7 @@ class SubhaloVelocities:
         This method saves the data.
         """
 
-        np.savetxt(f'{self._data_path}subhalo_vel.csv',
+        np.savetxt(f'{self._data_path}subhalo_vels.csv',
                    self._subhalo_velocities)
 
 
