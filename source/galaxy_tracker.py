@@ -1,12 +1,32 @@
 import numpy as np
 from scipy.stats import mode
 import pandas as pd
+from loadmodules import gadget_readsnap, load_subfind
 from utils.support import find_indices
 from multiprocessing import Pool
 from auriga.snapshot import Snapshot
 from auriga.settings import Settings
 from utils.paths import Paths
 from typing import Tuple
+
+
+def load_dm_snapshot(snapnum: int) -> pd.DataFrame:
+    paths = Paths()
+    sf = gadget_readsnap(snapshot=snapnum,
+                         snappath=paths.snapshots,
+                         loadonlytype=[1], lazy_load=True,
+                         cosmological=False,
+                         applytransformationfacs=False)
+    sb = load_subfind(id=snapnum, dir=paths.snapshots,
+                      cosmological=False)
+    sf.calc_sf_indizes(sf=sb)
+    df = pd.DataFrame({'ParticleIDs': sf.id,
+                       'Halo': sf.halo,
+                       'Subhalo': sf.subhalo,
+                       'Potential': sf.pot/sf.time  # (km/s)^2
+                       })
+    
+    return df
 
 
 class GalaxyTracker:
@@ -24,23 +44,13 @@ class GalaxyTracker:
 
     def _find_present_day_most_bound_dm_ids(self) -> np.ndarray:
         present_day_snapnum = 251 if self._rerun else 127
-        s = Snapshot(self._galaxy, self._rerun, self._resolution,
-                     snapnum=present_day_snapnum)
 
-        # We consider the present-day halo 0 and subhalo 0 to be the main
-        # object.
-        s.keep_only_halo(0, 0)
+        df = load_dm_snapshot(present_day_snapnum)
 
-        # Keep only dark matter particles.
-        s.drop_types([0, 2, 3, 4, 5])
-
-        # Remove all unused features.
-        s.keep_only_feats(['Halo', 'Subhalo', 'ParticleIDs', 'Potential'])
-
-        s.df.sort_values(by=['Potential'], ascending=True, inplace=True)
+        df.sort_values(by=['Potential'], ascending=True, inplace=True)
 
         most_bound_ids = \
-            s.df.ParticleIDs.iloc[0:self._settings.n_track_dm_parts]
+            df.ParticleIDs.iloc[0:self._settings.n_track_dm_parts]
 
         return most_bound_ids.to_numpy()
 
@@ -48,18 +58,16 @@ class GalaxyTracker:
         if snapnum < self._settings.first_snap:
             return 0, 0
         else:
-            s = Snapshot(self._galaxy, self._rerun, self._resolution, snapnum)
-            s.drop_types([0, 2, 3, 4, 5])
-            s.keep_only_feats(['Halo', 'Subhalo', 'ParticleIDs'])
+            df = load_dm_snapshot(snapnum)
 
-            target_idxs = find_indices(s.df.ParticleIDs.to_numpy(),
+            target_idxs = find_indices(df.ParticleIDs.to_numpy(),
                                        self._target_ids, invalid_specifier=-1)
 
             if target_idxs.min() == -1:
                 raise Exception('-1 detected in target indices.')
 
-            target_halo_idxs = s.df.Halo.iloc[target_idxs].to_numpy()
-            target_subhalo_idxs = s.df.Subhalo.iloc[target_idxs].to_numpy()
+            target_halo_idxs = df.Halo.iloc[target_idxs].to_numpy()
+            target_subhalo_idxs = df.Subhalo.iloc[target_idxs].to_numpy()
 
             target_halo = mode(target_halo_idxs, keepdims=False)[0]
             target_subhalo = mode(target_subhalo_idxs, keepdims=False)[0]
