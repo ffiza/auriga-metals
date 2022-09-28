@@ -79,9 +79,6 @@ class GalaxyTracker:
 
 
 if __name__ == '__main__':
-    settings = Settings()
-
-    for galaxy in settings.galaxies:
-        galaxy_tracker = GalaxyTracker(galaxy, False, 4)
+        galaxy_tracker = GalaxyTracker(6, False, 4)
         galaxy_tracker.track_galaxy()
         galaxy_tracker.save_data()
