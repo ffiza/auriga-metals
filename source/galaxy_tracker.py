@@ -72,8 +72,8 @@ class GalaxyTracker:
             target_halo_idxs = df.Halo.iloc[target_idxs].to_numpy()
             target_subhalo_idxs = df.Subhalo.iloc[target_idxs].to_numpy()
 
-            target_halo = mode(target_halo_idxs, keepdims=False)[0]
-            target_subhalo = mode(target_subhalo_idxs, keepdims=False)[0]
+            target_halo = mode(target_halo_idxs)[0][0]
+            target_subhalo = mode(target_subhalo_idxs)[0][0]
 
             return target_halo, target_subhalo
 
