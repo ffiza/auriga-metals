@@ -80,7 +80,7 @@ class GalaxyTracker:
     def track_galaxy(self) -> None:
         snapnums = [i for i in range(self._n_snapshots)]
         data = np.array(
-            Pool(2).map(self._find_location_of_target_ids, snapnums))
+            Pool().map(self._find_location_of_target_ids, snapnums))
 
         self.df['MainHaloIDX'] = data[:, 0]
         self.df['MainSubhaloIDX'] = data[:, 1]
