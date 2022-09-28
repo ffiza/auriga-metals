@@ -49,6 +49,9 @@ class GalaxyTracker:
         df = load_dm_snapshot(self._galaxy, self._rerun,
                               self._resolution, present_day_snapnum)
 
+        # Keep only particles from the halo 0, subhalo 0.
+        df = df[(df.Halo == 0) & (df.Subhalo == 0)]
+
         df.sort_values(by=['Potential'], ascending=True, inplace=True)
 
         most_bound_ids = \
