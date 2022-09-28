@@ -10,8 +10,9 @@ from utils.paths import Paths
 from typing import Tuple
 
 
-def load_dm_snapshot(snapnum: int) -> pd.DataFrame:
-    paths = Paths()
+def load_dm_snapshot(galaxy: int, rerun: bool,
+                     resolution: int, snapnum: int) -> pd.DataFrame:
+    paths = Paths(galaxy, rerun, resolution)
     sf = gadget_readsnap(snapshot=snapnum,
                          snappath=paths.snapshots,
                          loadonlytype=[1], lazy_load=True,
