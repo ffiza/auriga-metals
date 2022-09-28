@@ -16,7 +16,7 @@ class Snapshot:
     Attributes
     ----------
     galaxy : int
-        The snapshot in which to start the analysis.
+        The galaxy to analyze.
     df : pd.DataFrame
         A pandas data frame that contains the data of the particles
         in this snapshot.
