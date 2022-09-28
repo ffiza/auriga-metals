@@ -31,4 +31,4 @@ class Settings:
         self.polyorder = 1
 
         # Galaxy tracker configuration.
-        self.n_track_dm_parts = 16
+        self.n_track_dm_parts = 8
