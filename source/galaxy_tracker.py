@@ -46,7 +46,8 @@ class GalaxyTracker:
     def _find_present_day_most_bound_dm_ids(self) -> np.ndarray:
         present_day_snapnum = 251 if self._rerun else 127
 
-        df = load_dm_snapshot(present_day_snapnum)
+        df = load_dm_snapshot(self._galaxy, self._rerun,
+                              self._resolution, present_day_snapnum)
 
         df.sort_values(by=['Potential'], ascending=True, inplace=True)
 
@@ -59,7 +60,8 @@ class GalaxyTracker:
         if snapnum < self._settings.first_snap:
             return 0, 0
         else:
-            df = load_dm_snapshot(snapnum)
+            df = load_dm_snapshot(self._galaxy, self._rerun,
+                                  self._resolution, snapnum)
 
             target_idxs = find_indices(df.ParticleIDs.to_numpy(),
                                        self._target_ids, invalid_specifier=-1)
