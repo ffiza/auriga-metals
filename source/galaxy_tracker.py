@@ -69,7 +69,7 @@ class GalaxyTracker:
     def track_galaxy(self) -> None:
         snapnums = [i for i in range(self._n_snapshots)]
         data = np.array(
-            Pool(2).map(self._find_location_of_target_ids, snapnums))
+            Pool().map(self._find_location_of_target_ids, snapnums))
 
         self.df['MainHaloIDX'] = data[:, 0]
         self.df['MainSubhaloIDX'] = data[:, 1]
@@ -79,6 +79,9 @@ class GalaxyTracker:
 
 
 if __name__ == '__main__':
-    galaxy_tracker = GalaxyTracker(6, False, 4)
-    galaxy_tracker.track_galaxy()
-    galaxy_tracker.save_data()
+    settings = Settings()
+
+    for galaxy in settings.galaxies:
+        galaxy_tracker = GalaxyTracker(galaxy, False, 4)
+        galaxy_tracker.track_galaxy()
+        galaxy_tracker.save_data()
