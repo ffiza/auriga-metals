@@ -171,8 +171,11 @@ class GalaxyTracker:
             target_halo_idxs = df.Halo.iloc[target_idxs].to_numpy()
             target_subhalo_idxs = df.Subhalo.iloc[target_idxs].to_numpy()
 
-            target_halo = mode(target_halo_idxs)[0][0]
-            target_subhalo = mode(target_subhalo_idxs)[0][0]
+            # Remove particles in the inner or outer fuzz.
+            is_not_fuzz = (target_halo_idxs != -1) & (target_subhalo_idxs != -1)
+
+            target_halo = mode(target_halo_idxs[is_not_fuzz])[0][0]
+            target_subhalo = mode(target_subhalo_idxs[is_not_fuzz])[0][0]
 
             return target_halo, target_subhalo
 
