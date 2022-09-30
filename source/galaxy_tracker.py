@@ -2,11 +2,11 @@ import numpy as np
 from scipy.stats import mode
 import pandas as pd
 from loadmodules import gadget_readsnap, load_subfind
-from utils.support import find_indices
-from multiprocessing import Pool
-from auriga.snapshot import Snapshot
 from auriga.settings import Settings
+from auriga.simulation import Simulation
+from utils.support import find_indices
 from utils.paths import Paths
+from utils.timer import timer
 from typing import Tuple
 
 
@@ -31,6 +31,7 @@ def load_dm_snapshot(galaxy: int, rerun: bool,
     pd.DataFrame
         A data frame with the particle IDs, halo, subhalo and potential.
     """
+
     paths = Paths(galaxy, rerun, resolution)
     sf = gadget_readsnap(snapshot=snapnum,
                          snappath=paths.snapshots,
@@ -45,7 +46,7 @@ def load_dm_snapshot(galaxy: int, rerun: bool,
                        'Subhalo': sf.subhalo,
                        'Potential': sf.pot/sf.time  # (km/s)^2
                        })
-    
+
     return df
 
 
@@ -71,7 +72,7 @@ class GalaxyTracker:
         the tracking number set in Settings.
     _df : pd.DataFrame
         A data frame that contains the information of the track process.
-    
+
     Methods
     -------
     _find_present_day_most_bound_dm_ids()
@@ -86,6 +87,7 @@ class GalaxyTracker:
     save_data()
         This method saves the data to a csv file.
     """
+
     def __init__(self, galaxy: int, rerun: bool, resolution: int) -> None:
         """
         Parameters
@@ -97,21 +99,38 @@ class GalaxyTracker:
         resolution : int
             The resolution of the simulation.
         """
+
         self._galaxy = galaxy
         self._rerun = rerun
         self._resolution = resolution
-        self._n_snapshots = 252 if self._rerun else 128
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
         self._settings = Settings()
-
-        self._target_ids = self._find_present_day_most_bound_dm_ids()
+        self._n_snapshots = Simulation(self._rerun,
+                                       self._resolution).n_snapshots
 
         self._df = pd.DataFrame()
+        self._df['MainHaloIDX'] = 0 * np.ones(self._n_snapshots,
+                                              dtype=np.int32)
+        self._df['MainSubhaloIDX'] = 0 * np.ones(self._n_snapshots,
+                                                 dtype=np.int32)
+        # Set present day halo and subhalo index.
+        self._df.MainHaloIDX.iloc[-1] = 0
+        self._df.MainSubhaloIDX.iloc[-1] = 0
 
-    def _find_present_day_most_bound_dm_ids(self) -> np.ndarray:
-        """This method finds an array of IDs that belong to the present-day
-        most bound dark matter particles. The amount of particles to consider
-        is defined in Settings.
+    def _find_most_bound_dm_ids(self, snapnum: int, halo: int = 0,
+                                subhalo: int = 0) -> np.ndarray:
+        """This method finds the IDs of the most bound dark matter particles
+        in a given snapshot and a given halo and subhalo index. The amount of
+        particles to track is defined in Settings.
+
+        Parameters
+        ----------
+        snapnum : int
+            The snapshot number to analyze.
+        halo : int, optional
+            The index of the halo to search.
+        subhalo : int, optional
+            The index of the subhalo to search.
 
         Returns
         -------
@@ -119,14 +138,12 @@ class GalaxyTracker:
             An array that contains the IDs of the most bound dark matter
             particles.
         """
- 
-        present_day_snapnum = 251 if self._rerun else 127
 
         df = load_dm_snapshot(self._galaxy, self._rerun,
-                              self._resolution, present_day_snapnum)
+                              self._resolution, snapnum)
 
-        # Keep only particles from the halo 0, subhalo 0.
-        df = df[(df.Halo == 0) & (df.Subhalo == 0)]
+        # Keep only particles from the selected halo and subhalo.
+        df = df[(df.Halo == halo) & (df.Subhalo == subhalo)]
 
         df.sort_values(by=['Potential'], ascending=True, inplace=True)
 
@@ -135,14 +152,17 @@ class GalaxyTracker:
 
         return most_bound_ids.to_numpy()
 
-    def _find_location_of_target_ids(self, snapnum: int) -> Tuple[int, int]:
+    def _find_location_of_dm_ids(self, snapnum: int,
+                                 target_ids: np.ndarray) -> Tuple[int, int]:
         """This method finds the most common halo/subhalo index in the current
-        snapshot for the particles being tracked.
+        snapshot for the particle IDs indicated.
 
         Parameters
         ----------
         snapnum : int
             The snapshot number to analyze.
+        target_ids : np.ndarray
+            The array of particle IDs to search for.
 
         Returns
         -------
@@ -155,15 +175,16 @@ class GalaxyTracker:
             If not all target IDs were found in the particle IDs data for the
             current snapshot.
         """
-   
+
         if snapnum < self._settings.first_snap:
-            return 0, 0
+            # Return NaNs for snapshots outside of the analysis scope.
+            return np.nan, np.nan
         else:
             df = load_dm_snapshot(self._galaxy, self._rerun,
                                   self._resolution, snapnum)
 
             target_idxs = find_indices(df.ParticleIDs.to_numpy(),
-                                       self._target_ids, invalid_specifier=-1)
+                                       target_ids, invalid_specifier=-1)
 
             if target_idxs.min() == -1:
                 raise Exception('-1 detected in target indices.')
@@ -172,23 +193,31 @@ class GalaxyTracker:
             target_subhalo_idxs = df.Subhalo.iloc[target_idxs].to_numpy()
 
             # Remove particles in the inner or outer fuzz.
-            is_not_fuzz = (target_halo_idxs != -1) & (target_subhalo_idxs != -1)
+            is_not_fuzz = \
+                (target_halo_idxs != -1) & (target_subhalo_idxs != -1)
 
             target_halo = mode(target_halo_idxs[is_not_fuzz])[0][0]
             target_subhalo = mode(target_subhalo_idxs[is_not_fuzz])[0][0]
 
             return target_halo, target_subhalo
 
+    @timer
     def track_galaxy(self) -> None:
         """This method tracks the galaxy through all snapshots.
-        """      
-  
-        snapnums = [i for i in range(self._n_snapshots)]
-        data = np.array(
-            Pool().map(self._find_location_of_target_ids, snapnums))
+        """
 
-        self._df['MainHaloIDX'] = data[:, 0]
-        self._df['MainSubhaloIDX'] = data[:, 1]
+        for snapnum in range(self._n_snapshots-1, -1, -1):
+            if (snapnum != self._n_snapshots-1)\
+               & (snapnum >= self._settings.first_snap):
+                target_halo = self._df.MainHaloIDX.iloc[snapnum+1]
+                target_subhalo = self._df.MainSubhaloIDX.iloc[snapnum+1]
+                target_ids = self._find_most_bound_dm_ids(snapnum+1,
+                                                          target_halo,
+                                                          target_subhalo)
+                new_target_halo, new_target_subhalo = \
+                    self._find_location_of_dm_ids(snapnum, target_ids)
+                self._df.MainHaloIDX.iloc[snapnum] = new_target_halo
+                self._df.MainSubhaloIDX.iloc[snapnum] = new_target_subhalo
 
     def save_data(self) -> None:
         """This method saves the data to a csv file.
@@ -201,6 +230,8 @@ if __name__ == '__main__':
     settings = Settings()
 
     for galaxy in settings.galaxies:
+        print(f'Analyzing Au{galaxy}... ', end='')
         galaxy_tracker = GalaxyTracker(galaxy, False, 4)
         galaxy_tracker.track_galaxy()
         galaxy_tracker.save_data()
+        print(' Done.')
