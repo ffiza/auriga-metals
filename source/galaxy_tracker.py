@@ -46,7 +46,7 @@ def load_dm_snapshot(galaxy: int, rerun: bool,
     df = pd.DataFrame({'ParticleIDs': sf.id,
                        'Halo': sf.halo,
                        'Subhalo': sf.subhalo,
-                       'Potential': sf.pot/sf.time  # (km/s)^2
+                       'Potential': sf.pot / sf.time  # (km/s)^2
                        })
 
     return df
@@ -208,12 +208,12 @@ class GalaxyTracker:
         """This method tracks the galaxy through all snapshots.
         """
 
-        for snapnum in range(self._n_snapshots-1, -1, -1):
-            if (snapnum != self._n_snapshots-1)\
+        for snapnum in range(self._n_snapshots - 1, -1, -1):
+            if (snapnum != self._n_snapshots - 1)\
                & (snapnum >= self._settings.first_snap):
-                target_halo = self._df.MainHaloIDX.iloc[snapnum+1]
-                target_subhalo = self._df.MainSubhaloIDX.iloc[snapnum+1]
-                target_ids = self._find_most_bound_dm_ids(snapnum+1,
+                target_halo = self._df.MainHaloIDX.iloc[snapnum + 1]
+                target_subhalo = self._df.MainSubhaloIDX.iloc[snapnum + 1]
+                target_ids = self._find_most_bound_dm_ids(snapnum + 1,
                                                           target_halo,
                                                           target_subhalo)
                 new_target_halo, new_target_subhalo = \
