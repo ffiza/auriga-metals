@@ -7,7 +7,9 @@ from auriga.simulation import Simulation
 from utils.support import find_indices
 from utils.paths import Paths
 from utils.timer import timer
+from utils.images import add_redshift, figure_setup
 from typing import Tuple
+from matplotlib import pyplot as plt
 
 
 def load_dm_snapshot(galaxy: int, rerun: bool,
@@ -226,12 +228,68 @@ class GalaxyTracker:
         self._df.to_csv(f'{self._paths.data}main_object_idxs.csv')
 
 
-if __name__ == '__main__':
-    settings = Settings()
+def make_plot() -> None:
+    """This method creates a plot to visualize the main object halo/subhalo
+    index.
+    """
 
-    for galaxy in settings.galaxies:
-        print(f'Analyzing Au{galaxy}... ', end='')
-        galaxy_tracker = GalaxyTracker(galaxy, False, 4)
-        galaxy_tracker.track_galaxy()
-        galaxy_tracker.save_data()
-        print(' Done.')
+    figure_setup()
+
+    fig, axs = plt.subplots(figsize=(7.5, 7.5), nrows=6, ncols=5,
+                            sharex=True, sharey=True)
+    fig.subplots_adjust(wspace=0, hspace=0)
+    # fig = plt.figure(figsize=(7.5, 7.5))
+    # gs = fig.add_gridspec(6, 5, hspace=0, wspace=0)
+    # axs = gs.subplots(sharex=True, sharey=True)
+
+    for ax_idx, ax in enumerate(axs.flat):
+        ax.label_outer()
+        ax.grid(True, linestyle='--', lw=.25)
+        ax.tick_params(which='both', direction="in")
+        ax.set_xlim(0, 14)
+        ax.set_ylim(-0.5, 2.5)
+        ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
+        ax.set_yticks([0, 1, 2])
+        ax.set_yticklabels([0, 1, r'$\geq 2$'])
+
+        galaxy = ax_idx + 1
+
+        paths = Paths(galaxy, False, 4)
+        simulation = Simulation(False, 4)
+
+        df = pd.read_csv(f'{paths.data}main_object_idxs.csv')
+
+        ax.plot(simulation.times, df.MainHaloIDX, c='k', lw=1,
+                label='HaloIDX')
+        ax.plot(simulation.times, df.MainSubhaloIDX, c='k', lw=1,
+                label='SubhaloIDX')
+
+        if galaxy == 6:
+            ax.legend(loc='lower right', ncol=2, fontsize=2.5,
+                      framealpha=.75, bbox_to_anchor=(.95, .05),
+                      edgecolor='none', fancybox=False)
+
+        add_redshift(ax)
+        ax.text(1, 0.1, r'$\mathrm{Au}$' + f'{galaxy}')
+
+        if ax.get_subplotspec().is_first_col():
+            ax.set_ylabel('Index')
+        if ax.get_subplotspec().is_last_row():
+            ax.set_xlabel('Time [Gyr]')
+
+        fig.savefig('images/galaxy_tracker.png')
+        plt.close(fig)
+
+
+if __name__ == '__main__':
+    # Analysis.
+    # settings = Settings()
+    # for galaxy in settings.galaxies:
+    #     print(f'Analyzing Au{galaxy}... ', end='')
+    #     galaxy_tracker = GalaxyTracker(galaxy, False, 4)
+    #     galaxy_tracker.track_galaxy()
+    #     galaxy_tracker.save_data()
+    #     print(' Done.')
+    
+    # Plotting.
+    make_plot()
