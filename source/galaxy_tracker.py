@@ -7,7 +7,7 @@ from auriga.simulation import Simulation
 from utils.support import find_indices
 from utils.paths import Paths
 from utils.timer import timer
-from utils.images import add_redshift, figure_setup
+from utils.images import add_redshift, figure_setup, FULL_WIDTH
 from typing import Tuple
 from matplotlib import pyplot as plt
 
@@ -235,22 +235,21 @@ def make_plot() -> None:
 
     figure_setup()
 
-    fig, axs = plt.subplots(figsize=(7.5, 7.5), nrows=6, ncols=5,
+    fig, axs = plt.subplots(figsize=(FULL_WIDTH, FULL_WIDTH),
+                            nrows=6, ncols=5,
                             sharex=True, sharey=True)
     fig.subplots_adjust(wspace=0, hspace=0)
-    # fig = plt.figure(figsize=(7.5, 7.5))
-    # gs = fig.add_gridspec(6, 5, hspace=0, wspace=0)
-    # axs = gs.subplots(sharex=True, sharey=True)
 
     for ax_idx, ax in enumerate(axs.flat):
         ax.label_outer()
-        ax.grid(True, linestyle='--', lw=.25)
+        ax.grid(True, ls='-', lw=0.5, c='silver')
         ax.tick_params(which='both', direction="in")
         ax.set_xlim(0, 14)
-        ax.set_ylim(-0.5, 2.5)
+        ax.set_ylim(-0.5, 5.5)
         ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
-        ax.set_yticks([0, 1, 2])
-        ax.set_yticklabels([0, 1, r'$\geq 2$'])
+        ax.set_yticks([0, 1, 2, 3, 4, 5])
+        for spine in ['top', 'bottom', 'left', 'right']:
+            ax.spines[spine].set_linewidth(1.5)
 
         galaxy = ax_idx + 1
 
@@ -259,26 +258,29 @@ def make_plot() -> None:
 
         df = pd.read_csv(f'{paths.data}main_object_idxs.csv')
 
-        ax.plot(simulation.times, df.MainHaloIDX, c='k', lw=1,
-                label='HaloIDX')
-        ax.plot(simulation.times, df.MainSubhaloIDX, c='k', lw=1,
-                label='SubhaloIDX')
+        ax.plot(simulation.times, df.MainHaloIDX, c='tab:red', lw=2,
+                label='Halo', zorder=10)
+        ax.plot(simulation.times, df.MainSubhaloIDX, c='tab:green', lw=1,
+                label='Subhalo', zorder=11)
 
-        if galaxy == 6:
-            ax.legend(loc='lower right', ncol=2, fontsize=2.5,
-                      framealpha=.75, bbox_to_anchor=(.95, .05),
-                      edgecolor='none', fancybox=False)
+        if galaxy == 1:
+            ax.legend(loc='upper left', ncol=1, fontsize=5, framealpha=0,
+                      bbox_to_anchor=(0.05, 0.95))
 
         add_redshift(ax)
-        ax.text(1, 0.1, r'$\mathrm{Au}$' + f'{galaxy}')
+        ax.text(0.95, 0.95, f'Au{galaxy}', size=6,
+                ha='right', va='top',
+                transform=ax.transAxes,
+                bbox={"facecolor": "silver", "edgecolor": "white",
+                      "pad": .2, 'boxstyle': 'round', 'lw': 1})
 
         if ax.get_subplotspec().is_first_col():
             ax.set_ylabel('Index')
         if ax.get_subplotspec().is_last_row():
             ax.set_xlabel('Time [Gyr]')
 
-        fig.savefig('images/galaxy_tracker.png')
-        plt.close(fig)
+    fig.savefig('images/galaxy_tracker.png')
+    plt.close(fig)
 
 
 if __name__ == '__main__':
@@ -290,6 +292,6 @@ if __name__ == '__main__':
     #     galaxy_tracker.track_galaxy()
     #     galaxy_tracker.save_data()
     #     print(' Done.')
-    
+
     # Plotting.
     make_plot()
