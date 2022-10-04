@@ -3,6 +3,7 @@ from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
 from utils.paths import Paths
 from typing import Optional
+import pandas as pd
 import os
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
@@ -32,6 +33,10 @@ class SubhaloVelocities:
     _subhalo_velocities : np.ndarray
         An array with the subhalo velocity for each snapshot of this
         simulation.
+    _halo_idxs : np.ndarray
+        An array with the indices of the main halo.
+    _subhalo_idxs : np.ndarray
+        An array with the indices of the main subhalo.
 
     Methods
     -------
@@ -64,8 +69,13 @@ class SubhaloVelocities:
         self._rerun = rerun
         self._n_snapshots = 252 if self._rerun else 128
         self._resolution = resolution
-        self._paths = Paths(galaxy, rerun, resolution)
+        self._paths = Paths(self._galaxy, self._rerun, self._resolution)
         self._distance = distance
+
+        # Set halo/subhalo indices.
+        main_obj_df = pd.read_csv(f'{self._paths.data}main_object_idxs.csv')
+        self._halo_idxs = main_obj_df.MainHaloIDX.to_numpy()
+        self._subhalo_idxs = main_obj_df.MainSubhaloIDX.to_numpy()
 
     def calculate_subhalo_velocities(self) -> None:
         """
@@ -103,14 +113,18 @@ class SubhaloVelocities:
             sf.calc_sf_indizes(sf=sb)
 
             pos = (sf.pos - sb.data['spos'][0] / sf.hubbleparam) * 1E3  # ckpc
+            del sb
             vel = sf.vel * np.sqrt(sf.time)  # km/s
             mass = sf.mass * 1E10  # Msun
             age = sf.age
 
             r = np.linalg.norm(pos, axis=1)  # ckpc
+            del pos
 
             is_main_inner_star = (age > 0) & (r < self._distance) & \
-                                 (sf.halo == 0) & (sf.subhalo == 0)
+                                 (sf.halo == self._halo_idxs[snapnum]) & \
+                                 (sf.subhalo == self._subhalo_idxs[snapnum])
+            del sf, age, r
 
             if is_main_inner_star.sum() == 0:
                 # No stars were found with the condition (early snapshots).
