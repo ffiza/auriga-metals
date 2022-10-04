@@ -42,9 +42,6 @@ class Paths:
             else:
                 rerun_text = ''
 
-            if (galaxy != 6) or (resolution != 4):
-                raise Exception('Only halo 6 (L4) is stored locally.')
-
             self.snapshots = '/media/federico/Elements1/Simulations/' + \
                 f'au{galaxy}{rerun_text}/'
 
