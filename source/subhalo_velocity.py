@@ -2,6 +2,7 @@ from multiprocessing import Pool
 from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
 from utils.paths import Paths
+from utils.timer import timer
 from typing import Optional
 import pandas as pd
 import os
@@ -77,6 +78,7 @@ class SubhaloVelocities:
         self._halo_idxs = main_obj_df.MainHaloIDX.to_numpy()
         self._subhalo_idxs = main_obj_df.MainSubhaloIDX.to_numpy()
 
+    @timer
     def calculate_subhalo_velocities(self) -> None:
         """
         This method calculates the velocity of the main subhalo for all
@@ -85,7 +87,7 @@ class SubhaloVelocities:
 
         snapnums = [i for i in range(self._n_snapshots)]
         self._subhalo_velocities = np.array(
-            Pool(2).map(self._calculate_subhalo_velocity, snapnums))
+            Pool().map(self._calculate_subhalo_velocity, snapnums))
 
     def _calculate_subhalo_velocity(self, snapnum: int) -> None:
         """
@@ -103,6 +105,9 @@ class SubhaloVelocities:
         if snapnum < settings.first_snap:
             return np.array([np.nan, np.nan, np.nan])
         else:
+            halo_idx = self._halo_idxs[snapnum]
+            subhalo_idx = self._subhalo_idxs[snapnum]
+
             sf = gadget_readsnap(snapshot=snapnum,
                                  snappath=self._paths.snapshots,
                                  loadonlytype=[4], lazy_load=True,
@@ -112,7 +117,11 @@ class SubhaloVelocities:
                               cosmological=False)
             sf.calc_sf_indizes(sf=sb)
 
-            pos = (sf.pos - sb.data['spos'][0] / sf.hubbleparam) * 1E3  # ckpc
+            # Find the index of the subhalo in the subfind table.
+            subhalo_grouptab_idx = sb.data['ffsh'][halo_idx] + subhalo_idx
+
+            pos = (sf.pos - sb.data['spos'][subhalo_grouptab_idx]
+                   / sf.hubbleparam) * 1E3  # ckpc
             del sb
             vel = sf.vel * np.sqrt(sf.time)  # km/s
             mass = sf.mass * 1E10  # Msun
@@ -122,8 +131,8 @@ class SubhaloVelocities:
             del pos
 
             is_main_inner_star = (age > 0) & (r < self._distance) & \
-                                 (sf.halo == self._halo_idxs[snapnum]) & \
-                                 (sf.subhalo == self._subhalo_idxs[snapnum])
+                                 (sf.halo == halo_idx) & \
+                                 (sf.subhalo == subhalo_idx)
             del sf, age, r
 
             if is_main_inner_star.sum() == 0:
@@ -145,6 +154,11 @@ class SubhaloVelocities:
 
 
 if __name__ == '__main__':
-    subhalo_vels = SubhaloVelocities(6, False, 4)
-    subhalo_vels.calculate_subhalo_velocities()
-    subhalo_vels.save_data()
+    # Analysis.
+    settings = Settings()
+    for galaxy in settings.galaxies:
+        print(f'Analyzing Au{galaxy}... ', end='')
+        subhalo_vels = SubhaloVelocities(galaxy, False, 4)
+        subhalo_vels.calculate_subhalo_velocities()
+        subhalo_vels.save_data()
+        print(' Done.')
