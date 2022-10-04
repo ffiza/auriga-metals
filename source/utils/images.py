@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from source.auriga.cosmology import Cosmology
+from auriga.cosmology import Cosmology
 
 TICK_MAJOR_WIDTH = .5
 TICK_MAJOR_SIZE = 3
@@ -70,7 +70,7 @@ def add_redshift(ax: plt.Axes) -> None:
     ax2.tick_params(which='both', direction="in")
     ax2_label_values = [0.1, 0.5, 1, 2, 3, 10]
     ax2_ticklabels = ['0.1', '0.5', '1', '2', '3', '10']
-    ax2_ticks = [cosmology.redhift_to_time(float(item)) for item in
+    ax2_ticks = [cosmology.redshift_to_time(float(item)) for item in
                  ax2_label_values]
     ax2.set_xlim(ax.get_xlim())
     ax2.set_xticks(ax2_ticks)
