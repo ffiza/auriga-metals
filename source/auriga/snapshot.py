@@ -95,8 +95,8 @@ class Snapshot:
         sf.calc_sf_indizes(sf=sb)
 
         self.rotation_matrix = np.loadtxt(
-            f'{self._paths.data}' +
-            'rotation_matrices.csv')[self.snapnum].reshape((3, 3))
+            f'{self._paths.data}'
+            + 'rotation_matrices.csv')[self.snapnum].reshape((3, 3))
 
         self.subhalo_vel = np.loadtxt(
             f'{self._paths.data}subhalo_vels.csv')[self.snapnum]
@@ -186,11 +186,11 @@ class Snapshot:
         with warnings.catch_warnings():
             # Ignore RuntimeWarnings due to division by zero.
             warnings.simplefilter('ignore', RuntimeWarning)
-            jc = self.df.rCoordinates[is_galaxy & is_star] * \
-                self.expansion_factor * \
-                np.sqrt(physics.gravitational_constant * enclosed_mass /
-                        (1E3 * self.df.rCoordinates[is_galaxy & is_star] *
-                            self.expansion_factor))  # kpc km/s
+            jc = self.df.rCoordinates[is_galaxy & is_star] \
+                * self.expansion_factor \
+                * np.sqrt(physics.gravitational_constant * enclosed_mass
+                          / (1E3 * self.df.rCoordinates[is_galaxy & is_star]
+                             * self.expansion_factor))  # kpc km/s
         del enclosed_mass
 
         # Calculate circularity parameter.
@@ -211,8 +211,8 @@ class Snapshot:
             halo: The halo to keep.
             subhalo: The subhalo to keep.
         """
-        self.df = self.df[(self.df.Halo == halo) &
-                          (self.df.Subhalo == subhalo)]
+        self.df = self.df[(self.df.Halo == halo)
+                          & (self.df.Subhalo == subhalo)]
 
     def drop_types(self, particle_types: list) -> None:
         """
