@@ -1,6 +1,7 @@
 from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
 from utils.paths import Paths
+from utils.timer import timer
 from multiprocessing import Pool
 from scipy import linalg as linalg
 import pandas as pd
@@ -75,6 +76,7 @@ class RotationMatrices:
         self._halo_idxs = main_obj_df.MainHaloIDX.to_numpy()
         self._subhalo_idxs = main_obj_df.MainSubhaloIDX.to_numpy()
 
+    @timer
     def calculate_rotation_matrices(self) -> None:
         """
         This method calculates the rotation matrices of the main subhalo for
@@ -83,7 +85,7 @@ class RotationMatrices:
 
         snapnums = [i for i in range(self._n_snapshots)]
         self._rotation_matrices = np.array(
-            Pool(2).map(self._calculate_rotation_matrix, snapnums))
+            Pool().map(self._calculate_rotation_matrix, snapnums))
 
     def _calculate_rotation_matrix(self, snapnum: int) -> np.ndarray:
         """
@@ -197,6 +199,11 @@ class RotationMatrices:
 
 
 if __name__ == '__main__':
-    rotation_mats = RotationMatrices(6, False, 4)
-    rotation_mats.calculate_rotation_matrices()
-    rotation_mats.save_data()
+    # Analysis.
+    settings = Settings()
+    for galaxy in settings.galaxies:
+        print(f'Analyzing Au{galaxy}... ', end='')
+        rotation_mats = RotationMatrices(galaxy, False, 4)
+        rotation_mats.calculate_rotation_matrices()
+        rotation_mats.save_data()
+        print(' Done.')
