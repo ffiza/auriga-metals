@@ -154,6 +154,7 @@ class DensityMaps:
                   norm=mpl.colors.LogNorm(vmin=1E4, vmax=1E9),
                   rasterized=True, cmap=color_map,
                   range=self._hist_range)
+        # TODO: Use black arrows if the color maps require it.
         ax.quiver(np.transpose(xcenter).flatten(), ycenter.flatten(),
                   vx_quiver.flatten(), vy_quiver.flatten(), color='white')
 
