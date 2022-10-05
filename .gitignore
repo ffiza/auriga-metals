@@ -1,5 +1,3 @@
-source/__pycache__
-source/auriga/__pycache__
 .vscode/
-source/utils/__pycache__
-images/*/density_maps/*
+**/__pycache__
+**/density_maps/
