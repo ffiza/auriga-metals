@@ -38,6 +38,10 @@ class Snapshot:
         The age of the universe of this snapshot.
     _paths : Paths
         An instance of the Paths class.
+    _halo_idx : int
+        The index of the main halo in this snapshot.
+    _subhalo_idx : int
+        The index of the main subhalo in this snapshot.
 
     Methods
     -------
@@ -101,7 +105,16 @@ class Snapshot:
         self.subhalo_vel = np.loadtxt(
             f'{self._paths.data}subhalo_vels.csv')[self.snapnum]
 
-        pos = (self.rotation_matrix @ (sf.pos - sb.data['spos'][0]
+        # Set halo/subhalo indices.
+        main_obj_df = pd.read_csv(f'{self._paths.data}main_object_idxs.csv')
+        self._halo_idx = main_obj_df.MainHaloIDX.iloc[snapnum]
+        self._subhalo_idx = main_obj_df.MainSubhaloIDX.iloc[snapnum]
+
+        subhalo_grouptab_idx = sb.data['ffsh'][self._halo_idx] \
+            + self._subhalo_idx
+
+        pos = (self.rotation_matrix @ (sf.pos
+                                       - sb.data['spos'][subhalo_grouptab_idx]
                                        / sf.hubbleparam).T).T * 1E3
         vel = (self.rotation_matrix @ (sf.vel * np.sqrt(sf.time)
                                        - self.subhalo_vel).T).T
@@ -171,7 +184,8 @@ class Snapshot:
         jz = np.cross(pos, vel)[:, 2] * self.expansion_factor  # kpc km/s
         del pos, vel
 
-        is_galaxy = (self.df.Halo == 0) & (self.df.Subhalo == 0)
+        is_galaxy = (self.df.Halo == self._halo_idx) \
+            & (self.df.Subhalo == self._subhalo_idx)
         is_star = (self.df.PartTypes == 4) & (self.df.StellarFormationTime > 0)
 
         bins = np.asarray(
@@ -202,15 +216,26 @@ class Snapshot:
         del jz, jc, is_galaxy, is_star
         self.df['Circularity'] = eps
 
-    def keep_only_halo(self, halo: int, subhalo: int) -> None:
+    def keep_only_halo(self, halo: int = None, subhalo: int = None) -> None:
         """
         This method removes all particles in the data frame that do not belong
         to the chose halo/subhalo index.
 
-        Args:
-            halo: The halo to keep.
-            subhalo: The subhalo to keep.
+        Parameters
+        ----------
+        halo : int, optional
+            The index of the halo to keep. If not supplied, it defaults to
+            the main object halo index.
+        subhalo : int, optional
+            The index of the subhalo subhalo to keep. If not supplied, it
+            defaults to the main object subhalo index.
         """
+
+        if halo is None:
+            halo = self._halo_idx
+        if subhalo is None:
+            subhalo = self._subhalo_idx
+
         self.df = self.df[(self.df.Halo == halo)
                           & (self.df.Subhalo == subhalo)]
 
@@ -218,10 +243,12 @@ class Snapshot:
         """
         This method removes all particles that match the selected types.
 
-        Args:
-            particle_types: A list of particle types to remove from the
-             data frame.
+        Parameters
+        ----------
+        particle_types : list
+            A list of particle types to remove from the data frame.
         """
+
         for particle_type in particle_types:
             self.df = self.df[self.df.PartTypes != particle_type]
 
@@ -230,6 +257,7 @@ class Snapshot:
         This method removes all wind particles (with StellarFromationTime
         below or equal to zero) from the data frame.
         """
+
         self.df = self.df[~(self.df.StellarFormationTime <= 0)]
 
     def calc_extra_coordinates(self) -> None:
@@ -237,6 +265,7 @@ class Snapshot:
         This method calculates the radii of particles in cylindrical and
         spherical coordinates.
         """
+
         pos = self.df[['xCoordinates', 'yCoordinates',
                        'zCoordinates']].to_numpy()
         self.df['rxyCoordinates'] = np.linalg.norm(pos[:, 0:2], axis=1)
@@ -248,6 +277,7 @@ class Snapshot:
         for the first time (StellarFormationSnapshotNumber). All other particle
         types (including winds) get a NaN.
         """
+
         simulation = Simulation(self.rerun)
         stellar_birth_snapnum = np.nan * np.ones(self.df.Masses.shape[0])
         exp_fact_diff = self.df.StellarFormationTime
