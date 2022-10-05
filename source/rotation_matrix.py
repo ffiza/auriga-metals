@@ -83,7 +83,7 @@ class RotationMatrices:
         all snapshots in this simulation.
         """
 
-        snapnums = [i for i in range(self._n_snapshots)]
+        snapnums = list(range(self._n_snapshots))
         self._rotation_matrices = np.array(
             Pool().map(self._calculate_rotation_matrix, snapnums))
 
