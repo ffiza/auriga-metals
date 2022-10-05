@@ -1,10 +1,13 @@
-from multiprocessing import Pool
 from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
+from auriga.simulation import Simulation
 from utils.paths import Paths
 from utils.timer import timer
+from utils.images import add_redshift, figure_setup, FULL_WIDTH
 from typing import Optional
+from multiprocessing import Pool
 import pandas as pd
+from matplotlib import pyplot as plt
 import os
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
@@ -152,13 +155,72 @@ class SubhaloVelocities:
         np.savetxt(f'{self._paths.data}subhalo_vels.csv',
                    self._subhalo_velocities)
 
+    @staticmethod
+    def make_plot() -> None:
+        """This method makes a plot of the absolute value of the velocity
+        as a function of time. Bear in mind that it ignores the parameters
+        of the constructor of the class - it plots all galaxies.
+        """
+
+        figure_setup()
+
+        fig, axs = plt.subplots(figsize=(FULL_WIDTH, FULL_WIDTH),
+                                nrows=6, ncols=5,
+                                sharex=True, sharey=True)
+        fig.subplots_adjust(wspace=0, hspace=0)
+
+        for ax_idx, ax in enumerate(axs.flat):
+            ax.label_outer()
+            ax.grid(True, ls='-', lw=0.5, c='silver')
+            ax.tick_params(which='both', direction="in")
+            ax.set_xlim(0, 14)
+            # ax.set_ylim(-0.5, 5.5)
+            ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
+            # ax.set_yticks([0, 1, 2, 3, 4, 5])
+            for spine in ['top', 'bottom', 'left', 'right']:
+                ax.spines[spine].set_linewidth(1.5)
+
+            galaxy = ax_idx + 1
+
+            paths = Paths(galaxy, False, 4)
+            simulation = Simulation(False, 4)
+
+            data = np.loadtxt(f'{paths.data}subhalo_vels.csv')
+            vel_norm = np.linalg.norm(data, axis=1)
+
+            ax.plot(simulation.times, vel_norm, c='k', lw=2, zorder=10)
+
+            # if galaxy == 1:
+            #     ax.legend(loc='upper left', ncol=1, fontsize=5, framealpha=0,
+            #               bbox_to_anchor=(0.05, 0.95))
+
+            add_redshift(ax)
+            ax.text(0.95, 0.95, f'Au{galaxy}', size=6,
+                    ha='right', va='top',
+                    transform=ax.transAxes,
+                    bbox={"facecolor": "silver", "edgecolor": "white",
+                          "pad": .2, 'boxstyle': 'round', 'lw': 1})
+
+            if ax.get_subplotspec().is_first_col():
+                ax.set_ylabel('Index')
+            if ax.get_subplotspec().is_last_row():
+                ax.set_xlabel(
+                    r'Subhalo Velocity [$\mathrm{km} \, \mathrm{s}^{-1}$]')
+
+        fig.savefig('images/subhalo_velocity.png')
+        plt.close(fig)
+
 
 if __name__ == '__main__':
     # Analysis.
-    settings = Settings()
-    for galaxy in settings.galaxies:
-        print(f'Analyzing Au{galaxy}... ', end='')
-        subhalo_vels = SubhaloVelocities(galaxy, False, 4)
-        subhalo_vels.calculate_subhalo_velocities()
-        subhalo_vels.save_data()
-        print(' Done.')
+    # settings = Settings()
+    # for galaxy in settings.galaxies:
+    #     print(f'Analyzing Au{galaxy}... ', end='')
+    #     subhalo_vels = SubhaloVelocities(galaxy, False, 4)
+    #     subhalo_vels.calculate_subhalo_velocities()
+    #     subhalo_vels.save_data()
+    #     print(' Done.')
+
+    # Plotting.
+    subhalo_vels = SubhaloVelocities(6, False, 4)
+    subhalo_vels.make_plot()
