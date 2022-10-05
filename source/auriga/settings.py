@@ -42,3 +42,6 @@ class Settings:
         # Configuration for the density maps.
         self.box_size = 100  # ckpc
         self.n_bins = 200
+        self.color_maps = {0: 'Blues',
+                           1: 'Greens',
+                           4: 'Reds'}
