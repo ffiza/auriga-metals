@@ -59,8 +59,6 @@ class RotationMatrices:
             A bool to indicate if this is a original run or a rerun.
         resolution : int
             The resolution level of the simulation.
-        distance : float, optional
-            The distance to consider stars for velocity calculation.
         """
 
         self._galaxy = galaxy
