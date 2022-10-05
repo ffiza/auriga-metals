@@ -2,7 +2,6 @@ from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
 from utils.paths import Paths
 from multiprocessing import Pool
-from typing import Optional
 from scipy import linalg as linalg
 import pandas as pd
 import os
