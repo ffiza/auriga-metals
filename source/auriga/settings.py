@@ -38,3 +38,7 @@ class Settings:
 
         # Rotation matrix calculation configuration.
         self.rot_mat_distance = 10  # ckpc
+
+        # Configuration for the density maps.
+        self.box_size = 100  # ckpc
+        self.n_bins = 200
