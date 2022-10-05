@@ -86,7 +86,7 @@ class SubhaloVelocities:
         snapshots in this simulation.
         """
 
-        snapnums = [i for i in range(self._n_snapshots)]
+        snapnums = list(range(self._n_snapshots))
         self._subhalo_velocities = np.array(
             Pool().map(self._calculate_subhalo_velocity, snapnums))
 
