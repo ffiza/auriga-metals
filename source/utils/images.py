@@ -45,17 +45,6 @@ def figure_setup() -> None:
     plt.rcParams.update(params)
 
 
-def add_label(x: float, y: float, text: str, ax: plt.Axes,
-              ha: str = 'left', va: str = 'bottom') -> None:
-    # TODO: Document this function.
-    ax.text(x, y, text, ha=ha, va=va, size=GALAXY_LABEL_FONTSIZE,
-            bbox={"facecolor": "white",
-                  "edgecolor": "k",
-                  "pad": .2,
-                  'boxstyle': 'round',
-                  'lw': .5})
-
-
 def add_redshift(ax: plt.Axes) -> None:
     """
     This method add the redshift to a given axis.
