@@ -114,6 +114,7 @@ class DensityMaps:
                         va='bottom', ha='left')
 
         plt.tight_layout()
+        # TODO: Maybe use another file format (eps, pdf, svg).
         plt.savefig(f'{self._paths.images}density_maps/snapshot_{snapnum}.png',
                     bbox_inches='tight', pad_inches=0.02, dpi=800)
         plt.close(fig)
