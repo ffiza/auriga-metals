@@ -1,9 +1,10 @@
-from typing import Optional
 from loadmodules import gadget_readsnap, load_subfind
+from auriga.settings import Settings
 from utils.paths import Paths
 from multiprocessing import Pool
-from auriga.settings import Settings
+from typing import Optional
 from scipy import linalg as linalg
+import pandas as pd
 import os
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
@@ -32,6 +33,10 @@ class RotationMatrices:
         The total amount of snapshots in this simulation.
     _rotation_matrices : np.ndarray
         An array with the rotation matrix of each snapshot of this simulation.
+    _halo_idxs : np.ndarray
+        An array with the indices of the main halo.
+    _subhalo_idxs : np.ndarray
+        An array with the indices of the main subhalo.
 
     Methods
     -------
@@ -67,6 +72,11 @@ class RotationMatrices:
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
         self._distance = distance
 
+        # Set halo/subhalo indices.
+        main_obj_df = pd.read_csv(f'{self._paths.data}main_object_idxs.csv')
+        self._halo_idxs = main_obj_df.MainHaloIDX.to_numpy()
+        self._subhalo_idxs = main_obj_df.MainSubhaloIDX.to_numpy()
+
     def calculate_rotation_matrices(self) -> None:
         """
         This method calculates the rotation matrices of the main subhalo for
@@ -92,6 +102,9 @@ class RotationMatrices:
         if snapnum < settings.first_snap:
             return np.nan * np.ones((9,))
         else:
+            halo_idx = self._halo_idxs[snapnum]
+            subhalo_idx = self._subhalo_idxs[snapnum]
+
             subhalo_vel = np.loadtxt(f'{self._paths.data}/subhalo_vels.csv')
 
             sf = gadget_readsnap(snapshot=snapnum,
@@ -103,56 +116,67 @@ class RotationMatrices:
                               cosmological=False)
             sf.calc_sf_indizes(sf=sb)
 
-            pos = (sf.pos - sb.data['spos'][0] / sf.hubbleparam) * 1000  # ckpc
+            # Find the index of the subhalo in the subfind table.
+            subhalo_grouptab_idx = sb.data['ffsh'][halo_idx] + subhalo_idx
+
+            pos = (sf.pos - sb.data['spos'][subhalo_grouptab_idx]
+                   / sf.hubbleparam) * 1000  # ckpc
             vel = sf.vel * np.sqrt(sf.time) - subhalo_vel[snapnum]  # km/s
             mass = sf.mass * 1E10  # Msun
 
             r = np.linalg.norm(pos, axis=1)  # ckpc
             is_inner = r < self._distance
+            is_main_obj = (sf.halo == halo_idx) & (sf.subhalo == subhalo_idx)
 
-            pos = pos[is_inner]
-            vel = vel[is_inner]
-            mass = mass[is_inner]
+            pos = pos[is_inner & is_main_obj]
+            vel = vel[is_inner & is_main_obj]
+            mass = mass[is_inner & is_main_obj]
 
             # Inertia matrix.
-            inertia_tensor = np.nan * np.ones((3, 3), dtype='float64')
-            inertia_tensor[0, 0] = np.sum([mass*(pos[:, 1]**2 + pos[:, 2]**2)])
-            inertia_tensor[1, 1] = np.sum([mass*(pos[:, 0]**2 + pos[:, 2]**2)])
-            inertia_tensor[2, 2] = np.sum([mass*(pos[:, 0]**2 + pos[:, 1]**2)])
-            inertia_tensor[0, 1] = -np.sum([mass*pos[:, 0]*pos[:, 1]])
+            inertia_tensor = np.nan * np.ones((3, 3))
+            inertia_tensor[0, 0] = np.sum([mass * (pos[:, 1]**2
+                                                   + pos[:, 2]**2)])
+            inertia_tensor[1, 1] = np.sum([mass * (pos[:, 0]**2
+                                                   + pos[:, 2]**2)])
+            inertia_tensor[2, 2] = np.sum([mass * (pos[:, 0]**2
+                                                   + pos[:, 1]**2)])
+            inertia_tensor[0, 1] = -np.sum([mass * pos[:, 0] * pos[:, 1]])
             inertia_tensor[1, 0] = inertia_tensor[0][1]
-            inertia_tensor[0, 2] = -np.sum([mass*pos[:, 0]*pos[:, 2]])
+            inertia_tensor[0, 2] = -np.sum([mass * pos[:, 0] * pos[:, 2]])
             inertia_tensor[2, 0] = inertia_tensor[0][2]
-            inertia_tensor[1, 2] = -np.sum([mass*pos[:, 1]*pos[:, 2]])
+            inertia_tensor[1, 2] = -np.sum([mass * pos[:, 1] * pos[:, 2]])
             inertia_tensor[2, 1] = inertia_tensor[1][2]
 
             # Diagonalization.
             e_vals, e_vecs = linalg.eigh(inertia_tensor)
-            x = [1, 0, 0]
+            x = np.array([1, 0, 0])
             X = e_vecs[:, 0]
-            y = [0, 1, 0]
+            y = np.array([0, 1, 0])
             Y = e_vecs[:, 1]
-            z = [0, 0, 1]
+            z = np.array([0, 0, 1])
             Z = e_vecs[:, 2]
 
             # Angular momentum.
-            j = np.nan * np.ones(3, dtype='float64')
-            j[0] = np.sum(mass*(pos[:, 1]*vel[:, 2] - pos[:, 2]*vel[:, 1]))
-            j[1] = np.sum(mass*(pos[:, 2]*vel[:, 0] - pos[:, 0]*vel[:, 2]))
-            j[2] = np.sum(mass*(pos[:, 0]*vel[:, 1] - pos[:, 1]*vel[:, 0]))
+            j = np.nan * np.ones(3)
+            j[0] = np.sum(mass * (pos[:, 1] * vel[:, 2]
+                                  - pos[:, 2] * vel[:, 1]))
+            j[1] = np.sum(mass * (pos[:, 2] * vel[:, 0]
+                                  - pos[:, 0] * vel[:, 2]))
+            j[2] = np.sum(mass * (pos[:, 0] * vel[:, 1]
+                                  - pos[:, 1] * vel[:, 0]))
             j /= np.linalg.norm(j)  # Normalize.
 
-            # Verify direction of principal axes.
+            # Verify direction of principal axes with angular momentum.
             direction = np.dot(j, Z)
             if direction < 0:
-                X = X
-                Y = -Y
-                Z = -Z
+                X *= 1
+                Y *= -1
+                Z *= -1
             if np.sign(np.cross(X, Y)[2]) != np.sign(Z[2]):
-                X = -X
+                X *= -1
 
             # Define rotation matrix.
-            rotation_matrix = np.nan * np.ones((3, 3), dtype='float64')
+            rotation_matrix = np.nan * np.ones((3, 3))
             rotation_matrix[0, 0] = np.dot(X, x)
             rotation_matrix[0, 1] = np.dot(X, y)
             rotation_matrix[0, 2] = np.dot(X, z)
