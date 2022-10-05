@@ -37,4 +37,4 @@ class Settings:
         self.subh_vel_distance = 10  # ckpc
 
         # Rotation matrix calculation configuration.
-        self.rot_mat_distancia = 10  # ckpc
+        self.rot_mat_distance = 10  # ckpc
