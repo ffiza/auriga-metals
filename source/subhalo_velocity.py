@@ -4,7 +4,6 @@ from auriga.simulation import Simulation
 from utils.paths import Paths
 from utils.timer import timer
 from utils.images import add_redshift, figure_setup, FULL_WIDTH
-from typing import Optional
 from multiprocessing import Pool
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -54,8 +53,7 @@ class SubhaloVelocities:
         This method saves the data.
     """
 
-    def __init__(self, galaxy: int, rerun: bool, resolution: int,
-                 distance: Optional[float] = 10) -> None:
+    def __init__(self, galaxy: int, rerun: bool, resolution: int) -> None:
         """
         Parameters
         ----------
@@ -65,8 +63,6 @@ class SubhaloVelocities:
             A bool to indicate if this is a original run or a rerun.
         resolution : int
             The resolution level of the simulation.
-        distance : float, optional
-            The distance to consider stars for velocity calculation.
         """
 
         self._galaxy = galaxy
@@ -74,7 +70,9 @@ class SubhaloVelocities:
         self._n_snapshots = 252 if self._rerun else 128
         self._resolution = resolution
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
-        self._distance = distance
+
+        settings = Settings()
+        self._distance = settings.subh_vel_distance
 
         # Set halo/subhalo indices.
         main_obj_df = pd.read_csv(f'{self._paths.data}main_object_idxs.csv')
