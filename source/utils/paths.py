@@ -29,19 +29,10 @@ class Paths:
 
         # Path to snapshot files.
         if os.uname()[1] == 'virgo':
-            if rerun:
-                dir_name = 'RerunsHighFreqStellarSnaps'
-            else:
-                dir_name = 'Original'
-
+            dir_name = 'RerunsHighFreqStellarSnaps' if rerun else 'Original'
             self.snapshots = f'/virgotng/mpa/Auriga/level{resolution}/' + \
                 f'{dir_name}/halo_{galaxy}/output/'
         elif os.uname()[1] == 'neuromancer':
-            if rerun:
-                rerun_text = '_rerun'
-            else:
-                rerun_text = ''
-
             self.snapshots = '/media/federico/Elements1/Simulations/' + \
                 f'au{galaxy}{rerun_text}/'
 
