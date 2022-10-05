@@ -32,3 +32,9 @@ class Settings:
 
         # Galaxy tracker configuration.
         self.n_track_dm_parts = 32
+
+        # Subhalo velocity calculation configuration.
+        self.subh_vel_distance = 10  # ckpc
+
+        # Rotation matrix calculation configuration.
+        self.rot_mat_distancia = 10  # ckpc
