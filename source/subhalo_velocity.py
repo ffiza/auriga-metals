@@ -202,10 +202,10 @@ class SubhaloVelocities:
                           "pad": .2, 'boxstyle': 'round', 'lw': 1})
 
             if ax.get_subplotspec().is_first_col():
-                ax.set_ylabel('Index')
+                ax.set_ylabel(
+                    r'$v_\mathrm{sh}$ [$\mathrm{km} \, \mathrm{s}^{-1}$]')
             if ax.get_subplotspec().is_last_row():
-                ax.set_xlabel(
-                    r'Subhalo Velocity [$\mathrm{km} \, \mathrm{s}^{-1}$]')
+                ax.set_xlabel('Time [Gyr]')
 
         fig.savefig('images/subhalo_velocity.png')
         plt.close(fig)
