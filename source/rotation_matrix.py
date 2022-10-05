@@ -50,8 +50,7 @@ class RotationMatrices:
         This method saves the data.
     """
 
-    def __init__(self, galaxy: int, rerun: bool, resolution: int,
-                 distance: Optional[float] = 10) -> None:
+    def __init__(self, galaxy: int, rerun: bool, resolution: int) -> None:
         """
         Parameters
         ----------
@@ -70,7 +69,9 @@ class RotationMatrices:
         self._n_snapshots = 252 if self._rerun else 128
         self._resolution = resolution
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
-        self._distance = distance
+
+        settings = Settings()
+        self._distance = settings.rot_mat_distance
 
         # Set halo/subhalo indices.
         main_obj_df = pd.read_csv(f'{self._paths.data}main_object_idxs.csv')
