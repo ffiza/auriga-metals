@@ -153,8 +153,7 @@ class SubhaloVelocities:
         np.savetxt(f"{self._paths.data}subhalo_vels.csv",
                    self._subhalo_velocities)
 
-    @staticmethod
-    def make_plot() -> None:
+    def make_plot(self) -> None:
         """This method makes a plot of the absolute value of the velocity
         as a function of time. Bear in mind that it ignores the parameters
         of the constructor of the class - it plots all galaxies.
@@ -188,10 +187,6 @@ class SubhaloVelocities:
 
             ax.plot(simulation.times, vel_norm, c='k', lw=2, zorder=10)
 
-            # if galaxy == 1:
-            #     ax.legend(loc="upper left", ncol=1, fontsize=5, framealpha=0,
-            #               bbox_to_anchor=(0.05, 0.95))
-
             add_redshift(ax)
             ax.text(0.95, 0.95, f"Au{galaxy}", size=6,
                     ha="right", va="top",
@@ -205,7 +200,7 @@ class SubhaloVelocities:
             if ax.get_subplotspec().is_last_row():
                 ax.set_xlabel("Time [Gyr]")
 
-        fig.savefig("images/subhalo_velocity.png")
+        fig.savefig(f"images/level{self._resolution}/subhalo_velocity.pdf")
         plt.close(fig)
 
 

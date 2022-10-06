@@ -226,7 +226,6 @@ class GalaxyTracker:
 
         self._df.to_csv(f'{self._paths.data}main_object_idxs.csv')
 
-    @staticmethod
     def make_plot(self) -> None:
         """This method creates a plot to visualize the main object halo/subhalo
         index. Note that this plots all galaxies and hence the galaxy and
@@ -279,7 +278,7 @@ class GalaxyTracker:
             if ax.get_subplotspec().is_last_row():
                 ax.set_xlabel('Time [Gyr]')
 
-        fig.savefig(f'images/level{self._resolution}/galaxy_tracker.png')
+        fig.savefig(f'images/level{self._resolution}/galaxy_tracker.pdf')
         plt.close(fig)
 
 
