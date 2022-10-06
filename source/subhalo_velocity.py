@@ -22,7 +22,7 @@ class SubhaloVelocities:
     Attributes
     ----------
     _galaxy : int
-        The snapshot in which to start the analysis.
+        The galaxy number.
     _rerun : bool
         A bool to indicate if this is a original run or a rerun.
     _resolution : int
@@ -58,7 +58,7 @@ class SubhaloVelocities:
         Parameters
         ----------
         galaxy : int
-            The snapshot in which to start the analysis.
+            The galaxy number.
         rerun : bool
             A bool to indicate if this is a original run or a rerun.
         resolution : int
