@@ -16,6 +16,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 
 warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 
 class DensityMaps:
@@ -235,10 +236,8 @@ class DensityMaps:
         xcenter = np.asarray([xcenter for _ in range(self._quiver_plot_bins)])
         ycenter = np.asarray([ycenter for _ in range(self._quiver_plot_bins)])
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            vx_quiver /= n_quiver
-            vy_quiver /= n_quiver
+        vx_quiver /= n_quiver
+        vy_quiver /= n_quiver
 
         ax.set_xticks([-40, -20, 0, 20, 40])
         ax.set_yticks([-40, -20, 0, 20, 40])
@@ -269,5 +268,3 @@ if __name__ == "__main__":
         density_maps = DensityMaps(galaxy, False, 4)
         density_maps.make_plots()
         print(" Done.")
-
-    # TODO: Run plots for all galaxies.
