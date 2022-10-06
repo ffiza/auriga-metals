@@ -263,7 +263,8 @@ class DensityMaps:
 if __name__ == "__main__":
     figure_setup()
 
-    for galaxy in [6]:
+    settings = Settings()
+    for galaxy in settings.galaxies:
         print(f"Analyzing Au{galaxy}... ", end='')
         density_maps = DensityMaps(galaxy, False, 4)
         density_maps.make_plots()
