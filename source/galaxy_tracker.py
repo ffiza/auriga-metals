@@ -43,13 +43,12 @@ def load_dm_snapshot(galaxy: int, rerun: bool,
     sb = load_subfind(id=snapnum, dir=paths.snapshots,
                       cosmological=False)
     sf.calc_sf_indizes(sf=sb)
-    df = pd.DataFrame({'ParticleIDs': sf.id,
-                       'Halo': sf.halo,
-                       'Subhalo': sf.subhalo,
-                       'Potential': sf.pot / sf.time  # (km/s)^2
-                       })
 
-    return df
+    return pd.DataFrame({'ParticleIDs': sf.id,
+                         'Halo': sf.halo,
+                         'Subhalo': sf.subhalo,
+                         'Potential': sf.pot / sf.time  # (km/s)^2
+                         })
 
 
 class GalaxyTracker:
@@ -150,7 +149,7 @@ class GalaxyTracker:
         df.sort_values(by=['Potential'], ascending=True, inplace=True)
 
         most_bound_ids = \
-            df.ParticleIDs.iloc[0:self._settings.n_track_dm_parts]
+            df.ParticleIDs.iloc[:self._settings.n_track_dm_parts]
 
         return most_bound_ids.to_numpy()
 
@@ -227,60 +226,61 @@ class GalaxyTracker:
 
         self._df.to_csv(f'{self._paths.data}main_object_idxs.csv')
 
+    @staticmethod
+    def make_plot(self) -> None:
+        """This method creates a plot to visualize the main object halo/subhalo
+        index. Note that this plots all galaxies and hence the galaxy and
+        rerun parameter of the class constructor are not used.
+        """
 
-def make_plot() -> None:
-    """This method creates a plot to visualize the main object halo/subhalo
-    index.
-    """
+        figure_setup()
 
-    figure_setup()
+        fig, axs = plt.subplots(figsize=(FULL_WIDTH, FULL_WIDTH),
+                                nrows=6, ncols=5,
+                                sharex=True, sharey=True)
+        fig.subplots_adjust(wspace=0, hspace=0)
 
-    fig, axs = plt.subplots(figsize=(FULL_WIDTH, FULL_WIDTH),
-                            nrows=6, ncols=5,
-                            sharex=True, sharey=True)
-    fig.subplots_adjust(wspace=0, hspace=0)
+        for ax_idx, ax in enumerate(axs.flat):
+            ax.label_outer()
+            ax.grid(True, ls='-', lw=0.5, c='silver')
+            ax.tick_params(which='both', direction="in")
+            ax.set_xlim(0, 14)
+            ax.set_ylim(-0.5, 5.5)
+            ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
+            ax.set_yticks([0, 1, 2, 3, 4, 5])
+            for spine in ['top', 'bottom', 'left', 'right']:
+                ax.spines[spine].set_linewidth(1.5)
 
-    for ax_idx, ax in enumerate(axs.flat):
-        ax.label_outer()
-        ax.grid(True, ls='-', lw=0.5, c='silver')
-        ax.tick_params(which='both', direction="in")
-        ax.set_xlim(0, 14)
-        ax.set_ylim(-0.5, 5.5)
-        ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
-        ax.set_yticks([0, 1, 2, 3, 4, 5])
-        for spine in ['top', 'bottom', 'left', 'right']:
-            ax.spines[spine].set_linewidth(1.5)
+            galaxy = ax_idx + 1
 
-        galaxy = ax_idx + 1
+            paths = Paths(galaxy, False, 4)
+            simulation = Simulation(False, 4)
 
-        paths = Paths(galaxy, False, 4)
-        simulation = Simulation(False, 4)
+            df = pd.read_csv(f'{paths.data}main_object_idxs.csv')
 
-        df = pd.read_csv(f'{paths.data}main_object_idxs.csv')
+            ax.plot(simulation.times, df.MainHaloIDX, c='tab:red', lw=2,
+                    label='Halo', zorder=10)
+            ax.plot(simulation.times, df.MainSubhaloIDX, c='tab:green', lw=1,
+                    label='Subhalo', zorder=11)
 
-        ax.plot(simulation.times, df.MainHaloIDX, c='tab:red', lw=2,
-                label='Halo', zorder=10)
-        ax.plot(simulation.times, df.MainSubhaloIDX, c='tab:green', lw=1,
-                label='Subhalo', zorder=11)
+            if galaxy == 1:
+                ax.legend(loc='upper left', ncol=1, fontsize=5, framealpha=0,
+                          bbox_to_anchor=(0.05, 0.95))
 
-        if galaxy == 1:
-            ax.legend(loc='upper left', ncol=1, fontsize=5, framealpha=0,
-                      bbox_to_anchor=(0.05, 0.95))
+            add_redshift(ax)
+            ax.text(0.95, 0.95, f'Au{galaxy}', size=6,
+                    ha='right', va='top',
+                    transform=ax.transAxes,
+                    bbox={"facecolor": "silver", "edgecolor": "white",
+                          "pad": .2, 'boxstyle': 'round', 'lw': 1})
 
-        add_redshift(ax)
-        ax.text(0.95, 0.95, f'Au{galaxy}', size=6,
-                ha='right', va='top',
-                transform=ax.transAxes,
-                bbox={"facecolor": "silver", "edgecolor": "white",
-                      "pad": .2, 'boxstyle': 'round', 'lw': 1})
+            if ax.get_subplotspec().is_first_col():
+                ax.set_ylabel('Index')
+            if ax.get_subplotspec().is_last_row():
+                ax.set_xlabel('Time [Gyr]')
 
-        if ax.get_subplotspec().is_first_col():
-            ax.set_ylabel('Index')
-        if ax.get_subplotspec().is_last_row():
-            ax.set_xlabel('Time [Gyr]')
-
-    fig.savefig('images/galaxy_tracker.png')
-    plt.close(fig)
+        fig.savefig(f'images/level{self._resolution}/galaxy_tracker.png')
+        plt.close(fig)
 
 
 if __name__ == '__main__':
@@ -294,4 +294,5 @@ if __name__ == '__main__':
     #     print(' Done.')
 
     # Plotting.
-    make_plot()
+    galaxy_tracker = GalaxyTracker(6, False, 4)
+    galaxy_tracker.make_plot()
