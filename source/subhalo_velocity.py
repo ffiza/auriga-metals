@@ -75,7 +75,7 @@ class SubhaloVelocities:
         self._distance = settings.subh_vel_distance
 
         # Set halo/subhalo indices.
-        main_obj_df = pd.read_csv(f'{self._paths.data}main_object_idxs.csv')
+        main_obj_df = pd.read_csv(f"{self._paths.data}main_object_idxs.csv")
         self._halo_idxs = main_obj_df.MainHaloIDX.to_numpy()
         self._subhalo_idxs = main_obj_df.MainSubhaloIDX.to_numpy()
 
@@ -119,9 +119,9 @@ class SubhaloVelocities:
             sf.calc_sf_indizes(sf=sb)
 
             # Find the index of the subhalo in the subfind table.
-            subhalo_grouptab_idx = sb.data['ffsh'][halo_idx] + subhalo_idx
+            subhalo_grouptab_idx = sb.data["ffsh"][halo_idx] + subhalo_idx
 
-            pos = (sf.pos - sb.data['spos'][subhalo_grouptab_idx]
+            pos = (sf.pos - sb.data["spos"][subhalo_grouptab_idx]
                    / sf.hubbleparam) * 1E3  # ckpc
             del sb
             vel = sf.vel * np.sqrt(sf.time)  # km/s
@@ -150,7 +150,7 @@ class SubhaloVelocities:
         This method saves the data.
         """
 
-        np.savetxt(f'{self._paths.data}subhalo_vels.csv',
+        np.savetxt(f"{self._paths.data}subhalo_vels.csv",
                    self._subhalo_velocities)
 
     @staticmethod
@@ -169,13 +169,13 @@ class SubhaloVelocities:
 
         for ax_idx, ax in enumerate(axs.flat):
             ax.label_outer()
-            ax.grid(True, ls='-', lw=0.5, c='silver')
-            ax.tick_params(which='both', direction="in")
+            ax.grid(True, ls='-', lw=0.5, c="silver")
+            ax.tick_params(which="both", direction="in")
             ax.set_xlim(0, 14)
             # ax.set_ylim(-0.5, 5.5)
             ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
             # ax.set_yticks([0, 1, 2, 3, 4, 5])
-            for spine in ['top', 'bottom', 'left', 'right']:
+            for spine in ["top", "bottom", "left", "right"]:
                 ax.spines[spine].set_linewidth(1.5)
 
             galaxy = ax_idx + 1
@@ -183,41 +183,41 @@ class SubhaloVelocities:
             paths = Paths(galaxy, False, 4)
             simulation = Simulation(False, 4)
 
-            data = np.loadtxt(f'{paths.data}subhalo_vels.csv')
+            data = np.loadtxt(f"{paths.data}subhalo_vels.csv")
             vel_norm = np.linalg.norm(data, axis=1)
 
             ax.plot(simulation.times, vel_norm, c='k', lw=2, zorder=10)
 
             # if galaxy == 1:
-            #     ax.legend(loc='upper left', ncol=1, fontsize=5, framealpha=0,
+            #     ax.legend(loc="upper left", ncol=1, fontsize=5, framealpha=0,
             #               bbox_to_anchor=(0.05, 0.95))
 
             add_redshift(ax)
-            ax.text(0.95, 0.95, f'Au{galaxy}', size=6,
-                    ha='right', va='top',
+            ax.text(0.95, 0.95, f"Au{galaxy}", size=6,
+                    ha="right", va="top",
                     transform=ax.transAxes,
                     bbox={"facecolor": "silver", "edgecolor": "white",
-                          "pad": .2, 'boxstyle': 'round', 'lw': 1})
+                          "pad": .2, "boxstyle": "round", "lw": 1})
 
             if ax.get_subplotspec().is_first_col():
                 ax.set_ylabel(
-                    r'$v_\mathrm{sh}$ [$\mathrm{km} \, \mathrm{s}^{-1}$]')
+                    r"$v_\mathrm{sh}$ [$\mathrm{km} \, \mathrm{s}^{-1}$]")
             if ax.get_subplotspec().is_last_row():
-                ax.set_xlabel('Time [Gyr]')
+                ax.set_xlabel("Time [Gyr]")
 
-        fig.savefig('images/subhalo_velocity.png')
+        fig.savefig("images/subhalo_velocity.png")
         plt.close(fig)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Analysis.
     # settings = Settings()
     # for galaxy in settings.galaxies:
-    #     print(f'Analyzing Au{galaxy}... ', end='')
+    #     print(f"Analyzing Au{galaxy}... ", end='')
     #     subhalo_vels = SubhaloVelocities(galaxy, False, 4)
     #     subhalo_vels.calculate_subhalo_velocities()
     #     subhalo_vels.save_data()
-    #     print(' Done.')
+    #     print(" Done.")
 
     # Plotting.
     subhalo_vels = SubhaloVelocities(6, False, 4)
