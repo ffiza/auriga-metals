@@ -141,6 +141,7 @@ class DensityMaps:
         # Set style of axes.
         for ax in axes.flatten():
             ax.set_aspect("equal", adjustable="box")
+            ax.tick_params(length=6, width=2)
             for spine in ["top", "bottom", "left", "right"]:
                 ax.spines[spine].set_linewidth(self._spine_width)
 
@@ -262,9 +263,12 @@ class DensityMaps:
 if __name__ == "__main__":
     figure_setup()
 
-    settings = Settings()
-    for galaxy in settings.galaxies:
-        print(f"Analyzing Au{galaxy}... ", end='')
-        density_maps = DensityMaps(galaxy, False, 4)
-        density_maps.make_plots()
-        print(" Done.")
+    # settings = Settings()
+    # for galaxy in settings.galaxies:
+    #     print(f"Analyzing Au{galaxy}... ", end='')
+    #     density_maps = DensityMaps(galaxy, False, 4)
+    #     density_maps.make_plots()
+    #     print(" Done.")
+
+    density_maps = DensityMaps(6, False, 4)
+    density_maps._make_snapshot_plot(127)
