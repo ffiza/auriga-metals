@@ -285,13 +285,13 @@ class GalaxyTracker:
 if __name__ == '__main__':
     # Analysis.
     # settings = Settings()
-    # for galaxy in settings.galaxies:
-    #     print(f'Analyzing Au{galaxy}... ', end='')
-    #     galaxy_tracker = GalaxyTracker(galaxy, False, 4)
-    #     galaxy_tracker.track_galaxy()
-    #     galaxy_tracker.save_data()
-    #     print(' Done.')
+    for galaxy in [4]:
+        print(f'Analyzing Au{galaxy}... ', end='')
+        galaxy_tracker = GalaxyTracker(galaxy, False, 4)
+        galaxy_tracker.track_galaxy()
+        galaxy_tracker.save_data()
+        print(' Done.')
 
     # Plotting.
-    galaxy_tracker = GalaxyTracker(6, False, 4)
-    galaxy_tracker.make_plot()
+    # galaxy_tracker = GalaxyTracker(6, False, 4)
+    # galaxy_tracker.make_plot()

@@ -31,7 +31,7 @@ class Settings:
         self.polyorder = 1
 
         # Galaxy tracker configuration.
-        self.n_track_dm_parts = 32
+        self.n_track_dm_parts = 128
 
         # Subhalo velocity calculation configuration.
         self.subh_vel_distance = 10  # ckpc
