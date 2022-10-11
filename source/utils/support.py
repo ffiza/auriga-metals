@@ -55,3 +55,30 @@ def timer(method: Callable) -> Callable:
         return result
 
     return wrapper
+
+
+def get_bool_input(msg: str) -> bool:
+    """This method get the input from the user by displaying a message
+    and returns the result as a boolean.
+
+    Parameters
+    ----------
+    msg : str
+        A message to display.
+
+    Returns
+    -------
+    bool
+        The user input as a boolean.
+    """
+
+    rsp = None
+    while rsp is None:
+        rsp = input(f"{msg} [y/n]")
+        if rsp == 'y':
+            rsp = True
+        elif rsp == 'n':
+            rsp = False
+        else:
+            rsp = None
+    return rsp
