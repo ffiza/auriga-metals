@@ -85,7 +85,7 @@ def get_bool_input(msg: str) -> bool:
 
 
 def find_idx_ksmallest(arr: np.ndarray, k: int) -> np.ndarray:
-    """This method find the k smallest numbers in arr.
+    """This method find the indizes of the k smallest numbers in arr.
 
     Parameters
     ----------
@@ -97,7 +97,7 @@ def find_idx_ksmallest(arr: np.ndarray, k: int) -> np.ndarray:
     Returns
     -------
     np.ndarray
-        The k smallest numbers in the array.
+        The indizes of the k smallest numbers in the array.
     """
 
     idx = np.argpartition(arr, k)
