@@ -45,3 +45,12 @@ class Settings:
         self.color_maps = {0: 'Blues',
                            1: 'Greens',
                            4: 'Reds'}
+
+        # Parameters for the galactic decomposition.
+        self.disc_min_circ = 0.4
+        self.cold_disc_delta_circ = 0.25
+        self.bulge_max_specific_energy = -0.75
+
+        # Parameters to calculate the reference potential.
+        self.infinity_factor = 3
+        self.neighbor_number = 64
