@@ -82,3 +82,23 @@ def get_bool_input(msg: str) -> bool:
         else:
             rsp = None
     return rsp
+
+
+def find_idx_ksmallest(arr: np.ndarray, k: int) -> np.ndarray:
+    """This method find the k smallest numbers in arr.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        An array to search.
+    k : int
+        The amount of values to find.
+
+    Returns
+    -------
+    np.ndarray
+        The k smallest numbers in the array.
+    """
+
+    idx = np.argpartition(arr, k)
+    return idx[:k]
