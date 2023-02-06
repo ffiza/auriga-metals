@@ -7,20 +7,76 @@ from utils.support import find_idx_ksmallest, timer
 
 
 class ReferencePotential:
-    # TODO: Add documentation.
+    """
+    A class to manage the calculations regarding the reference potential.
+
+    Attributes
+    ----------
+    _galaxy : int
+        The galaxy number.
+    _rerun : bool
+        A bool to indicate if this is a original run or a rerun.
+    _resolution : int
+        The resolution level of the simulation.
+    _paths : Paths
+        An instance of the Paths class.
+    _n_snapshots : int
+        The total amount of snapshots in this simulation.
+    _reference_potentials : np.ndarray
+        An array with the reference potential for each snapshot of this
+        simulation.
+
+    Methods
+    -------
+    calculate_subhalo_velocities()
+        This method calculates the velocity of the main subhalo for all
+        snapshots in this simulation.
+    _calculate_subhalo_velocity(snapnum)
+        This method calculates the velocity of the main subhalo in this
+        snapshot.
+    save_data()
+        This method saves the data.
+    """
 
     def __init__(self, galaxy: int, rerun: bool, resolution: int) -> None:
-        # TODO: Add documentation.
+        """
+        Parameters
+        ----------
+        galaxy : int
+            The galaxy number.
+        rerun : bool
+            A bool to indicate if this is a original run or a rerun.
+        resolution : int
+            The resolution level of the simulation.
+        """
 
         self._galaxy = galaxy
         self._rerun = rerun
         self._resolution = resolution
         self._n_snapshots = 252 if self._rerun else 128
-        self._settings = Settings()
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
 
-    def _calc_reference_potential(self, snapnum: int) -> None:
-        # TODO: Add documentation.
+    def _calc_reference_potential(self, snapnum: int) -> float:
+        """
+        This method calculates the reference potential for a given snapshot.
+
+        Parameters
+        ----------
+        snapnum : int
+            The snapshot number.
+
+        Returns
+        -------
+        float
+            The reference potential for this snapshot.
+
+        Raises
+        ------
+        ValueError
+            Raise ValueError if not enough dark matter particles are detected.
+        """
+
+        settings = Settings()
 
         self._virial_radius = np.loadtxt(
             f'{self._paths.data}virial_radius.csv')[self._snapnum]
@@ -35,7 +91,7 @@ class ReferencePotential:
             idx = find_idx_ksmallest(
                 np.abs(s.df.SphericalRadius
                        - self.settings.infinity_factor * self._virial_radius),
-                self._settings.neighbor_number)
+                settings.neighbor_number)
 
             # Calculate the mean potential for selected DM particles
             reference_potential = s.df.Potential[idx].mean()
@@ -44,14 +100,17 @@ class ReferencePotential:
 
     @timer
     def analyze_galaxy(self) -> None:
-        # TODO: Add documentation.
+        """
+        This method calculates the reference potential for all snapshots.
+        """
 
         snapnums = list(range(self._n_snapshots))
         self._reference_potentials = np.array(
             Pool().map(self._calc_reference_potential, snapnums))
 
     def save_data(self) -> None:
-        """This method saves the data.
+        """
+        This method saves the data.
         """
 
         np.savetxt(f"{self._paths.data}subhalo_vels.csv",
