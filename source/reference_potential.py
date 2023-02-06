@@ -1,5 +1,8 @@
 import numpy as np
 from multiprocessing import Pool
+from os.path import exists
+import pandas as pd
+
 from snapshot import Snapshot
 from settings import Settings
 from utils.paths import Paths
@@ -25,6 +28,9 @@ class ReferencePotential:
     _reference_potentials : np.ndarray
         An array with the reference potential for each snapshot of this
         simulation.
+    _df : pd.DataFrame
+        A DataFrame with all the temporal data for a given simulation. It is
+        loaded if it exists or created if not.
 
     Methods
     -------
@@ -34,6 +40,9 @@ class ReferencePotential:
     _calculate_subhalo_velocity(snapnum)
         This method calculates the velocity of the main subhalo in this
         snapshot.
+    _create_or_load_dataframe()
+        This method loads the temporal data frame if it exists or creates it
+        if it doesn't.
     save_data()
         This method saves the data.
     """
@@ -55,6 +64,7 @@ class ReferencePotential:
         self._resolution = resolution
         self._n_snapshots = 252 if self._rerun else 128
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
+        self._df = self._create_or_load_dataframe()
 
     def _calc_reference_potential(self, snapnum: int) -> float:
         """
@@ -108,16 +118,32 @@ class ReferencePotential:
         self._reference_potentials = np.array(
             Pool().map(self._calc_reference_potential, snapnums))
 
+    def _create_or_load_dataframe(self) -> pd.DataFrame:
+        """
+        This method loads the temporal data frame if it exists or creates it
+        if it doesn't.
+
+        Returns
+        -------
+        pd.DataFrame
+            The data frame.
+        """
+
+        if exists(f"{self._paths.data}temporal_data.csv"):
+            df = pd.loadcsv(f"{self._paths.data}temporal_data.csv")
+        else:
+            df = pd.DataFrame()
+        return df
+
     def save_data(self) -> None:
         """
         This method saves the data.
         """
 
-        np.savetxt(f"{self._paths.data}subhalo_vels.csv",
-                   self._reference_potentials)
+        self.df.to_csv(f"{self._paths.data}temporal_data.csv")
 
 
-if __name__ == "__main__":
+def main() -> None:
     settings = Settings()
     for galaxy in settings.galaxies:
         print(f"Analyzing Au{galaxy}... ", end='')
@@ -125,3 +151,7 @@ if __name__ == "__main__":
         reference_potentials.analyze_galaxy()
         reference_potentials.save_data()
         print(" Done.")
+
+
+if __name__ == "__main__":
+    main()
