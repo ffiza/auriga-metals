@@ -102,3 +102,41 @@ def find_idx_ksmallest(arr: np.ndarray, k: int) -> np.ndarray:
 
     idx = np.argpartition(arr, k)
     return idx[:k]
+
+
+def make_snapshot_number(rerun: bool, resolution: int) -> int:
+    """
+    This method calculates the number of snapshots in a given simulation.
+
+    Parameters
+    ----------
+    rerun : bool
+        If the simulation is a rerun or not.
+    resolution : int
+        The resolution of the simulation.
+
+    Returns
+    -------
+    int
+        The number of snapshots in this simulation.
+
+    Raises
+    ------
+    ValueError
+        If the resolution is not implemented.
+    """
+
+    if resolution == 2 and rerun is False:
+        n_snapshots = 127 + 1
+        return n_snapshots
+    if resolution == 3:
+        n_snapshots = 63 + 1 if rerun is False else 127 + 1
+        return n_snapshots
+    elif resolution == 4:
+        n_snapshots = 127 + 1 if rerun is False else 251 + 1
+        return n_snapshots
+    elif resolution == 5 and rerun is False:
+        n_snapshots = 63 + 1
+        return n_snapshots
+    else:
+        raise ValueError("Resolution value not implemented.")
