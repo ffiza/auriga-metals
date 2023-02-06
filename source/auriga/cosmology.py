@@ -31,14 +31,14 @@ class Cosmology:
     """
 
     def __init__(self) -> None:
-        self.hubble_factor = 0.6777
-        self.hubble_constant = 67.77  # km/s/Mpc
-        self.omega0 = 0.307  # Matter density
-        self.omega_baryon = 0.048  # Baryon density
-        self.omega_lambda = 0.693  # Dark energy density
+        self.hubble_factor: float = 0.6777
+        self.hubble_constant: float = 67.77  # km/s/Mpc
+        self.omega0: float = 0.307  # Matter density
+        self.omega_baryon: float = 0.048  # Baryon density
+        self.omega_lambda: float = 0.693  # Dark energy density
         self.cosmology = FlatLambdaCDM(H0=self.hubble_constant,
                                        Om0=self.omega0)
-        self.present_time = self.cosmology.age(0).value  # Gyr
+        self.present_time: float = self.cosmology.age(0).value  # Gyr
 
     def redshift_to_time(self, redshift: float) -> float:
         """
@@ -74,4 +74,4 @@ class Cosmology:
             The corresponding expansion factor.
         """
 
-        return 1/(1+redshift)
+        return 1 / (1 + redshift)
