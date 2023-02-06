@@ -1,56 +1,40 @@
 class Settings:
     """
     A class to manage several configuration variables.
-
-    Attributes
-    ----------
-    repo_name : str
-        The name of the respository for this project.
-    first_snap : int
-        The first snapshot to consider in all analysis.
-    galaxies : list
-        A list of all galaxies.
-    reruns : list
-        A list of the rerun galaxies.
-    window_length : int
-        The window length used in the Savitzky-Golay filter for smoothing.
-    polyorder : ing
-        The order of the polynomial used in the Savitzky-Golay filter.
-    n_track_dm_parts : int
-        The number of dark matter particles to use in the galaxy tracker.
     """
 
     def __init__(self) -> None:
-        self.repo_name = 'auriga-metals'
-        self.first_snap = 30
-        self.galaxies = list(range(1, 31))
-        self.reruns = [5, 6, 9, 13, 17, 23, 24, 26, 28]
+        self.repo_name: str = "auriga-metals"
+        self.first_snap: int = 30
+        self.galaxies: list = list(range(1, 31))
+        self.reruns: list = [5, 6, 9, 13, 17, 23, 24, 26, 28]
+        self.processes: int = 2
 
-        # Smoothing configuration.
-        self.window_length = 9
-        self.polyorder = 1
+        # Smoothing configuration
+        self.window_length: int = 9
+        self.polyorder: int = 1
 
-        # Galaxy tracker configuration.
-        self.n_track_dm_parts = 32
+        # Galaxy tracker configuration
+        self.n_track_dm_parts: int = 32
 
-        # Subhalo velocity calculation configuration.
-        self.subh_vel_distance = 10  # ckpc
+        # Subhalo velocity calculation configuration
+        self.subh_vel_distance: int = 10  # ckpc
 
         # Rotation matrix calculation configuration.
         self.rot_mat_distance = 10  # ckpc
 
-        # Configuration for the density maps.
-        self.box_size = 100  # ckpc
-        self.n_bins = 200
-        self.color_maps = {0: 'Blues',
-                           1: 'Greens',
-                           4: 'Reds'}
+        # Configuration for the density maps
+        self.box_size: float = 100.0  # ckpc
+        self.n_bins: int = 200
+        self.color_maps: dict = {0: 'Blues',
+                                 1: 'Greens',
+                                 4: 'Reds'}
 
         # Parameters for the galactic decomposition.
-        self.disc_min_circ = 0.4
-        self.cold_disc_delta_circ = 0.25
-        self.bulge_max_specific_energy = -0.75
+        self.disc_min_circ: float = 0.4
+        self.cold_disc_delta_circ: float = 0.25
+        self.bulge_max_specific_energy: float = -0.75
 
         # Parameters to calculate the reference potential.
-        self.infinity_factor = 3
-        self.neighbor_number = 64
+        self.infinity_factor: int = 3
+        self.neighbor_number: int = 64
