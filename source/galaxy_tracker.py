@@ -2,16 +2,14 @@ import numpy as np
 from scipy.stats import mode
 import pandas as pd
 from typing import Tuple
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 
 from loadmodules import gadget_readsnap, load_subfind
 from settings import Settings
 from support import find_indices, create_or_load_dataframe, timer
 from support import make_snapshot_number
 from paths import Paths
-# from images import add_redshift, figure_setup, FULL_WIDTH
-
-# TODO: Fix plot.
+from images import add_redshift, figure_setup
 
 
 def load_dm_snapshot(galaxy: int, rerun: bool,
@@ -235,61 +233,68 @@ class GalaxyTracker:
                         index=False)
 
 
-# def make_plot(self) -> None:
-#     """This method creates a plot to visualize the main object halo/subhalo
-#     index. Note that this plots all galaxies and hence the galaxy and
-#     rerun parameter of the class constructor are not used.
-#     """
+def plot_main_obj_index(savefig: bool) -> None:
+    """
+    This method creates a plot to visualize the main object halo/subhalo
+    index. Note that this plots all galaxies and hence the galaxy and
+    rerun parameter of the class constructor are not used.
+    """
 
-#     figure_setup()
+    settings = Settings()
 
-#     fig, axs = plt.subplots(figsize=(FULL_WIDTH, FULL_WIDTH),
-#                             nrows=6, ncols=5,
-#                             sharex=True, sharey=True)
-#     fig.subplots_adjust(wspace=0, hspace=0)
+    fig = plt.figure(figsize=settings.big_fig_size)
+    gs = fig.add_gridspec(nrows=settings.big_fig_nrows,
+                          ncols=settings.big_fig_ncols,
+                          hspace=settings.big_fig_hspace,
+                          wspace=settings.big_fig_wspace)
+    axs = gs.subplots(sharex=True, sharey=True)
 
-#     for ax_idx, ax in enumerate(axs.flat):
-#         ax.label_outer()
-#         ax.grid(True, ls='-', lw=0.5, c='silver')
-#         ax.tick_params(which='both', direction="in")
-#         ax.set_xlim(0, 14)
-#         ax.set_ylim(-0.5, 5.5)
-#         ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
-#         ax.set_yticks([0, 1, 2, 3, 4, 5])
-#         for spine in ['top', 'bottom', 'left', 'right']:
-#             ax.spines[spine].set_linewidth(1.5)
+    for ax_idx, ax in enumerate(axs.flat):
+        ax.label_outer()
+        ax.grid(True, ls='-', lw=settings.big_fig_grid_lw, c='silver')
+        ax.tick_params(which='both', direction="in")
+        ax.set_xlim(0, 14)
+        ax.set_ylim(-0.5, 5.5)
+        ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
+        ax.set_yticks([0, 1, 2, 3, 4, 5])
+        # for spine in ['top', 'bottom', 'left', 'right']:
+        #     ax.spines[spine].set_linewidth(1.5)
 
-#         galaxy = ax_idx + 1
+        galaxy = ax_idx + 1
 
-#         paths = Paths(galaxy, False, 4)
-#         simulation = Simulation(False, 4)
+        paths = Paths(galaxy, False, 4)
+        df = pd.read_csv(f"{paths.data}temporal_data.csv")
+        ax.plot(df["Time_Gyr"], df["MainHaloIdx"], c='tab:red',
+                lw=settings.big_fig_line_lw,
+                label='Halo', zorder=10)
+        ax.plot(df["Time_Gyr"], df["MainSubhaloIdx"], c='tab:green',
+                lw=settings.big_fig_line_lw,
+                label='Subhalo', zorder=11)
 
-#         df = pd.read_csv(f'{paths.data}main_object_idxs.csv')
+        if galaxy == 1:
+            ax.legend(loc='upper left', ncol=1, framealpha=0,
+                      fontsize=settings.big_fig_legend_fontsize)
 
-#         ax.plot(simulation.times, df.MainHaloIDX, c='tab:red', lw=2,
-#                 label='Halo', zorder=10)
-#         ax.plot(simulation.times, df.MainSubhaloIDX, c='tab:green', lw=1,
-#                 label='Subhalo', zorder=11)
+        add_redshift(ax)
+        ax.text(0.95, 0.95, f'Au{galaxy}', size=6,
+                ha='right', va='top',
+                transform=ax.transAxes,
+                bbox={"facecolor": "silver", "edgecolor": "white",
+                      "pad": .2, 'boxstyle': 'round', 'lw': 1})
 
-#         if galaxy == 1:
-#             ax.legend(loc='upper left', ncol=1, fontsize=5, framealpha=0,
-#                       bbox_to_anchor=(0.05, 0.95))
+        if ax.get_subplotspec().is_first_col():
+            ax.set_ylabel('Index')
+        if ax.get_subplotspec().is_last_row():
+            ax.set_xlabel('Time [Gyr]')
 
-#         add_redshift(ax)
-#         ax.text(0.95, 0.95, f'Au{galaxy}', size=6,
-#                 ha='right', va='top',
-#                 transform=ax.transAxes,
-#                 bbox={"facecolor": "silver", "edgecolor": "white",
-#                       "pad": .2, 'boxstyle': 'round', 'lw': 1})
-
-#         if ax.get_subplotspec().is_first_col():
-#             ax.set_ylabel('Index')
-#         if ax.get_subplotspec().is_last_row():
-#             ax.set_xlabel('Time [Gyr]')
-
-#     fig.savefig(f'images/level{self._resolution}/galaxy_tracker.pdf')
-#     plt.close(fig)
+    if savefig:
+        for extension in settings.figure_extensions:
+            fig.savefig(f"images/level4/galaxy_tracker.{extension}")
+        plt.close(fig)
+    else:
+        plt.show()
 
 
 if __name__ == '__main__':
-    pass
+    figure_setup()
+    plot_main_obj_index(savefig=True)
