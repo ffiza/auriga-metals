@@ -1,6 +1,9 @@
 import numpy as np
 import time
 from typing import Callable
+from sys import stdout
+import pandas as pd
+from os.path import exists
 
 
 def find_indices(a: np.array, b: np.array,
@@ -51,7 +54,7 @@ def timer(method: Callable) -> Callable:
         result = method(*args, **kw)
         end_time = int(round(time.time()))
 
-        print(f'Timer: {end_time-start_time} s.')
+        stdout.write(f"Timer: {end_time-start_time} s.")
         return result
 
     return wrapper
@@ -140,3 +143,26 @@ def make_snapshot_number(rerun: bool, resolution: int) -> int:
         return n_snapshots
     else:
         raise ValueError("Resolution value not implemented.")
+
+
+def create_or_load_dataframe(df_path: str) -> pd.DataFrame:
+    """
+    This method loads the dataframe of the given path or, if it does not
+    exist, it creates a new (empty) dataframe.
+
+    Parameters
+    ----------
+    df_path : str
+        The path to the dataframe.
+
+    Returns
+    -------
+    pd.DataFrame
+        The dataframe.
+    """
+
+    if exists(f"{df_path}temporal_data.csv"):
+        df = pd.read_csv(f"{df_path}temporal_data.csv")
+    else:
+        df = pd.DataFrame()
+    return df
