@@ -37,7 +37,7 @@ class Paths:
                 f'au{galaxy}{rerun_text}/'
 
         # Path to data files.
-        self.data = f'data/level{resolution}/au{galaxy}{rerun_text}/'
+        self.data = f"data/level{resolution}/au{galaxy}{rerun_text}/"
 
         # Path to image files.
-        self.images = f'images/level{resolution}/au{galaxy}{rerun_text}/'
+        self.images = f"images/level{resolution}/au{galaxy}{rerun_text}/"
