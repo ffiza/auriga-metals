@@ -3,7 +3,6 @@ from sys import stdout
 from settings import Settings
 from galactic_properties import GalacticPropertiesAnalysis
 from galaxy_tracker import GalaxyTracker
-from reference_potential import ReferencePotentialAnalysis
 
 
 class MainPipeline():
