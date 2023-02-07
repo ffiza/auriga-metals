@@ -1,32 +1,57 @@
 import matplotlib.pyplot as plt
 from cosmology import Cosmology
-from settings import Settings
+
+
+TICK_MAJOR_WIDTH: float = 0.5
+TICK_MAJOR_SIZE: float = 1.5
+TICK_MINOR_WIDTH: float = 0.25
+TICK_MINOR_SIZE: float = 1.5
+
+DPI: int = 800
+SAVEFIG_PAD_INCHES: float = 0.02
+
+LABEL_SIZE: float = 10.0
+FONTSIZE: float = 8.0
+TITLE_FONTSIZE: float = 8.0
+GALAXY_LABEL_FONTSIZE: float = 7.0
+LEGEND_FONTSIZE: float = 4.0
+
+HALF_WIDTH: float = 3.0
+FULL_WIDTH: float = 2.0 * HALF_WIDTH
+STANDARD_HEIGHT: float = 2.0
+FIGSIZE: tuple = (HALF_WIDTH, HALF_WIDTH)
+SIZE_FACT: float = 1.2
+
+MARKER_SIZE: float = 4.0
+MARKER_EDGE_WIDTH: float = 1.5
+LINE_WIDTH: float = 1.0
 
 
 def figure_setup():
-    settings = Settings()
-
-    params = {'axes.labelsize': settings.label_size,
+    params = {'axes.labelsize': LABEL_SIZE,
+              'axes.titlesize': TITLE_FONTSIZE,
               'text.usetex': True,
-              'figure.dpi': settings.dpi,
+              'figure.dpi': DPI,
+              'figure.figsize': FIGSIZE,
               'figure.facecolor': 'white',
+              'font.size': FONTSIZE,
               'font.serif': [],
               'font.sans-serif': [],
               'font.monospace': [],
               'font.family': 'serif',
               'xtick.top': 'on',
               'ytick.right': 'on',
-              'xtick.major.width': settings.tick_major_width,
-              'xtick.major.size': settings.tick_major_size,
-              'xtick.minor.width': settings.tick_minor_width,
-              'xtick.minor.size': settings.tick_minor_size,
-              'ytick.major.width': settings.tick_major_width,
-              'ytick.major.size': settings.tick_major_size,
-              'ytick.minor.width': settings.tick_minor_width,
-              'ytick.minor.size': settings.tick_minor_size,
-              'savefig.dpi': self.dpi,
+              'xtick.major.width': TICK_MAJOR_WIDTH,
+              'xtick.major.size': TICK_MAJOR_SIZE,
+              'xtick.minor.width': TICK_MINOR_WIDTH,
+              'xtick.minor.size': TICK_MINOR_SIZE,
+              'ytick.major.width': TICK_MAJOR_WIDTH,
+              'ytick.major.size': TICK_MAJOR_SIZE,
+              'ytick.minor.width': TICK_MINOR_WIDTH,
+              'ytick.minor.size': TICK_MINOR_SIZE,
+              'savefig.dpi': DPI,
               'savefig.bbox': 'tight',
-              'savefig.pad_inches': settings.savefig_pad_inches}
+              'savefig.pad_inches': SAVEFIG_PAD_INCHES}
     plt.rcParams.update(params)
 
 
