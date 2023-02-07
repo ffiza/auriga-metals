@@ -11,8 +11,8 @@ import numpy as np
 from cosmology import Cosmology
 from pylib import gadget
 from settings import Settings
-from utils.paths import Paths
-from utils.support import timer
+from paths import Paths
+from support import timer
 
 
 class GalacticPropertiesAnalysis:
@@ -114,7 +114,7 @@ class GalacticPropertiesAnalysis:
             self._calc_properties_in_snapshot, snapnums))
 
         self._df["SnapshotNumber"] = data[:, 0]
-        self._df["Time"] = data[:, 1]
+        self._df["Time_Gyr"] = data[:, 1]
         self._df["Redshift"] = data[:, 2]
         self._df["ExpansionFactor"] = data[:, 3]
 

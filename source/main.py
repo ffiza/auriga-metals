@@ -1,5 +1,5 @@
 from galactic_properties import GalacticPropertiesAnalysis
-from auriga.settings import Settings
+from settings import Settings
 
 
 class MainPipeline():
