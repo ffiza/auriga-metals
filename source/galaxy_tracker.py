@@ -196,7 +196,8 @@ class GalaxyTracker:
 
     @timer
     def track_galaxy(self) -> None:
-        """This method tracks the galaxy through all snapshots.
+        """
+        This method tracks the galaxy through all snapshots.
         """
 
         settings = Settings()
@@ -204,18 +205,20 @@ class GalaxyTracker:
         main_halo_idx = 0 * np.ones(self._n_snapshots, dtype=np.int32)
         main_subhalo_idx = 0 * np.ones(self._n_snapshots, dtype=np.int32)
 
-        for snapnum in range(self._n_snapshots - 1, -1, -1):
-            if (snapnum != self._n_snapshots - 1)\
-               & (snapnum >= settings.first_snap):
-                target_halo = main_halo_idx[snapnum + 1]
-                target_subhalo = main_subhalo_idx[snapnum + 1]
-                target_ids = self._find_most_bound_dm_ids(snapnum + 1,
-                                                          target_halo,
-                                                          target_subhalo)
-                new_target_halo, new_target_subhalo = \
-                    self._find_location_of_dm_ids(snapnum, target_ids)
-                main_halo_idx[snapnum] = new_target_halo
-                main_subhalo_idx[snapnum] = new_target_subhalo
+        # Track only those galaxies configured in settings.py
+        if self._galaxy in settings.galaxies_to_track:
+            for snapnum in range(self._n_snapshots - 1, -1, -1):
+                if (snapnum != self._n_snapshots - 1)\
+                   & (snapnum >= settings.first_snap):
+                    target_halo = main_halo_idx[snapnum + 1]
+                    target_subhalo = main_subhalo_idx[snapnum + 1]
+                    target_ids = self._find_most_bound_dm_ids(snapnum + 1,
+                                                              target_halo,
+                                                              target_subhalo)
+                    new_target_halo, new_target_subhalo = \
+                        self._find_location_of_dm_ids(snapnum, target_ids)
+                    main_halo_idx[snapnum] = new_target_halo
+                    main_subhalo_idx[snapnum] = new_target_subhalo
 
         self._df["MainHaloIdx"] = main_halo_idx
         self._df["MainSubhaloIdx"] = main_subhalo_idx
@@ -289,7 +292,4 @@ class GalaxyTracker:
 
 
 if __name__ == '__main__':
-
-    # Plotting.
-    galaxy_tracker = GalaxyTracker(6, False, 4)
-    galaxy_tracker.make_plot()
+    pass
