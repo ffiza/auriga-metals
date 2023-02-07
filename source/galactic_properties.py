@@ -1,5 +1,6 @@
 from multiprocessing import Pool
 from support import make_snapshot_number
+from sys import stdout
 import os
 os.environ["MKL_NUM_THREADS"] = "1"  # Limits threads in Numpy
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
@@ -147,10 +148,10 @@ class GalacticPropertiesAnalysis:
 
 
 def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
-    print(f"Analyzing Au{galaxy}... ", end='')
+    stdout.write(f"Analyzing Au{galaxy}... ")
     analysis = GalacticPropertiesAnalysis(galaxy, rerun, resolution)
     analysis.analyze_galaxy()
-    print(" Done.")
+    stdout.write(" Done.\n")
 
 
 def main() -> None:
