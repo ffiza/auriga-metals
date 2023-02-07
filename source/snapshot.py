@@ -88,25 +88,22 @@ class Snapshot:
         self._paths = Paths(self.galaxy, self.rerun, self.resolution)
         self.snapnum = snapnum
 
-        sf = gadget_readsnap(
-            snapshot=self.snapnum,
-            snappath=self._paths.snapshots,
-            lazy_load=True,
-            cosmological=False,
-            applytransformationfacs=False,
-        )
-        sb = load_subfind(
-            id=self.snapnum, dir=self._paths.snapshots, cosmological=False
-        )
+        sf = gadget_readsnap(snapshot=self.snapnum,
+                             snappath=self._paths.snapshots,
+                             lazy_load=True,
+                             cosmological=False,
+                             applytransformationfacs=False)
+        sb = load_subfind(id=self.snapnum,
+                          dir=self._paths.snapshots,
+                          cosmological=False)
         sf.calc_sf_indizes(sf=sb)
 
         self.rotation_matrix = np.loadtxt(
-            f"{self._paths.data}" + "rotation_matrices.csv"
-        )[self.snapnum].reshape((3, 3))
+            f"{self._paths.data}" + "rotation_matrices.csv")[
+                self.snapnum].reshape((3, 3))
 
-        self.subhalo_vel = np.loadtxt(f"{self._paths.data}subhalo_vels.csv")[
-            self.snapnum
-        ]
+        self.subhalo_vel = np.loadtxt(
+            f"{self._paths.data}subhalo_vels.csv")[self.snapnum]
 
         # Set halo/subhalo indices.
         main_obj_df = pd.read_csv(f"{self._paths.data}main_object_idxs.csv")
@@ -119,8 +116,7 @@ class Snapshot:
         pos = (
             self.rotation_matrix @ (sf.pos
                                     - sb.data["spos"][subhalo_grouptab_idx]
-                                    / sf.hubbleparam).T
-        ).T * 1e3
+                                    / sf.hubbleparam).T).T * 1e3
         vel = (self.rotation_matrix @ (sf.vel * np.sqrt(sf.time)
                - self.subhalo_vel).T).T
 
