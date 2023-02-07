@@ -29,9 +29,6 @@ class ReferencePotentialAnalysis:
         An instance of the Paths class.
     _n_snapshots : int
         The total amount of snapshots in this simulation.
-    _reference_potentials : np.ndarray
-        An array with the reference potential for each snapshot of this
-        simulation.
     _df : pd.DataFrame
         A DataFrame with all the temporal data for a given simulation. It is
         loaded if it exists or created if not.
@@ -44,10 +41,7 @@ class ReferencePotentialAnalysis:
     _calculate_subhalo_velocity(snapnum)
         This method calculates the velocity of the main subhalo in this
         snapshot.
-    _create_or_load_dataframe()
-        This method loads the temporal data frame if it exists or creates it
-        if it doesn't.
-    save_data()
+    _save_data()
         This method saves the data.
     """
 
@@ -126,9 +120,11 @@ class ReferencePotentialAnalysis:
             Pool(settings.processes).map(
                 self._calc_reference_potential, snapnums))
 
-        self._df["ReferencePotential_"] = reference_potential
+        self._df["ReferencePotential_(km/s)^2"] = reference_potential
 
-    def save_data(self) -> None:
+        self._save_data()
+
+    def _save_data(self) -> None:
         """
         This method saves the data.
         """
