@@ -134,7 +134,7 @@ class GalacticPropertiesAnalysis:
         """
 
         if exists(f"{self._paths.data}temporal_data.csv"):
-            df = pd.loadcsv(f"{self._paths.data}temporal_data.csv")
+            df = pd.read_csv(f"{self._paths.data}temporal_data.csv")
         else:
             df = pd.DataFrame()
         return df
