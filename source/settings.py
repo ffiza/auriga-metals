@@ -121,3 +121,16 @@ class Settings:
         self.long_horizontal_fig_marker_ew: float = 0.5
 
         self.figure_extensions: list = ["pdf", "png"]
+
+        # General config variables for plots
+        self.tick_major_width: float = 0.5
+        self.tick_major_size: float = 1.5
+        self.tick_minor_width: float = .25
+        self.tick_minor_size: float = 1.5
+        self.dpi: int = 800
+        self.savefig_pad_inches: float = 0.02
+        self.label_size = 10
+        self.fontsize = 8
+        self.half_width = 3
+        self.full_width = 2 * self.half_width
+        self.fig_size = (self.half_width, self.half_width)
