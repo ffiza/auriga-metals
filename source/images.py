@@ -1,47 +1,32 @@
 import matplotlib.pyplot as plt
-from auriga.cosmology import Cosmology
-
-TICK_MAJOR_WIDTH = .5
-TICK_MAJOR_SIZE = 3
-TICK_MINOR_WIDTH = .25
-TICK_MINOR_SIZE = 1.5
-LABEL_SIZE = 9
-FONTSIZE = 7
-GALAXY_LABEL_FONTSIZE = 6
-DPI = 800
-FIGSIZE = [2.3, 2]
-HALF_WIDTH = 3
-FULL_WIDTH = 3 * HALF_WIDTH
+from cosmology import Cosmology
+from settings import Settings()
 
 
-def figure_setup() -> None:
-    """
-    This method configures the rcParams of MatPlotLib.
-    """
+def figure_setup():
+    settings = Settings()
 
-    params = {'axes.labelsize': LABEL_SIZE,
+    params = {'axes.labelsize': settings.label_size,
               'text.usetex': True,
-              'figure.dpi': DPI,
-              'figure.figsize': FIGSIZE,
+              'figure.dpi': settings.dpi,
               'figure.facecolor': 'white',
-              'font.size': FONTSIZE,
               'font.serif': [],
               'font.sans-serif': [],
               'font.monospace': [],
               'font.family': 'serif',
               'xtick.top': 'on',
               'ytick.right': 'on',
-              'xtick.major.width': TICK_MAJOR_WIDTH,
-              'xtick.major.size': TICK_MAJOR_SIZE,
-              'xtick.minor.width': TICK_MINOR_WIDTH,
-              'xtick.minor.size': TICK_MINOR_SIZE,
-              'ytick.major.width': TICK_MAJOR_WIDTH,
-              'ytick.major.size': TICK_MAJOR_SIZE,
-              'ytick.minor.width': TICK_MINOR_WIDTH,
-              'ytick.minor.size': TICK_MINOR_SIZE,
-              'savefig.dpi': DPI,
+              'xtick.major.width': settings.tick_major_width,
+              'xtick.major.size': settings.tick_major_size,
+              'xtick.minor.width': settings.tick_minor_width,
+              'xtick.minor.size': settings.tick_minor_size,
+              'ytick.major.width': settings.tick_major_width,
+              'ytick.major.size': settings.tick_major_size,
+              'ytick.minor.width': settings.tick_minor_width,
+              'ytick.minor.size': settings.tick_minor_size,
+              'savefig.dpi': self.dpi,
               'savefig.bbox': 'tight',
-              'savefig.pad_inches': .02}
+              'savefig.pad_inches': settings.savefig_pad_inches}
     plt.rcParams.update(params)
 
 
@@ -54,6 +39,7 @@ def add_redshift(ax: plt.Axes) -> None:
     ax : plt.Axes
         The axis to add the redshift.
     """
+
     cosmology = Cosmology()
     ax2 = ax.twiny()
     ax2.tick_params(which='both', direction="in")
