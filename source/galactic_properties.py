@@ -9,7 +9,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 
 from cosmology import Cosmology
-from pylib import gadget
+from pylib import gadget, gadget_subfind
 from settings import Settings
 from paths import Paths
 from support import timer
@@ -87,18 +87,18 @@ class GalacticPropertiesAnalysis:
 
         cosmology = Cosmology()
 
-        s = gadget.gadget_readsnap(snapshot=snapshot_number,
-                                   snappath=self._paths.snapshots,
-                                   onlyHeader=True,
-                                   lazy_load=True,
-                                   cosmological=False,
-                                   applytransformationfacs=False)
+        sb = gadget_subfind.load_subfind(id=snapshot_number,
+                                         dir=self.snapshot_path,
+                                         cosmological=False)
 
-        time = cosmology.redshift_to_time(s.redshift)
-        expansion_factor = s.time
-        redshift = s.redshift
+        time = cosmology.redshift_to_time(sb.redshift)
+        expansion_factor = sb.time
+        redshift = sb.redshift
+        virial_radius = sb.data['frc2'][0] * 1E3 / sb.hubbleparam  # ckpc
+        virial_mass = sb.data['fmc2'][0] / sb.hubbleparam  # 1E10 Msun
 
-        return snapshot_number, time, redshift, expansion_factor
+        return (snapshot_number, time, redshift,
+                expansion_factor, virial_radius, virial_mass)
 
     @timer
     def analyze_galaxy(self) -> None:
@@ -117,6 +117,8 @@ class GalacticPropertiesAnalysis:
         self._df["Time_Gyr"] = data[:, 1]
         self._df["Redshift"] = data[:, 2]
         self._df["ExpansionFactor"] = data[:, 3]
+        self._df["VirialRadius_ckpc"] = data[:, 4]
+        self._df["VirialMass_1E10Msun"] = data[:, 5]
 
         self._save_data()
 
