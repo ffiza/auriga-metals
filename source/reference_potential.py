@@ -1,15 +1,19 @@
-import numpy as np
 from multiprocessing import Pool
-from os.path import exists
-import pandas as pd
+from sys import stdout
+import os
+os.environ["MKL_NUM_THREADS"] = "1"  # Limits threads in Numpy
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
+import numpy as np
 
 from snapshot import Snapshot
 from settings import Settings
-from utils.paths import Paths
-from utils.support import find_idx_ksmallest, timer
+from paths import Paths
+from support import find_idx_ksmallest, timer, make_snapshot_number
+from support import create_or_load_dataframe
 
 
-class ReferencePotential:
+class ReferencePotentialAnalysis:
     """
     A class to manage the calculations regarding the reference potential.
 
@@ -62,9 +66,10 @@ class ReferencePotential:
         self._galaxy = galaxy
         self._rerun = rerun
         self._resolution = resolution
-        self._n_snapshots = 252 if self._rerun else 128
+        self._n_snapshots = make_snapshot_number(self._rerun, self._resolution)
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
-        self._df = self._create_or_load_dataframe()
+        self._df = create_or_load_dataframe(
+            f"{self._paths.data}temporal_data.csv")
 
     def _calc_reference_potential(self, snapnum: int) -> float:
         """
@@ -114,43 +119,38 @@ class ReferencePotential:
         This method calculates the reference potential for all snapshots.
         """
 
+        settings = Settings()
+
         snapnums = list(range(self._n_snapshots))
-        self._reference_potentials = np.array(
-            Pool().map(self._calc_reference_potential, snapnums))
+        reference_potential = np.array(
+            Pool(settings.processes).map(
+                self._calc_reference_potential, snapnums))
 
-    def _create_or_load_dataframe(self) -> pd.DataFrame:
-        """
-        This method loads the temporal data frame if it exists or creates it
-        if it doesn't.
-
-        Returns
-        -------
-        pd.DataFrame
-            The data frame.
-        """
-
-        if exists(f"{self._paths.data}temporal_data.csv"):
-            df = pd.loadcsv(f"{self._paths.data}temporal_data.csv")
-        else:
-            df = pd.DataFrame()
-        return df
+        self._df["ReferencePotential_"] = reference_potential
 
     def save_data(self) -> None:
         """
         This method saves the data.
         """
 
-        self.df.to_csv(f"{self._paths.data}temporal_data.csv")
+        self._df.set_index(keys="SnapshotNumber")
+        self._df.to_csv(f"{self._paths.data}temporal_data.csv",
+                        index=False)
+
+
+def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
+    stdout.write(f"Analyzing Au{galaxy}... ")
+    analysis = ReferencePotentialAnalysis(galaxy, rerun, resolution)
+    analysis.analyze_galaxy()
+    stdout.write(" Done.\n")
 
 
 def main() -> None:
     settings = Settings()
     for galaxy in settings.galaxies:
-        print(f"Analyzing Au{galaxy}... ", end='')
-        reference_potentials = ReferencePotential(galaxy, False, 4)
-        reference_potentials.analyze_galaxy()
-        reference_potentials.save_data()
-        print(" Done.")
+        run_analysis(galaxy=galaxy, rerun=False, resolution=4)
+        if galaxy in settings.reruns:
+            run_analysis(galaxy=galaxy, rerun=True, resolution=4)
 
 
 if __name__ == "__main__":
