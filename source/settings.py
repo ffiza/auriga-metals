@@ -27,8 +27,11 @@ class Settings:
         self.colors: list = ["tab:blue", "tab:red", "tab:orange",
                              "tab:green", "tab:purple"] * 6
 
-        # Rotation matrix calculation configuration.
+        # Rotation matrix calculation configuration
         self.rot_mat_distance = 10  # ckpc
+
+        # Galaxies to track using the DM particles
+        self.galaxies_to_track: list = [1, 11]
 
         # Configuration for the density maps
         self.box_size: float = 100.0  # ckpc
@@ -37,12 +40,12 @@ class Settings:
                                  1: 'Greens',
                                  4: 'Reds'}
 
-        # Parameters for the galactic decomposition.
+        # Parameters for the galactic decomposition
         self.disc_min_circ: float = 0.4
         self.cold_disc_delta_circ: float = 0.25
         self.bulge_max_specific_energy: float = -0.75
 
-        # Parameters to calculate the reference potential.
+        # Parameters to calculate the reference potential
         self.infinity_factor: int = 3
         self.neighbor_number: int = 64
 
