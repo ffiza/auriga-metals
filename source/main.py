@@ -1,3 +1,5 @@
+from sys import stdout
+
 from galactic_properties import GalacticPropertiesAnalysis
 from settings import Settings
 
@@ -23,10 +25,10 @@ class MainPipeline():
 
 
 def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
-    print(f"Analyzing Au{galaxy}... ", end='')
+    stdout.write(f"Analyzing Au{galaxy}... ")
     pipeline = MainPipeline(galaxy, rerun, resolution)
     pipeline.run_pipeline()
-    print(" Done.")
+    stdout.write(" Done.\n")
 
 
 def main() -> None:
@@ -38,5 +40,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    pipeline = MainPipeline(galaxy=6, rerun=False, resolution=4)
-    pipeline.run_pipeline()
+    main()
