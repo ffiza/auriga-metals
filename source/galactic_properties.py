@@ -1,5 +1,4 @@
 from multiprocessing import Pool
-import pandas as pd
 from support import make_snapshot_number
 import os
 os.environ["MKL_NUM_THREADS"] = "1"  # Limits threads in Numpy
