@@ -68,11 +68,6 @@ class GalaxyTracker:
         The total number of snapshots in the simulation.
     _paths : Paths
         An instance of the Paths class with this parameters.
-    _settings : Settings
-        An instance of the Settings class.
-    _target_ids : np.ndarray
-        An array of dark matter IDs to track, selected from the present given
-        the tracking number set in Settings.
     _df : pd.DataFrame
         A data frame that contains the information of the track process.
 
@@ -106,9 +101,8 @@ class GalaxyTracker:
         self._galaxy = galaxy
         self._rerun = rerun
         self._resolution = resolution
-        self._paths = Paths(self._galaxy, self._rerun, self._resolution)
         self._n_snapshots = make_snapshot_number(self._rerun, self._resolution)
-
+        self._paths = Paths(self._galaxy, self._rerun, self._resolution)
         self._df = create_or_load_dataframe(
             f"{self._paths.data}temporal_data.csv")
 
@@ -134,6 +128,8 @@ class GalaxyTracker:
             particles.
         """
 
+        settings = Settings()
+
         df = load_dm_snapshot(self._galaxy, self._rerun,
                               self._resolution, snapnum)
 
@@ -143,7 +139,7 @@ class GalaxyTracker:
         df.sort_values(by=['Potential'], ascending=True, inplace=True)
 
         most_bound_ids = \
-            df.ParticleIDs.iloc[:self._settings.n_track_dm_parts]
+            df.ParticleIDs.iloc[:settings.n_track_dm_parts]
 
         return most_bound_ids.to_numpy()
 
@@ -171,7 +167,9 @@ class GalaxyTracker:
             current snapshot.
         """
 
-        if snapnum < self._settings.first_snap:
+        settings = Settings()
+
+        if snapnum < settings.first_snap:
             # Return NaNs for snapshots outside of the analysis scope.
             return np.nan, np.nan
         else:
