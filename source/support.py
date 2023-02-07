@@ -161,8 +161,8 @@ def create_or_load_dataframe(df_path: str) -> pd.DataFrame:
         The dataframe.
     """
 
-    if exists(f"{df_path}temporal_data.csv"):
-        df = pd.read_csv(f"{df_path}temporal_data.csv")
+    if exists(df_path):
+        df = pd.read_csv(df_path)
     else:
         df = pd.DataFrame()
     return df
