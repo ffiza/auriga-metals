@@ -1,5 +1,4 @@
 from multiprocessing import Pool
-from os.path import exists
 import pandas as pd
 from support import make_snapshot_number
 import os
@@ -12,7 +11,7 @@ from cosmology import Cosmology
 from pylib import gadget, gadget_subfind
 from settings import Settings
 from paths import Paths
-from support import timer
+from support import timer, create_or_load_dataframe
 
 
 class GalacticPropertiesAnalysis:
@@ -67,7 +66,8 @@ class GalacticPropertiesAnalysis:
         self._resolution = resolution
         self._n_snapshots = make_snapshot_number(self._rerun, self._resolution)
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
-        self._df = self._create_or_load_dataframe()
+        self._df = create_or_load_dataframe(
+            f"{self._paths.data}temporal_data.csv")
 
     def _calc_properties_in_snapshot(self, snapshot_number: int) -> tuple:
         """
@@ -136,23 +136,6 @@ class GalacticPropertiesAnalysis:
         self._df["VirialMass_1E10Msun"] = data[:, 6]
 
         self._save_data()
-
-    def _create_or_load_dataframe(self) -> pd.DataFrame:
-        """
-        This method loads the temporal data frame if it exists or creates it
-        if it doesn't.
-
-        Returns
-        -------
-        pd.DataFrame
-            The data frame.
-        """
-
-        if exists(f"{self._paths.data}temporal_data.csv"):
-            df = pd.read_csv(f"{self._paths.data}temporal_data.csv")
-        else:
-            df = pd.DataFrame()
-        return df
 
     def _save_data(self) -> None:
         """
