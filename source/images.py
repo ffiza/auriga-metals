@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from cosmology import Cosmology
-from settings import Settings()
+from settings import Settings
 
 
 def figure_setup():
