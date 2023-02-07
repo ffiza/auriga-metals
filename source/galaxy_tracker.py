@@ -257,8 +257,6 @@ def plot_main_obj_index(savefig: bool) -> None:
         ax.set_ylim(-0.5, 5.5)
         ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
         ax.set_yticks([0, 1, 2, 3, 4, 5])
-        # for spine in ['top', 'bottom', 'left', 'right']:
-        #     ax.spines[spine].set_linewidth(1.5)
 
         galaxy = ax_idx + 1
 
