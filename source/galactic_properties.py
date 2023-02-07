@@ -71,8 +71,8 @@ class GalacticPropertiesAnalysis:
 
     def _calc_properties_in_snapshot(self, snapshot_number: int) -> tuple:
         """
-        This method calculates the snapshot number, cosmic time, expansion
-        factor and redshift for a given snapshot.
+        This method calculates the snapshot number, cosmic time, lookback
+        time, expansion factor and redshift for a given snapshot.
 
         Parameters
         ----------
@@ -85,19 +85,33 @@ class GalacticPropertiesAnalysis:
             A tuple with the calculated values.
         """
 
+        settings = Settings()
         cosmology = Cosmology()
 
-        sb = gadget_subfind.load_subfind(id=snapshot_number,
-                                         dir=self.snapshot_path,
-                                         cosmological=False)
+        sf = gadget.gadget_readsnap(snapshot=snapshot_number,
+                                    snappath=self._paths.snapshots,
+                                    onlyHeader=True,
+                                    lazy_load=True,
+                                    cosmological=False,
+                                    applytransformationfacs=False)
+        time = cosmology.redshift_to_time(sf.redshift)
+        lookback_time = cosmology.redshift_to_lookback_time(sf.redshift)
+        expansion_factor = sf.time
+        redshift = sf.redshift
+        del sf
 
-        time = cosmology.redshift_to_time(sb.redshift)
-        expansion_factor = sb.time
-        redshift = sb.redshift
-        virial_radius = sb.data['frc2'][0] * 1E3 / sb.hubbleparam  # ckpc
-        virial_mass = sb.data['fmc2'][0] / sb.hubbleparam  # 1E10 Msun
+        if snapshot_number >= settings.first_snap:
+            sb = gadget_subfind.load_subfind(id=snapshot_number,
+                                             dir=self._paths.snapshots,
+                                             cosmological=False)
+            virial_radius = sb.data['frc2'][0] * 1E3 / sb.hubbleparam  # ckpc
+            virial_mass = sb.data['fmc2'][0] / sb.hubbleparam  # 1E10 Msun
+            del sb
+        else:
+            virial_radius = np.nan
+            virial_mass = np.nan
 
-        return (snapshot_number, time, redshift,
+        return (snapshot_number, time, lookback_time, redshift,
                 expansion_factor, virial_radius, virial_mass)
 
     @timer
@@ -113,12 +127,13 @@ class GalacticPropertiesAnalysis:
         data = np.array(Pool(settings.processes).map(
             self._calc_properties_in_snapshot, snapnums))
 
-        self._df["SnapshotNumber"] = data[:, 0]
+        self._df["SnapshotNumber"] = data[:, 0].astype(np.int)
         self._df["Time_Gyr"] = data[:, 1]
-        self._df["Redshift"] = data[:, 2]
-        self._df["ExpansionFactor"] = data[:, 3]
-        self._df["VirialRadius_ckpc"] = data[:, 4]
-        self._df["VirialMass_1E10Msun"] = data[:, 5]
+        self._df["LookbackTime_Gyr"] = data[:, 2]
+        self._df["Redshift"] = data[:, 3]
+        self._df["ExpansionFactor"] = data[:, 4]
+        self._df["VirialRadius_ckpc"] = data[:, 5]
+        self._df["VirialMass_1E10Msun"] = data[:, 6]
 
         self._save_data()
 
@@ -144,7 +159,9 @@ class GalacticPropertiesAnalysis:
         This method saves the data.
         """
 
-        self._df.to_csv(f"{self._paths.data}temporal_data.csv")
+        self._df.set_index(keys="SnapshotNumber")
+        self._df.to_csv(f"{self._paths.data}temporal_data.csv",
+                        index=False)
 
 
 def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
