@@ -48,7 +48,7 @@ class Cosmology:
         Parameters
         ----------
         redshift : float
-            The refshift to transform.
+            The redshift to transform.
 
         Returns
         -------
@@ -57,6 +57,23 @@ class Cosmology:
         """
 
         return self.cosmology.age(redshift).value
+
+    def redshift_to_lookback_time(self, redshift: float) -> float:
+        """
+        This method calculates the lookback time for a given redshift.
+
+        Parameters
+        ----------
+        redshift : float
+            The redshift to transform.
+
+        Returns
+        -------
+        float
+            The corresponding lookback time.
+        """
+
+        return self.cosmology.lookback_time(redshift).value
 
     def redshift_to_expansion_factor(self, redshift: float) -> float:
         """
