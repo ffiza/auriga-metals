@@ -1,7 +1,9 @@
 from sys import stdout
 
-from galactic_properties import GalacticPropertiesAnalysis
 from settings import Settings
+from galactic_properties import GalacticPropertiesAnalysis
+from galaxy_tracker import GalaxyTracker
+from reference_potential import ReferencePotentialAnalysis
 
 
 class MainPipeline():
@@ -12,15 +14,28 @@ class MainPipeline():
         self._resolution: int = resolution
 
     def run_pipeline(self) -> None:
-        # Calculate basic simulation data
-        analysis = GalacticPropertiesAnalysis(self._galaxy,
-                                              self._rerun,
-                                              self._resolution)
-        analysis.analyze_galaxy()
+        # # Calculate basic simulation data
+        # analysis = GalacticPropertiesAnalysis(self._galaxy,
+        #                                       self._rerun,
+        #                                       self._resolution)
+        # analysis.analyze_galaxy()
 
-        # Calculate the reference potential
+        # Track galaxy to find the main halo and subhalo idx
+        tracker = GalaxyTracker(self._galaxy,
+                                self._rerun,
+                                self._resolution)
+        tracker.track_galaxy()
+
+        # # Calculate the reference potential
+        # analysis = ReferencePotentialAnalysis(self._galaxy,
+        #                                       self._rerun,
+        #                                       self._resolution)
+        # analysis.analyze_galaxy()
+
         # Calculate the velocity of the main subhalo
+
         # Calculate the rotation matrix
+
         # Plot the density maps
 
 
