@@ -5,11 +5,13 @@ from galaxy_tracker import GalaxyTracker
 from galactic_properties import GalacticPropertiesAnalysis
 from subhalo_velocity import SubhaloVelocityAnalysis
 from rotation_matrix import RotationMatrixAnalysis
+from reference_potential import ReferencePotentialAnalysis
 
 track_galaxy: bool = False
 calculate_basic_properties: bool = False
-calculate_subhalo_velocity: bool = True
+calculate_subhalo_velocity: bool = False
 calculate_rotation_matrices: bool = False
+calculate_reference_potential: bool = True
 
 
 class MainPipeline():
@@ -49,11 +51,11 @@ class MainPipeline():
             analysis.calculate_rotation_matrices()
 
         # # Calculate the reference potential
-        # analysis = ReferencePotentialAnalysis(self._galaxy,
-        #                                       self._rerun,
-        #                                       self._resolution)
-        # analysis.analyze_galaxy()
-
+        if calculate_reference_potential:
+            analysis = ReferencePotentialAnalysis(self._galaxy,
+                                                  self._rerun,
+                                                  self._resolution)
+            analysis.analyze_galaxy()
 
         # Plot the density maps
 
