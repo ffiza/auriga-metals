@@ -67,7 +67,7 @@ class Settings:
         self.big_fig_axis_fontsize: float = 6.0
         self.big_fig_legend_fontsize: float = 4.0
         self.big_fig_standard_lw: float = 1.0
-        self.big_fig_label_fontsize: float = 5.0
+        self.big_fig_label_fontsize: float = 6.0
         self.big_fig_line_lw: float = 0.5
         self.big_fig_marker_size: float = 2.5
         self.big_fig_marker_ew: float = 0.5
