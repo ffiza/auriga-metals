@@ -104,6 +104,7 @@ class GalacticPropertiesAnalysis:
             sb = gadget_subfind.load_subfind(id=snapshot_number,
                                              dir=self._paths.snapshots,
                                              cosmological=False)
+            # BUG: These properties do not have the correct index.
             virial_radius = sb.data['frc2'][0] * 1E3 / sb.hubbleparam  # ckpc
             virial_mass = sb.data['fmc2'][0] / sb.hubbleparam  # 1E10 Msun
             del sb
