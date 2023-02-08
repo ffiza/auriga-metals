@@ -3,6 +3,7 @@ from sys import stdout
 from settings import Settings
 from galaxy_tracker import GalaxyTracker
 from galactic_properties import GalacticPropertiesAnalysis
+from subhalo_velocity import SubhaloVelocityAnalysis
 from rotation_matrix import RotationMatrixAnalysis
 
 track_galaxy: bool = False
@@ -35,7 +36,10 @@ class MainPipeline():
 
         # Calculate the velocity of the main subhalo
         if calculate_subhalo_velocity:
-            pass
+            analysis = SubhaloVelocityAnalysis(self._galaxy,
+                                               self._rerun,
+                                               self._resolution)
+            analysis.calculate_subhalo_velocities()
 
         # Calculate the rotation matrix
         if calculate_rotation_matrices:
