@@ -72,6 +72,8 @@ class Settings:
         self.big_fig_marker_size: float = 2.5
         self.big_fig_marker_ew: float = 0.5
         self.big_fig_annotations_fontsize: float = 4.8
+        self.big_fig_dash_length: float = 3.0
+        self.big_fig_dash_space: float = 1.5
 
         self.medium_fig_size: tuple = (6.0, 6.0)
         self.medium_fig_ncols: int = 3
