@@ -126,6 +126,8 @@ class GalacticPropertiesAnalysis:
         else:
             virial_radius = np.nan
             virial_mass = np.nan
+            virial_radius_00 = np.nan
+            virial_mass_00 = np.nan
 
         return (snapshot_number, time, lookback_time, redshift,
                 expansion_factor, virial_radius, virial_mass,
