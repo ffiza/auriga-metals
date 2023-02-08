@@ -4,6 +4,9 @@ from settings import Settings
 from galactic_properties import GalacticPropertiesAnalysis
 from galaxy_tracker import GalaxyTracker
 
+track_galaxy: bool = False
+calculate_basic_properties: bool = True
+
 
 class MainPipeline():
 
@@ -13,17 +16,19 @@ class MainPipeline():
         self._resolution: int = resolution
 
     def run_pipeline(self) -> None:
-        # # Calculate basic simulation data
-        # analysis = GalacticPropertiesAnalysis(self._galaxy,
-        #                                       self._rerun,
-        #                                       self._resolution)
-        # analysis.analyze_galaxy()
-
         # Track galaxy to find the main halo and subhalo idx
-        tracker = GalaxyTracker(self._galaxy,
-                                self._rerun,
-                                self._resolution)
-        tracker.track_galaxy()
+        if track_galaxy:
+            tracker = GalaxyTracker(self._galaxy,
+                                    self._rerun,
+                                    self._resolution)
+            tracker.track_galaxy()
+
+        # Calculate basic simulation data
+        if calculate_basic_properties:
+            analysis = GalacticPropertiesAnalysis(self._galaxy,
+                                                  self._rerun,
+                                                  self._resolution)
+            analysis.analyze_galaxy()
 
         # # Calculate the reference potential
         # analysis = ReferencePotentialAnalysis(self._galaxy,
