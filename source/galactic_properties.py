@@ -104,9 +104,15 @@ class GalacticPropertiesAnalysis:
             sb = gadget_subfind.load_subfind(id=snapshot_number,
                                              dir=self._paths.snapshots,
                                              cosmological=False)
-            # BUG: These properties do not have the correct index.
-            virial_radius = sb.data['frc2'][0] * 1E3 / sb.hubbleparam  # ckpc
-            virial_mass = sb.data['fmc2'][0] / sb.hubbleparam  # 1E10 Msun
+
+            halo_idx = self._df["MainHaloIdx"].loc[snapshot_number]
+            subhalo_idx = self._df["MainSubhaloIdx"].loc[snapshot_number]
+            subhalo_grouptab_idx = sb.data["ffsh"][halo_idx] + subhalo_idx
+
+            virial_radius = sb.data['frc2'][subhalo_grouptab_idx] * 1E3 \
+                / sb.hubbleparam  # ckpc
+            virial_mass = sb.data['fmc2'][subhalo_grouptab_idx] \
+                / sb.hubbleparam  # 1E10 Msun
             del sb
         else:
             virial_radius = np.nan
