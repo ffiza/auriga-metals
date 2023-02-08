@@ -5,6 +5,8 @@ from utils.timer import timer
 from multiprocessing import Pool
 from scipy import linalg as linalg
 import pandas as pd
+from sys import stdout
+from support import make_snapshot_number
 import os
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
@@ -12,7 +14,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 
 
-class RotationMatrices:
+class RotationMatrixAnalysis:
     """
     A class to manage the calculations regarding the rotation matrices of the
     main galaxy.
@@ -64,17 +66,15 @@ class RotationMatrices:
 
         self._galaxy = galaxy
         self._rerun = rerun
-        self._n_snapshots = 252 if self._rerun else 128
         self._resolution = resolution
+        self._n_snapshots = make_snapshot_number(self._rerun, self._resolution)
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
 
-        settings = Settings()
-        self._distance = settings.rot_mat_distance
-
         # Set halo/subhalo indices.
-        main_obj_df = pd.read_csv(f'{self._paths.data}main_object_idxs.csv')
-        self._halo_idxs = main_obj_df.MainHaloIDX.to_numpy()
-        self._subhalo_idxs = main_obj_df.MainSubhaloIDX.to_numpy()
+        df = pd.read_csv(f"{self._paths.data}temporal_data.csv",
+                         usecols=["MainHaloIdx", "MainSubhaloIdx"])
+        self._halo_idxs = df["MainHaloIdx"].to_numpy()
+        self._subhalo_idxs = df["MainSubhaloIdx"].to_numpy()
 
     @timer
     def calculate_rotation_matrices(self) -> None:
@@ -83,9 +83,14 @@ class RotationMatrices:
         all snapshots in this simulation.
         """
 
+        settings = Settings()
+
         snapnums = list(range(self._n_snapshots))
         self._rotation_matrices = np.array(
-            Pool().map(self._calculate_rotation_matrix, snapnums))
+            Pool(settings.processes).map(self._calculate_rotation_matrix,
+                                         snapnums))
+
+        self._save_data()
 
     def _calculate_rotation_matrix(self, snapnum: int) -> np.ndarray:
         """
@@ -99,6 +104,7 @@ class RotationMatrices:
         """
 
         settings = Settings()
+
         if snapnum < settings.first_snap:
             return np.nan * np.ones((9,))
         else:
@@ -125,7 +131,7 @@ class RotationMatrices:
             mass = sf.mass * 1E10  # Msun
 
             r = np.linalg.norm(pos, axis=1)  # ckpc
-            is_inner = r < self._distance
+            is_inner = r < settings.rot_mat_distance
             is_main_obj = (sf.halo == halo_idx) & (sf.subhalo == subhalo_idx)
 
             pos = pos[is_inner & is_main_obj]
@@ -189,7 +195,7 @@ class RotationMatrices:
 
             return rotation_matrix.reshape((9,))
 
-    def save_data(self) -> None:
+    def _save_data(self) -> None:
         """
         This method saves the data.
         """
@@ -198,12 +204,20 @@ class RotationMatrices:
                    self._rotation_matrices)
 
 
-if __name__ == '__main__':
-    # Analysis.
+def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
+    stdout.write(f"Analyzing Au{galaxy}... ")
+    analysis = RotationMatrixAnalysis(galaxy, rerun, resolution)
+    analysis.calculate_rotation_matrices()
+    stdout.write(" Done.\n")
+
+
+def main() -> None:
     settings = Settings()
     for galaxy in settings.galaxies:
-        print(f'Analyzing Au{galaxy}... ', end='')
-        rotation_mats = RotationMatrices(galaxy, False, 4)
-        rotation_mats.calculate_rotation_matrices()
-        rotation_mats.save_data()
-        print(' Done.')
+        run_analysis(galaxy=galaxy, rerun=False, resolution=4)
+        if galaxy in settings.reruns:
+            run_analysis(galaxy=galaxy, rerun=True, resolution=4)
+
+
+if __name__ == '__main__':
+    main()
