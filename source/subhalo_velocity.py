@@ -1,9 +1,9 @@
 from loadmodules import gadget_readsnap, load_subfind
-from auriga.settings import Settings
-from auriga.simulation import Simulation
-from utils.paths import Paths
-from utils.timer import timer
-from utils.images import add_redshift, figure_setup, FULL_WIDTH
+from settings import Settings
+from simulation import Simulation
+from paths import Paths
+from support import timer, make_snapshot_number
+from images import add_redshift, figure_setup, FULL_WIDTH
 from multiprocessing import Pool
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -14,7 +14,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 
 
-class SubhaloVelocities:
+class SubhaloVelocityAnalysis:
     """
     A class to manage the calculations regarding the velocity of the main
     galaxy.
@@ -67,17 +67,15 @@ class SubhaloVelocities:
 
         self._galaxy = galaxy
         self._rerun = rerun
-        self._n_snapshots = 252 if self._rerun else 128
         self._resolution = resolution
+        self._n_snapshots = make_snapshot_number(self._rerun, self._resolution)
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
 
-        settings = Settings()
-        self._distance = settings.subh_vel_distance
-
         # Set halo/subhalo indices.
-        main_obj_df = pd.read_csv(f"{self._paths.data}main_object_idxs.csv")
-        self._halo_idxs = main_obj_df.MainHaloIDX.to_numpy()
-        self._subhalo_idxs = main_obj_df.MainSubhaloIDX.to_numpy()
+        df = pd.read_csv(f"{self._paths.data}temporal_data.csv",
+                         usecols=["MainHaloIdx", "MainSubhaloIdx"])
+        self._halo_idxs = df["MainHaloIdx"].to_numpy()
+        self._subhalo_idxs = df["MainSubhaloIdx"].to_numpy()
 
     @timer
     def calculate_subhalo_velocities(self) -> None:
@@ -89,6 +87,8 @@ class SubhaloVelocities:
         snapnums = list(range(self._n_snapshots))
         self._subhalo_velocities = np.array(
             Pool().map(self._calculate_subhalo_velocity, snapnums))
+
+        self._save_data()
 
     def _calculate_subhalo_velocity(self, snapnum: int) -> None:
         """
@@ -131,9 +131,10 @@ class SubhaloVelocities:
             r = np.linalg.norm(pos, axis=1)  # ckpc
             del pos
 
-            is_main_inner_star = (age > 0) & (r < self._distance) & \
-                                 (sf.halo == halo_idx) & \
-                                 (sf.subhalo == subhalo_idx)
+            is_main_inner_star = (age > 0) \
+                & (r < settings.subh_vel_distance) \
+                & (sf.halo == halo_idx) \
+                & (sf.subhalo == subhalo_idx)
             del sf, age, r
 
             if is_main_inner_star.sum() == 0:
@@ -145,7 +146,7 @@ class SubhaloVelocities:
                     mass[is_main_inner_star].sum()  # km/s
                 return vel_cm
 
-    def save_data(self) -> None:
+    def _save_data(self) -> None:
         """
         This method saves the data.
         """
@@ -153,67 +154,52 @@ class SubhaloVelocities:
         np.savetxt(f"{self._paths.data}subhalo_vels.csv",
                    self._subhalo_velocities)
 
-    def make_plot(self) -> None:
-        """This method makes a plot of the absolute value of the velocity
-        as a function of time. Bear in mind that it ignores the parameters
-        of the constructor of the class - it plots all galaxies.
-        """
+    # def make_plot(self) -> None:
+    #     """This method makes a plot of the absolute value of the velocity
+    #     as a function of time. Bear in mind that it ignores the parameters
+    #     of the constructor of the class - it plots all galaxies.
+    #     """
 
-        figure_setup()
+    #     figure_setup()
 
-        fig, axs = plt.subplots(figsize=(FULL_WIDTH, FULL_WIDTH),
-                                nrows=6, ncols=5,
-                                sharex=True, sharey=True)
-        fig.subplots_adjust(wspace=0, hspace=0)
+    #     fig, axs = plt.subplots(figsize=(FULL_WIDTH, FULL_WIDTH),
+    #                             nrows=6, ncols=5,
+    #                             sharex=True, sharey=True)
+    #     fig.subplots_adjust(wspace=0, hspace=0)
 
-        for ax_idx, ax in enumerate(axs.flat):
-            ax.label_outer()
-            ax.grid(True, ls='-', lw=0.5, c="silver")
-            ax.tick_params(which="both", direction="in")
-            ax.set_xlim(0, 14)
-            # ax.set_ylim(-0.5, 5.5)
-            ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
-            # ax.set_yticks([0, 1, 2, 3, 4, 5])
-            for spine in ["top", "bottom", "left", "right"]:
-                ax.spines[spine].set_linewidth(1.5)
+    #     for ax_idx, ax in enumerate(axs.flat):
+    #         ax.label_outer()
+    #         ax.grid(True, ls='-', lw=0.5, c="silver")
+    #         ax.tick_params(which="both", direction="in")
+    #         ax.set_xlim(0, 14)
+    #         # ax.set_ylim(-0.5, 5.5)
+    #         ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
+    #         # ax.set_yticks([0, 1, 2, 3, 4, 5])
+    #         for spine in ["top", "bottom", "left", "right"]:
+    #             ax.spines[spine].set_linewidth(1.5)
 
-            galaxy = ax_idx + 1
+    #         galaxy = ax_idx + 1
 
-            paths = Paths(galaxy, False, 4)
-            simulation = Simulation(False, 4)
+    #         paths = Paths(galaxy, False, 4)
+    #         simulation = Simulation(False, 4)
 
-            data = np.loadtxt(f"{paths.data}subhalo_vels.csv")
-            vel_norm = np.linalg.norm(data, axis=1)
+    #         data = np.loadtxt(f"{paths.data}subhalo_vels.csv")
+    #         vel_norm = np.linalg.norm(data, axis=1)
 
-            ax.plot(simulation.times, vel_norm, c='k', lw=2, zorder=10)
+    #         ax.plot(simulation.times, vel_norm, c='k', lw=2, zorder=10)
 
-            add_redshift(ax)
-            ax.text(0.95, 0.95, f"Au{galaxy}", size=6,
-                    ha="right", va="top",
-                    transform=ax.transAxes,
-                    bbox={"facecolor": "silver", "edgecolor": "white",
-                          "pad": .2, "boxstyle": "round", "lw": 1})
+    #         add_redshift(ax)
+    #         ax.text(0.95, 0.95, f"Au{galaxy}", size=6,
+    #                 ha="right", va="top",
+    #                 transform=ax.transAxes,
+    #                 bbox={"facecolor": "silver", "edgecolor": "white",
+    #                       "pad": .2, "boxstyle": "round", "lw": 1})
 
-            if ax.get_subplotspec().is_first_col():
-                ax.set_ylabel(
-                    r"$v_\mathrm{sh}$ [$\mathrm{km} \, \mathrm{s}^{-1}$]")
-            if ax.get_subplotspec().is_last_row():
-                ax.set_xlabel("Time [Gyr]")
+    #         if ax.get_subplotspec().is_first_col():
+    #             ax.set_ylabel(
+    #                 r"$v_\mathrm{sh}$ [$\mathrm{km} \, \mathrm{s}^{-1}$]")
+    #         if ax.get_subplotspec().is_last_row():
+    #             ax.set_xlabel("Time [Gyr]")
 
-        fig.savefig(f"images/level{self._resolution}/subhalo_velocity.pdf")
-        plt.close(fig)
-
-
-if __name__ == "__main__":
-    # Analysis.
-    # settings = Settings()
-    # for galaxy in settings.galaxies:
-    #     print(f"Analyzing Au{galaxy}... ", end='')
-    #     subhalo_vels = SubhaloVelocities(galaxy, False, 4)
-    #     subhalo_vels.calculate_subhalo_velocities()
-    #     subhalo_vels.save_data()
-    #     print(" Done.")
-
-    # Plotting.
-    subhalo_vels = SubhaloVelocities(6, False, 4)
-    subhalo_vels.make_plot()
+    #     fig.savefig(f"images/level{self._resolution}/subhalo_velocity.pdf")
+    #     plt.close(fig)
