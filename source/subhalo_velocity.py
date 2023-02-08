@@ -1,9 +1,8 @@
 from loadmodules import gadget_readsnap, load_subfind
 from settings import Settings
-from simulation import Simulation
 from paths import Paths
 from support import timer, make_snapshot_number
-from images import add_redshift, figure_setup, FULL_WIDTH
+from images import add_redshift, figure_setup
 from multiprocessing import Pool
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -49,7 +48,7 @@ class SubhaloVelocityAnalysis:
     _calculate_subhalo_velocity(snapnum)
         This method calculates the velocity of the main subhalo in this
         snapshot.
-    save_data()
+    _save_data()
         This method saves the data.
     """
 
