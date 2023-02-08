@@ -107,8 +107,7 @@ class GalacticPropertiesAnalysis:
 
             halo_idx = self._df["MainHaloIdx"].loc[snapshot_number]
             subhalo_idx = self._df["MainSubhaloIdx"].loc[snapshot_number]
-            # subhalo_grouptab_idx = sb.data["ffsh"][halo_idx] + subhalo_idx
-            subhalo_grouptab_idx = 0
+            subhalo_grouptab_idx = sb.data["ffsh"][halo_idx] + subhalo_idx
 
             virial_radius = sb.data['frc2'][subhalo_grouptab_idx] * 1E3 \
                 / sb.hubbleparam  # ckpc
