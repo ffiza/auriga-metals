@@ -1,11 +1,13 @@
 from sys import stdout
 
 from settings import Settings
-from galactic_properties import GalacticPropertiesAnalysis
 from galaxy_tracker import GalaxyTracker
+from galactic_properties import GalacticPropertiesAnalysis
+from rotation_matrices import RotationMatrixAnalysis
 
 track_galaxy: bool = False
-calculate_basic_properties: bool = True
+calculate_basic_properties: bool = False
+calculate_rotation_matrices: bool = True
 
 
 class MainPipeline():
@@ -30,6 +32,13 @@ class MainPipeline():
                                                   self._resolution)
             analysis.analyze_galaxy()
 
+        # Calculate the rotation matrix
+        if calculate_rotation_matrices:
+            analysis = RotationMatrixAnalysis(self._galaxy,
+                                              self._rerun,
+                                              self._resolution)
+            analysis.analyze_galaxy()
+
         # # Calculate the reference potential
         # analysis = ReferencePotentialAnalysis(self._galaxy,
         #                                       self._rerun,
@@ -37,8 +46,6 @@ class MainPipeline():
         # analysis.analyze_galaxy()
 
         # Calculate the velocity of the main subhalo
-
-        # Calculate the rotation matrix
 
         # Plot the density maps
 
