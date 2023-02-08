@@ -18,7 +18,7 @@ class Settings:
         self.n_track_dm_parts: int = 32
 
         # Subhalo velocity calculation configuration
-        self.subh_vel_distance: int = 10  # ckpc
+        self.subh_vel_distance: float = 10.0  # ckpc
 
         # Galaxy markers
         self.markers: list = ["o", "^", "d", "s", "p", "v"] * 5
