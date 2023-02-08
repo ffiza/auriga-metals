@@ -211,8 +211,13 @@ def plot_virial_radius(savefig: bool) -> None:
 
         paths = Paths(galaxy, False, 4)
         df = pd.read_csv(f"{paths.data}temporal_data.csv")
-        ax.plot(df["Time_Gyr"], df["VirialRadius_ckpc"], c='k',
+        ax.plot(df["Time_Gyr"], df["VirialRadius_ckpc"], c='k', ls='-',
                 lw=settings.big_fig_line_lw, zorder=10)
+        if galaxy in settings.galaxies_to_track:
+            ax.plot(df["Time_Gyr"], df["VirialRadius00_ckpc"], c='k',
+                    ls='--', lw=settings.big_fig_line_lw, zorder=10,
+                    dashes=(settings.big_fig_dash_length,
+                            settings.big_fig_dash_space))
 
         if galaxy in settings.reruns:
             paths = Paths(galaxy, True, 4)
@@ -221,7 +226,8 @@ def plot_virial_radius(savefig: bool) -> None:
                     lw=settings.big_fig_line_lw, ls="--", zorder=11)
 
         add_redshift(ax)
-        ax.text(0.95, 0.95, f'Au{galaxy}', size=6,
+        ax.text(0.95, 0.95, f'Au{galaxy}',
+                size=settings.big_fig_label_fontsize,
                 ha='right', va='top',
                 transform=ax.transAxes,
                 bbox={"facecolor": "silver", "edgecolor": "white",
@@ -240,6 +246,70 @@ def plot_virial_radius(savefig: bool) -> None:
         plt.show()
 
 
+def plot_virial_mass(savefig: bool) -> None:
+    """
+    This method creates a plot to visualize the virial radius of each
+    galaxy.
+    """
+
+    settings = Settings()
+
+    fig = plt.figure(figsize=settings.big_fig_size)
+    gs = fig.add_gridspec(nrows=settings.big_fig_nrows,
+                          ncols=settings.big_fig_ncols,
+                          hspace=settings.big_fig_hspace,
+                          wspace=settings.big_fig_wspace)
+    axs = gs.subplots(sharex=True, sharey=True)
+
+    for ax_idx, ax in enumerate(axs.flat):
+        ax.label_outer()
+        ax.grid(True, ls='-', lw=settings.big_fig_grid_lw, c='silver')
+        ax.tick_params(which='both', direction="in")
+        ax.set_xlim(0, 14)
+        ax.set_ylim(0, 300)
+        ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
+        ax.set_yticks([100, 200, 300])
+
+        galaxy = ax_idx + 1
+
+        paths = Paths(galaxy, False, 4)
+        df = pd.read_csv(f"{paths.data}temporal_data.csv")
+        ax.plot(df["Time_Gyr"], df["VirialMass_1E10Msun"], c='k', ls='-',
+                lw=settings.big_fig_line_lw, zorder=10)
+        if galaxy in settings.galaxies_to_track:
+            ax.plot(df["Time_Gyr"], df["VirialMass00_1E10Msun"], c='k',
+                    ls='--', lw=settings.big_fig_line_lw, zorder=10,
+                    dashes=(settings.big_fig_dash_length,
+                            settings.big_fig_dash_space))
+
+        if galaxy in settings.reruns:
+            paths = Paths(galaxy, True, 4)
+            df = pd.read_csv(f"{paths.data}temporal_data.csv")
+            ax.plot(df["Time_Gyr"], df["VirialMass_1E10Msun"], c='tab:red',
+                    lw=settings.big_fig_line_lw, ls="--", zorder=11)
+
+        add_redshift(ax)
+        ax.text(0.95, 0.95, f'Au{galaxy}',
+                size=settings.big_fig_label_fontsize,
+                ha='right', va='top',
+                transform=ax.transAxes,
+                bbox={"facecolor": "silver", "edgecolor": "white",
+                      "pad": .2, 'boxstyle': 'round', 'lw': 1})
+
+        if ax.get_subplotspec().is_first_col():
+            ax.set_ylabel(r"$M_{200}$ [$10^{10} \, \mathrm{M}_\odot$]")
+        if ax.get_subplotspec().is_last_row():
+            ax.set_xlabel('Time [Gyr]')
+
+    if savefig:
+        for extension in settings.figure_extensions:
+            fig.savefig(f"images/level4/virial_mass.{extension}")
+        plt.close(fig)
+    else:
+        plt.show()
+
+
 if __name__ == "__main__":
     figure_setup()
-    plot_virial_radius(savefig=True)
+    # plot_virial_radius(savefig=True)
+    plot_virial_mass(savefig=True)
