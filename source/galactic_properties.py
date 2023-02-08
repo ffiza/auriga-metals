@@ -107,7 +107,8 @@ class GalacticPropertiesAnalysis:
 
             halo_idx = self._df["MainHaloIdx"].loc[snapshot_number]
             subhalo_idx = self._df["MainSubhaloIdx"].loc[snapshot_number]
-            subhalo_grouptab_idx = sb.data["ffsh"][halo_idx] + subhalo_idx
+            # subhalo_grouptab_idx = sb.data["ffsh"][halo_idx] + subhalo_idx
+            subhalo_grouptab_idx = 0
 
             virial_radius = sb.data['frc2'][subhalo_grouptab_idx] * 1E3 \
                 / sb.hubbleparam  # ckpc
@@ -135,12 +136,12 @@ class GalacticPropertiesAnalysis:
             self._calc_properties_in_snapshot, snapnums))
 
         self._df["SnapshotNumber"] = data[:, 0].astype(np.int)
-        self._df["Time_Gyr"] = data[:, 1]
-        self._df["LookbackTime_Gyr"] = data[:, 2]
-        self._df["Redshift"] = data[:, 3]
-        self._df["ExpansionFactor"] = data[:, 4]
-        self._df["VirialRadius_ckpc"] = data[:, 5]
-        self._df["VirialMass_1E10Msun"] = data[:, 6]
+        self._df["Time_Gyr"] = np.round(data[:, 1], 7)
+        self._df["LookbackTime_Gyr"] = np.round(data[:, 2], 7)
+        self._df["Redshift"] = np.round(data[:, 3], 7)
+        self._df["ExpansionFactor"] = np.round(data[:, 4], 7)
+        self._df["VirialRadius_ckpc"] = np.round(data[:, 5], 7)
+        self._df["VirialMass_1E10Msun"] = np.round(data[:, 6], 7)
 
         self._save_data()
 
