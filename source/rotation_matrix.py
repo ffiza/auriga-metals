@@ -5,7 +5,6 @@ from support import timer
 from multiprocessing import Pool
 from scipy import linalg as linalg
 import pandas as pd
-from sys import stdout
 from support import make_snapshot_number
 import os
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -154,7 +153,7 @@ class RotationMatrixAnalysis:
             inertia_tensor[2, 1] = inertia_tensor[1][2]
 
             # Diagonalization.
-            e_vals, e_vecs = linalg.eigh(inertia_tensor)
+            _, e_vecs = linalg.eigh(inertia_tensor)
             x = np.array([1, 0, 0])
             X = e_vecs[:, 0]
             y = np.array([0, 1, 0])
@@ -202,22 +201,3 @@ class RotationMatrixAnalysis:
 
         np.savetxt(f'{self._paths.data}rotation_matrices.csv',
                    self._rotation_matrices)
-
-
-def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
-    stdout.write(f"Analyzing Au{galaxy}... ")
-    analysis = RotationMatrixAnalysis(galaxy, rerun, resolution)
-    analysis.calculate_rotation_matrices()
-    stdout.write(" Done.\n")
-
-
-def main() -> None:
-    settings = Settings()
-    for galaxy in settings.galaxies:
-        run_analysis(galaxy=galaxy, rerun=False, resolution=4)
-        if galaxy in settings.reruns:
-            run_analysis(galaxy=galaxy, rerun=True, resolution=4)
-
-
-if __name__ == '__main__':
-    main()
