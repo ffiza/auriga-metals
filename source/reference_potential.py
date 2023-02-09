@@ -87,23 +87,26 @@ class ReferencePotentialAnalysis:
 
         settings = Settings()
 
-        self._virial_radius = np.loadtxt(
-            f'{self._paths.data}virial_radius.csv')[self._snapnum]
+        if snapnum >= settings.first_snap:
+            self._virial_radius = self._df["VirialRadius_ckpc"].iloc[snapnum]
 
-        s = Snapshot(self.galaxy, self.rerun, self.resolution, snapnum)
-        s.drop_types([0, 2, 3, 4, 5])
+            s = Snapshot(self._galaxy, self._rerun, self._resolution, snapnum)
+            s.drop_types([0, 2, 3, 4, 5])
+            s.calc_extra_coordinates()
 
-        # Find the indices of the smallest k values in array
-        if len(s.df.index) < self.settings.neighbor_number:
-            raise ValueError('Too few DM particles detected.')
+            # Find the indices of the smallest k values in array
+            if len(s.df.index) < settings.neighbor_number:
+                raise ValueError('Too few DM particles detected.')
+            else:
+                idx = find_idx_ksmallest(
+                    np.abs(s.df["rCoordinates"] - settings.infinity_factor
+                           * self._virial_radius).to_numpy(),
+                    settings.neighbor_number)
+
+                # Calculate the mean potential for selected DM particles
+                reference_potential = s.df.Potential.iloc[idx].mean()
         else:
-            idx = find_idx_ksmallest(
-                np.abs(s.df.SphericalRadius
-                       - self.settings.infinity_factor * self._virial_radius),
-                settings.neighbor_number)
-
-            # Calculate the mean potential for selected DM particles
-            reference_potential = s.df.Potential[idx].mean()
+            reference_potential = np.nan
 
         return reference_potential
 
@@ -134,20 +137,6 @@ class ReferencePotentialAnalysis:
                         index=False)
 
 
-def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
-    stdout.write(f"Analyzing Au{galaxy}... ")
-    analysis = ReferencePotentialAnalysis(galaxy, rerun, resolution)
-    analysis.analyze_galaxy()
-    stdout.write(" Done.\n")
-
-
-def main() -> None:
-    settings = Settings()
-    for galaxy in settings.galaxies:
-        run_analysis(galaxy=galaxy, rerun=False, resolution=4)
-        if galaxy in settings.reruns:
-            run_analysis(galaxy=galaxy, rerun=True, resolution=4)
-
-
 if __name__ == "__main__":
-    main()
+    analysis = ReferencePotentialAnalysis(1, False, 4)
+    analysis._calc_reference_potential(30)
