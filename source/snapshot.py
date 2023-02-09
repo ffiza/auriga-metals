@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 import warnings
 from loadmodules import gadget_readsnap, load_subfind
-from auriga.cosmology import Cosmology
-from auriga.simulation import Simulation
-from auriga.physics import Physics
-from utils.paths import Paths
+from cosmology import Cosmology
+from simulation import Simulation
+from physics import Physics
+from paths import Paths
 
 
 class Snapshot:
@@ -38,9 +38,9 @@ class Snapshot:
         The age of the universe of this snapshot.
     _paths : Paths
         An instance of the Paths class.
-    _halo_idx : int
+    _halo_idxs : int
         The index of the main halo in this snapshot.
-    _subhalo_idx : int
+    _subhalo_idxs : int
         The index of the main subhalo in this snapshot.
 
     Methods
@@ -106,9 +106,10 @@ class Snapshot:
             f"{self._paths.data}subhalo_vels.csv")[self.snapnum]
 
         # Set halo/subhalo indices.
-        main_obj_df = pd.read_csv(f"{self._paths.data}main_object_idxs.csv")
-        self._halo_idx = main_obj_df.MainHaloIDX.iloc[snapnum]
-        self._subhalo_idx = main_obj_df.MainSubhaloIDX.iloc[snapnum]
+        df = pd.read_csv(f"{self._paths.data}temporal_data.csv",
+                         usecols=["MainHaloIdx", "MainSubhaloIdx"])
+        self._halo_idx = df["MainHaloIdx"].to_numpy()[self.snapnum]
+        self._subhalo_idx = df["MainSubhaloIdx"].to_numpy()[self.snapnum]
 
         subhalo_grouptab_idx = sb.data["ffsh"][self._halo_idx] \
             + self._subhalo_idx
@@ -298,3 +299,7 @@ class Snapshot:
                                   & (exp_fact_diff > 0)] = i
             exp_fact_diff = new_exp_fact_diff
         self.df["StellarFormationSnapshotNumber"] = stellar_birth_snapnum
+
+
+if __name__ == "__main__":
+    s = Snapshot(1, False, 4, 127)
