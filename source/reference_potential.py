@@ -90,9 +90,13 @@ class ReferencePotentialAnalysis:
         if snapnum >= settings.first_snap:
             self._virial_radius = self._df["VirialRadius_ckpc"].iloc[snapnum]
 
-            s = Snapshot(self._galaxy, self._rerun, self._resolution, snapnum)
-            s.drop_types([0, 2, 3, 4, 5])
+            s = Snapshot(galaxy=self._galaxy,
+                         rerun=self._rerun,
+                         resolution=self._resolution,
+                         snapnum=snapnum,
+                         loadonlytype=[1])
             s.calc_extra_coordinates()
+            s.keep_only_feats(["rCoordinates", "Potential"])
 
             # Find the indices of the smallest k values in array
             if len(s.df.index) < settings.neighbor_number:
@@ -104,7 +108,7 @@ class ReferencePotentialAnalysis:
                     settings.neighbor_number)
 
                 # Calculate the mean potential for selected DM particles
-                reference_potential = s.df.Potential.iloc[idx].mean()
+                reference_potential = s.df["Potential"].iloc[idx].mean()
         else:
             reference_potential = np.nan
 
