@@ -54,7 +54,7 @@ def timer(method: Callable) -> Callable:
         result = method(*args, **kw)
         end_time = int(round(time.time()))
 
-        stdout.write(f"Timer: {end_time-start_time} s.")
+        stdout.write(f"Timer: {end_time-start_time} s. ")
         return result
 
     return wrapper

@@ -9,9 +9,9 @@ from reference_potential import ReferencePotentialAnalysis
 
 track_galaxy: bool = False
 calculate_basic_properties: bool = False
-calculate_subhalo_velocity: bool = False
-calculate_rotation_matrices: bool = False
-calculate_reference_potential: bool = True
+calculate_subhalo_velocity: bool = True
+calculate_rotation_matrices: bool = True
+calculate_reference_potential: bool = False
 
 
 class MainPipeline():
@@ -64,7 +64,7 @@ def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
     stdout.write(f"Analyzing Au{galaxy}... ")
     pipeline = MainPipeline(galaxy, rerun, resolution)
     pipeline.run_pipeline()
-    stdout.write(" Done.\n")
+    stdout.write("Done.\n")
 
 
 def main() -> None:
