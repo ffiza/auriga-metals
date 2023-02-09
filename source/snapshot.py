@@ -65,8 +65,9 @@ class Snapshot:
         specified in the argument.
     """
 
-    def __init__(self, galaxy: int, rerun: bool, resolution: int,
-                 snapnum: int) -> None:
+    def __init__(self, galaxy: int, rerun: bool,
+                 resolution: int, snapnum: int,
+                 loadonlytype: list = [0, 1, 2, 3, 4, 5]) -> None:
         """
         Parameters
         ----------
@@ -92,7 +93,8 @@ class Snapshot:
                              snappath=self._paths.snapshots,
                              lazy_load=True,
                              cosmological=False,
-                             applytransformationfacs=False)
+                             applytransformationfacs=False,
+                             loadonlytype=loadonlytype)
         sb = load_subfind(id=self.snapnum,
                           dir=self._paths.snapshots,
                           cosmological=False)
@@ -134,17 +136,25 @@ class Snapshot:
         self.df["xVelocities"] = vel[:, 0]  # km/s
         self.df["yVelocities"] = vel[:, 1]  # km/s
         self.df["zVelocities"] = vel[:, 2]  # km/s
-        self.df["PartTypes"] = sf.type
         self.df["ParticleIDs"] = sf.id
         self.df["Potential"] = sf.pot / self.expansion_factor  # (km/s)^2
-        self.df["Masses"] = sf.mass * 1e10  # Msun
         self.df["Halo"] = sf.halo
         self.df["Subhalo"] = sf.subhalo
 
-        # Stellar formation time.
-        formation_time = np.nan * np.ones(sf.mass.shape[0])
-        formation_time[sf.type == 4] = sf.age
-        self.df["StellarFormationTime"] = formation_time
+        if len(loadonlytype) > 1:
+            self.df["PartTypes"] = sf.type
+
+        # Stellar formation time
+        if 4 in loadonlytype:
+            formation_time = np.nan * np.ones(sf.type.shape[0])
+            formation_time[sf.type == 4] = sf.age
+            self.df["StellarFormationTime"] = formation_time
+
+        # Mass of particles in Msun
+        if len(loadonlytype) == 1 and loadonlytype[0] == 1:
+            self.df["Masses"] = sf.masses[1] * np.ones(sf.type.shape[0]) * 1e10
+        else:
+            self.df["Masses"] = sf.mass * 1e10
 
     def keep_only_feats(self, feats: list) -> None:
         """
