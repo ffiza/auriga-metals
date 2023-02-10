@@ -9,9 +9,10 @@ from reference_potential import ReferencePotentialAnalysis
 
 track_galaxy: bool = False
 calculate_basic_properties: bool = False
-calculate_subhalo_velocity: bool = True
-calculate_rotation_matrices: bool = True
-calculate_reference_potential: bool = False
+calculate_subhalo_velocity: bool = False
+calculate_rotation_matrices: bool = False
+calculate_reference_potential: bool = True
+plot_density_maps: bool = False
 
 
 class MainPipeline():
@@ -24,6 +25,7 @@ class MainPipeline():
     def run_pipeline(self) -> None:
         # Track galaxy to find the main halo and subhalo idx
         if track_galaxy:
+            stdout.write("Tracking main object... ")
             tracker = GalaxyTracker(self._galaxy,
                                     self._rerun,
                                     self._resolution)
@@ -31,6 +33,7 @@ class MainPipeline():
 
         # Calculate basic simulation data
         if calculate_basic_properties:
+            stdout.write("Calculating basic properties... ")
             analysis = GalacticPropertiesAnalysis(self._galaxy,
                                                   self._rerun,
                                                   self._resolution)
@@ -38,6 +41,7 @@ class MainPipeline():
 
         # Calculate the velocity of the main subhalo
         if calculate_subhalo_velocity:
+            stdout.write("Calculating subhalo velocity... ")
             analysis = SubhaloVelocityAnalysis(self._galaxy,
                                                self._rerun,
                                                self._resolution)
@@ -45,6 +49,7 @@ class MainPipeline():
 
         # Calculate the rotation matrix
         if calculate_rotation_matrices:
+            stdout.write("Calculating rotation matrices... ")
             analysis = RotationMatrixAnalysis(self._galaxy,
                                               self._rerun,
                                               self._resolution)
@@ -52,12 +57,17 @@ class MainPipeline():
 
         # # Calculate the reference potential
         if calculate_reference_potential:
+            stdout.write("Calculating reference potential... ")
             analysis = ReferencePotentialAnalysis(self._galaxy,
                                                   self._rerun,
                                                   self._resolution)
             analysis.analyze_galaxy()
 
         # Plot the density maps
+        if plot_density_maps:
+            stdout.write("Plotting density maps... ")
+            # TODO: Plot density maps
+            pass
 
 
 def run_analysis(galaxy: int, rerun: bool, resolution: int) -> None:
