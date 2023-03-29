@@ -3,20 +3,18 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 import copy
 import warnings
-from auriga.settings import Settings
-from auriga.simulation import Simulation
-from auriga.snapshot import Snapshot
-from utils.paths import Paths
-from utils.timer import timer
-from utils.images import figure_setup, FULL_WIDTH
 import os
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 
-warnings.filterwarnings('ignore', category=UserWarning)
-warnings.filterwarnings('ignore', category=RuntimeWarning)
+from settings import Settings
+from support import make_snapshot_number
+from snapshot import Snapshot
+from paths import Paths
+from timer import timer
+from images import figure_setup
 
 
 class DensityMaps:
@@ -82,10 +80,7 @@ class DensityMaps:
         self._galaxy = galaxy
         self._rerun = rerun
         self._resolution = resolution
-
-        simulation = Simulation(self._rerun, self._resolution)
-        self._n_snapshots = simulation.n_snapshots
-
+        self._n_snapshots = make_snapshot_number(self._rerun, self._resolution)
         self._paths = Paths(self._galaxy, self._rerun, self._resolution)
 
         settings = Settings()
@@ -97,9 +92,12 @@ class DensityMaps:
         self._hist_range = [[-self._box_size / 2, self._box_size / 2],
                             [-self._box_size / 2, self._box_size / 2]]
 
-        # Density map style.
-        self._bbox_props = {"facecolor": "white", "edgecolor": "None",
-                            "pad": 0.2, "alpha": 0.8, "boxstyle": "round"}
+        # Density map style
+        self._bbox_props = {"facecolor": "white",
+                            "edgecolor": "None",
+                            "pad": 0.2,
+                            "alpha": 0.8,
+                            "boxstyle": "round"}
         self._fontsize = 12
         self._spine_width = 3.0
         self._quiver_plot_bins = 32
@@ -122,6 +120,8 @@ class DensityMaps:
             The snapshot number.
         """
 
+        settings = Settings()
+
         # Read snapshot.
         s = Snapshot(self._galaxy, self._rerun, self._resolution, snapnum)
         s.keep_only_halo()
@@ -133,7 +133,7 @@ class DensityMaps:
                     & (np.abs(s.df.zCoordinates) <= self._box_size / 2)]
 
         fig, axes = plt.subplots(ncols=3, nrows=3,
-                                 figsize=(FULL_WIDTH, FULL_WIDTH),
+                                 figsize=settings.medium_fig_size,
                                  gridspec_kw={"width_ratios": [1, 1, 1],
                                               "height_ratios": [1, 1, 1],
                                               "hspace": 0, "wspace": 0})
