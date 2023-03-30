@@ -10,11 +10,9 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 
 from settings import Settings
-from support import make_snapshot_number
+from support import make_snapshot_number, timer
 from snapshot import Snapshot
 from paths import Paths
-from timer import timer
-from images import figure_setup
 
 
 class DensityMaps:
@@ -237,8 +235,10 @@ class DensityMaps:
         xcenter = np.asarray([xcenter for _ in range(self._quiver_plot_bins)])
         ycenter = np.asarray([ycenter for _ in range(self._quiver_plot_bins)])
 
-        vx_quiver /= n_quiver
-        vy_quiver /= n_quiver
+        with warnings.catch_warnings():
+            warnings.simplefilter(action="ignore", category=RuntimeWarning)
+            vx_quiver /= n_quiver
+            vy_quiver /= n_quiver
 
         ax.set_xticks([-40, -20, 0, 20, 40])
         ax.set_yticks([-40, -20, 0, 20, 40])
@@ -258,14 +258,3 @@ class DensityMaps:
                   range=self._hist_range)
         ax.quiver(np.transpose(xcenter).flatten(), ycenter.flatten(),
                   vx_quiver.flatten(), vy_quiver.flatten(), color="black")
-
-
-if __name__ == "__main__":
-    figure_setup()
-
-    settings = Settings()
-    for galaxy in settings.galaxies:
-        print(f"Analyzing Au{galaxy}... ", end='')
-        density_maps = DensityMaps(galaxy, False, 4)
-        density_maps.make_plots()
-        print(" Done.")
