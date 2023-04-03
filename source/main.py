@@ -13,7 +13,7 @@ calculate_basic_properties: bool = False
 calculate_subhalo_velocity: bool = False
 calculate_rotation_matrices: bool = False
 calculate_reference_potential: bool = False
-create_density_maps: bool = True
+create_density_maps: bool = False
 
 
 class MainPipeline():
