@@ -1,11 +1,14 @@
 import pandas as pd
 import numpy as np
 import warnings
+import time
 from loadmodules import gadget_readsnap, load_subfind
+
 from cosmology import Cosmology
 from simulation import Simulation
 from physics import Physics
 from paths import Paths
+from settings import Settings
 
 
 class Snapshot:
@@ -136,15 +139,25 @@ class Snapshot:
         self.df["xVelocities"] = vel[:, 0]  # km/s
         self.df["yVelocities"] = vel[:, 1]  # km/s
         self.df["zVelocities"] = vel[:, 2]  # km/s
-        self.df["ParticleIDs"] = sf.id
+        self.df["ParticleIDs"] = pd.Series(sf.id, dtype="uint64")
         self.df["Potential"] = sf.pot / self.expansion_factor  # (km/s)^2
+        self._add_reference_to_potential()
         self.df["Halo"] = sf.halo
         self.df["Subhalo"] = sf.subhalo
 
-        if len(loadonlytype) > 1:
-            self.df["PartTypes"] = sf.type
+        del pos
 
-        # Stellar formation time
+        # Specific orbital energy
+        self.df["SpecificOrbitalEnergy"] = 0.5 \
+            * np.linalg.norm(vel, axis=1)**2 \
+            + self.df["Potential"].to_numpy()  # (km/s)^2
+        
+        del vel
+
+        if len(loadonlytype) > 1:
+            self.df["PartTypes"] = pd.Series(sf.type, dtype='uint8')
+        
+        # Calculate stellar formation time if stars were loaded
         if 4 in loadonlytype:
             formation_time = np.nan * np.ones(sf.type.shape[0])
             formation_time[sf.type == 4] = sf.age
@@ -155,6 +168,40 @@ class Snapshot:
             self.df["Masses"] = sf.masses[1] * np.ones(sf.type.shape[0]) * 1e10
         else:
             self.df["Masses"] = sf.mass * 1e10
+
+    def _add_reference_to_potential(self) -> None:
+        df = pd.read_csv(f"{self._paths.data}temporal_data.csv",
+                         index_col="SnapshotNumber")
+        ref_pot = df["ReferencePotential_(km/s)^2"].loc[self.snapnum]
+        del df
+        self.df["Potential"] = self.df["Potential"] - ref_pot  # (km/s)^2
+
+    def calc_normalized_potential(self) -> None:
+        if 4 not in self.df["PartTypes"].values:
+            raise ValueError("Stars not found in the snapshot.")
+
+        is_star = self.df["PartTypes"] == 4 
+        is_wind = self.df["StellarFormationTime"] <= 0
+
+        max_potential = np.abs(
+            self.df.loc[is_star & ~is_wind, "Potential"]).max()
+
+        self.df["NormalizedPotential"] = self.df["Potential"] / max_potential
+
+    def calc_normalized_orbital_energy(self) -> None:
+        if 4 not in self.df["PartTypes"].values:
+            raise ValueError("Stars not found in the snapshot.")
+
+        is_star = self.df["PartTypes"] == 4
+        is_wind = self.df["StellarFormationTime"] <= 0
+            
+        max_energy = np.abs(
+            self.df.loc[is_star & ~is_wind, "SpecificOrbitalEnergy"]).max()
+
+        col_name = "NormalizedSpecificOrbitalEnergy"
+        self.df[col_name] = np.nan
+        self.df.loc[is_star, col_name] = \
+            self.df.loc[is_star, "SpecificOrbitalEnergy"] / max_energy
 
     def keep_only_feats(self, feats: list) -> None:
         """
@@ -192,7 +239,7 @@ class Snapshot:
 
         pos = self.df[["xCoordinates", "yCoordinates",
                        "zCoordinates"]].to_numpy()
-        vel = self.df[["xVelocity", "yVelocity", "zVelocity"]].to_numpy()
+        vel = self.df[["xVelocities", "yVelocities", "zVelocities"]].to_numpy()
         jz = np.cross(pos, vel)[:, 2] * self.expansion_factor  # kpc km/s
         del pos, vel
 
@@ -309,7 +356,45 @@ class Snapshot:
                                   & (exp_fact_diff > 0)] = i
             exp_fact_diff = new_exp_fact_diff
         self.df["StellarFormationSnapshotNumber"] = stellar_birth_snapnum
+    
+    def tag_particles_by_region(self) -> None:
+
+        if "Circularity" not in self.df.columns.values:
+            self.calc_circularity()
+
+        if "NormalizedPotential" not in self.df.columns.values:
+            self.calc_normalized_potential()
+
+        settings = Settings()
+
+        region_tag = np.repeat("None", self.df["Masses"].shape[0])
+        region_tag[(np.abs(self.df["Circularity"] - settings.disc_std_circ) \
+                    <= settings.cold_disc_delta_circ) \
+                        & (self.df["PartTypes"] == 4)] = "ColdDisc"
+        region_tag[(self.df["Circularity"] >= settings.disc_min_circ) \
+                   & (self.df["Circularity"] <= settings.disc_std_circ \
+                      - settings.cold_disc_delta_circ) \
+                   & (self.df["PartTypes"] == 4)] = "WarmDisc"
+    
+        region_tag[(self.df["NormalizedPotential"] <=\
+                   settings.bulge_max_specific_energy) \
+                   & (self.df["PartTypes"] == 4)] = "Bulge"
+    
+        region_tag[(self.df["NormalizedPotential"] >= \
+                    settings.bulge_max_specific_energy) \
+                   & (self.df["PartTypes"] == 4)] = "Halo"
+    
+        self.df["RegionTag"] = pd.Series(region_tag, dtype="category")
 
 
 if __name__ == "__main__":
     s = Snapshot(1, False, 4, 127)
+    s.tag_particles_by_region()
+    print(s.df.info())
+    # print(s.df)
+    # print(s.df.describe(include="all"))
+    # df = pd.read_csv("data/level4/au1/temporal_data.csv",
+    #                  index_col="SnapshotNumber")
+    # print(df)
+    # print(df["ReferencePotential_(km/s)^2"].to_numpy()[-1])
+
