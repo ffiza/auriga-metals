@@ -1,15 +1,11 @@
-from sys import stdout
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import pandas as pd
 import numpy as np
 
-from cosmology import Cosmology
 from snapshot import Snapshot
 from settings import Settings
 from paths import Paths
-from support import timer, create_or_load_dataframe
-from images import add_redshift, figure_setup
+from images import figure_setup
 
 
 def plot_energy_circularity(galaxy: int, rerun: bool,
