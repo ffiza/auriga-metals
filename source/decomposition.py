@@ -11,7 +11,8 @@ from images import figure_setup
 def plot_energy_circularity(galaxy: int, rerun: bool,
                             resolution: int, snapnum: int,
                             savefig: bool = True) -> None:
-    """This method creates a plot of the normalized specific orbital energy
+    """
+    This method creates a plot of the normalized specific orbital energy
     of stars versus their circularity as a color map.
 
     Parameters

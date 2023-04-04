@@ -1,7 +1,6 @@
-import numpy as np
-import pandas as pd
+import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-from matplotlib import pyplot as plt
+import numpy as np
 
 from snapshot import Snapshot
 from settings import Settings
@@ -12,6 +11,22 @@ from images import figure_setup
 def create_age_metallicity_plot(galaxy: int, rerun: bool,
                                 resolution: int, snapnum: int,
                                 savefig: bool = True) -> None:
+    """
+    This method creates the age-metallicity plot.
+
+    Parameters
+    ----------
+    galaxy : int
+        The galaxy number.
+    rerun : bool
+        True for the reruns and False for the original simulations.
+    resolution : int
+        The resolution of the simulation.
+    snapnum : int
+        The snapshot number to plot.
+    savefig : bool, optional
+        If True, save the figure. If not, only show the plot.
+    """
 
     settings = Settings()
     paths = Paths(galaxy, rerun, resolution)
