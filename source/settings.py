@@ -56,6 +56,10 @@ class Settings:
                                               26, 27],
                              "NotMilkyWayLike": [4, 7, 12, 15, 20],
                              "Excluded": [1, 5, 19, 28, 29, 30]}
+        
+        # Galactic decomposition
+        self.components = ["Halo", "Bulge", "ColdDisc", "WarmDisc"]
+        self.component_labels = ["Halo", "Bulge", "Cold Disc", "Warm Disc"]
 
         # Figure settings
         self.big_fig_size: tuple = (7.2, 7.2)
