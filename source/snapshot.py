@@ -91,6 +91,7 @@ class Snapshot:
         self.resolution = resolution
         self._paths = Paths(self.galaxy, self.rerun, self.resolution)
         self.snapnum = snapnum
+        self.units = {}
 
         sf = gadget_readsnap(snapshot=self.snapnum,
                              snappath=self._paths.snapshots,
@@ -126,31 +127,39 @@ class Snapshot:
         vel = (self.rotation_matrix @ (sf.vel * np.sqrt(sf.time)
                - self.subhalo_vel).T).T
 
-        # Snapshot properties.
+        # Snapshot properties
         self.redshift = sf.redshift
         self.expansion_factor = sf.time
         cosmology = Cosmology()
         self.time = cosmology.redshift_to_time(self.redshift)
 
-        # General particle properties.
-        self.df["xCoordinates"] = pos[:, 0]  # ckpc
-        self.df["yCoordinates"] = pos[:, 1]  # ckpc
-        self.df["zCoordinates"] = pos[:, 2]  # ckpc
-        self.df["xVelocities"] = vel[:, 0]  # km/s
-        self.df["yVelocities"] = vel[:, 1]  # km/s
-        self.df["zVelocities"] = vel[:, 2]  # km/s
+        # General particle properties
+        self.df["xCoordinates"] = pos[:, 0]
+        self.df["yCoordinates"] = pos[:, 1]
+        self.df["zCoordinates"] = pos[:, 2]
+        self.df["xVelocities"] = vel[:, 0]
+        self.df["yVelocities"] = vel[:, 1]
+        self.df["zVelocities"] = vel[:, 2]
         self.df["ParticleIDs"] = pd.Series(sf.id, dtype="uint64")
-        self.df["Potential"] = sf.pot / self.expansion_factor  # (km/s)^2
+        self.df["Potential"] = sf.pot / self.expansion_factor
         self._add_reference_to_potential()
         self.df["Halo"] = sf.halo
         self.df["Subhalo"] = sf.subhalo
+
+        self.units["xCoordinates"] = "ckpc"
+        self.units["yCoordinates"] = "ckpc"
+        self.units["zCoordinates"] = "ckpc"
+        self.units["xVelocities"] = "km/s"
+        self.units["yVelocities"] = "km/s"
+        self.units["zVelocities"] = "km/s"
+        self.units["Potential"] = "(km/s)^2"
 
         del pos
 
         # Specific orbital energy
         self.df["SpecificOrbitalEnergy"] = 0.5 \
-            * np.linalg.norm(vel, axis=1)**2 \
-            + self.df["Potential"].to_numpy()  # (km/s)^2
+            * np.linalg.norm(vel, axis=1)**2 + self.df["Potential"].to_numpy()
+        self.units["SpecificOrbitalEnergy"] = "(km/s)^2"
         
         del vel
 
@@ -162,12 +171,43 @@ class Snapshot:
             formation_time = np.nan * np.ones(sf.type.shape[0])
             formation_time[sf.type == 4] = sf.age
             self.df["StellarFormationTime"] = formation_time
+            self.units["StellarFormationTime"] = "a"
 
         # Mass of particles in Msun
         if len(loadonlytype) == 1 and loadonlytype[0] == 1:
             self.df["Masses"] = sf.masses[1] * np.ones(sf.type.shape[0]) * 1e10
         else:
             self.df["Masses"] = sf.mass * 1e10
+        self.units["Masses"] = "Msun"
+    
+        # Add metals to data frame.
+        self._add_metals_to_dataframe(sf)
+
+    def calculate_stellar_age(self) -> None:
+        """
+        This method calculates the stellar age based on the stellar formation
+        time.
+        """
+      
+        cosmology = Cosmology()
+
+        stellar_formation_times = cosmology.expansion_factor_to_time(
+            self.df["StellarFormationTime"])
+        self.df["StellarAge"] = cosmology.present_time \
+            - stellar_formation_times
+
+
+    def _add_metals_to_dataframe(self, sf) -> None:
+
+        is_baryon = (sf.type == 0) | (sf.type == 4)
+
+        metals = np.nan * np.ones((len(sf.type), sf.gmet.shape[1]))
+        metals[is_baryon] = sf.gmet
+
+        physics = Physics()
+
+        for idx, metal in enumerate(physics.metals):
+            self.df[f"{metal}Fraction"] = metals[:, idx]
 
     def _add_reference_to_potential(self) -> None:
         df = pd.read_csv(f"{self._paths.data}temporal_data.csv",
@@ -187,6 +227,7 @@ class Snapshot:
             self.df.loc[is_star & ~is_wind, "Potential"]).max()
 
         self.df["NormalizedPotential"] = self.df["Potential"] / max_potential
+        self.units["NormalizedPotential"] = "1"
 
     def calc_normalized_orbital_energy(self) -> None:
         if 4 not in self.df["PartTypes"].values:
@@ -202,6 +243,7 @@ class Snapshot:
         self.df[col_name] = np.nan
         self.df.loc[is_star, col_name] = \
             self.df.loc[is_star, "SpecificOrbitalEnergy"] / max_energy
+        self.units[col_name] = "1"
 
     def keep_only_feats(self, feats: list) -> None:
         """
@@ -218,6 +260,18 @@ class Snapshot:
         for feat in feats:
             drop_feats.remove(feat)
         self.df.drop(columns=drop_feats, inplace=True)
+
+    def drop_feats(self, feats: list) -> None:
+        """
+        This method removes the selected feats from the data frame.
+
+        Parameters
+        ----------
+        feats : list
+            A list of feats to remove.
+        """
+
+        self.df.drop(columns=feats, inplace=True)
 
     def calc_circularity(self) -> None:
         """
@@ -283,7 +337,9 @@ class Snapshot:
             warnings.simplefilter("ignore", RuntimeWarning)
             eps[is_galaxy & is_star] = jz[is_galaxy & is_star] / jc
         del jz, jc, is_galaxy, is_star
+        
         self.df["Circularity"] = eps
+        self.units["Circularity"] = 1
 
     def keep_only_halo(self, halo: int = None, subhalo: int = None) -> None:
         """
@@ -308,6 +364,8 @@ class Snapshot:
         self.df = self.df[(self.df.Halo == halo)
                           & (self.df.Subhalo == subhalo)]
 
+        self.df.reset_index(inplace=True, drop=True)
+
     def drop_types(self, particle_types: list) -> None:
         """
         This method removes all particles that match the selected types.
@@ -321,6 +379,8 @@ class Snapshot:
         for particle_type in particle_types:
             self.df = self.df[self.df.PartTypes != particle_type]
 
+        self.df.reset_index(inplace=True, drop=True)
+
     def drop_winds(self) -> None:
         """
         This method removes all wind particles (with StellarFromationTime
@@ -328,6 +388,8 @@ class Snapshot:
         """
 
         self.df = self.df[~(self.df.StellarFormationTime <= 0)]
+
+        self.df.reset_index(inplace=True, drop=True)
 
     def calc_extra_coordinates(self) -> None:
         """
@@ -339,6 +401,9 @@ class Snapshot:
                        "zCoordinates"]].to_numpy()
         self.df["rxyCoordinates"] = np.linalg.norm(pos[:, 0:2], axis=1)
         self.df["rCoordinates"] = np.linalg.norm(pos, axis=1)
+
+        self.units["rxyCoordinates"] = "ckpc"
+        self.units["yCoordinates"] = "ckpc"
 
     def calc_birth_snapnum(self) -> None:
         """
@@ -367,24 +432,57 @@ class Snapshot:
 
         settings = Settings()
 
-        region_tag = np.repeat("None", self.df["Masses"].shape[0])
-        region_tag[(np.abs(self.df["Circularity"] - settings.disc_std_circ) \
-                    <= settings.cold_disc_delta_circ) \
-                        & (self.df["PartTypes"] == 4)] = "ColdDisc"
-        region_tag[(self.df["Circularity"] >= settings.disc_min_circ) \
-                   & (self.df["Circularity"] <= settings.disc_std_circ \
-                      - settings.cold_disc_delta_circ) \
-                   & (self.df["PartTypes"] == 4)] = "WarmDisc"
+        region_tag = ["Halo"] * self.df["Masses"].shape[0]
+        region_tag = np.array(region_tag, dtype="<U8")
+
+        circ = self.df["Circularity"].to_numpy()
+        pot = self.df["NormalizedPotential"].to_numpy()
+
+        region_tag[
+            (np.abs(circ - settings.disc_std_circ) \
+                <= settings.cold_disc_delta_circ)] = "ColdDisc"
+
+        region_tag[
+            (np.abs(circ - settings.disc_std_circ) \
+                > settings.cold_disc_delta_circ) \
+            & (circ >= settings.disc_min_circ)] = "WarmDisc"
     
-        region_tag[(self.df["NormalizedPotential"] <=\
-                   settings.bulge_max_specific_energy) \
-                   & (self.df["PartTypes"] == 4)] = "Bulge"
+        region_tag[(pot <= settings.bulge_max_specific_energy) \
+                   & (circ < settings.disc_min_circ)] = "Bulge"
     
-        region_tag[(self.df["NormalizedPotential"] >= \
-                    settings.bulge_max_specific_energy) \
-                   & (self.df["PartTypes"] == 4)] = "Halo"
-    
-        self.df["RegionTag"] = pd.Series(region_tag, dtype="category")
+        region_tag[
+            (pot > settings.bulge_max_specific_energy) \
+            & (circ < settings.disc_min_circ)] = "Halo"
+        
+        self.df["RegionTag"] = pd.Categorical(region_tag)
+
+    def calc_metal_abundance(self, of: str, to: str) -> None:
+        if (4 not in self.df["PartTypes"].values) \
+            and (0 not in self.df["PartTypes"].values):
+            raise ValueError("No gas nor star cells found.")
+        
+        if f"{of}Fraction" not in self.df.columns.values:
+            raise ValueError(f"{of}Fraction not found in data frame.")
+        if f"{to}Fraction" not in self.df.columns.values:
+            raise ValueError(f"{to}Fraction not found in data frame.")
+
+        physics = Physics()
+
+        col_name = f"{of}{to}_Abundance"
+
+        with warnings.catch_warnings():
+            # Ignore RuntimeWarnings due to division by zero
+            warnings.simplefilter("ignore", RuntimeWarning)
+
+            self.df[col_name] = np.log10(
+                self.df[f"{of}Fraction"] / self.df[f"{to}Fraction"])
+            self.df[col_name] -= np.log10(
+                physics.atomic_numbers[of] / physics.atomic_numbers[to])
+            self.df[col_name] -= physics.solar_abundances[of] \
+                                - physics.solar_abundances[to]
+        
+        if of == "Mg" and to == "H":  # Apply correction for [Mg/H]
+            self.df[col_name] += 0.4
 
 
 if __name__ == "__main__":
