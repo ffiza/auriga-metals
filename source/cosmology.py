@@ -56,7 +56,7 @@ class Cosmology:
             The corresponding age of the universe in Gyr.
         """
 
-        return self.cosmology.age(redshift).value
+        return self.cosmology.age(redshift).value  # Gyr
 
     def redshift_to_lookback_time(self, redshift: float) -> float:
         """
@@ -73,7 +73,44 @@ class Cosmology:
             The corresponding lookback time.
         """
 
-        return self.cosmology.lookback_time(redshift).value
+        return self.cosmology.lookback_time(redshift).value  # Gyr
+
+    def expansion_factor_to_redshift(self, a: float) -> float:
+        """
+        This method calculatest the redshift asociated with a given value of
+        the expansion factor.
+
+        Parameters
+        ----------
+        a : float
+            The expansion factor.
+        
+        Returns
+        -------
+        float
+            The corresponding redshift.
+        """
+
+        return 1 / a - 1
+
+    def expansion_factor_to_time(self, a: float) -> float:
+        """
+        This method calculates the cosmic time in Gyr asociated with a
+        given value of the expansion factor.
+
+        Parameters
+        ----------
+        a : float
+            The expansion factor.
+        
+        Returns
+        -------
+        float
+            The corresponding cosmic time.
+        """
+
+        redshift = self.expansion_factor_to_redshift(a)
+        return self.redshift_to_time(redshift)  # Gyr
 
     def redshift_to_expansion_factor(self, redshift: float) -> float:
         """
