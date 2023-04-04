@@ -94,5 +94,5 @@ def plot_energy_circularity(galaxy: int, rerun: bool,
 
 
 if __name__ == "__main__":
-    # figure_setup()
+    figure_setup()
     plot_energy_circularity(6, False, 4, 127, True)
