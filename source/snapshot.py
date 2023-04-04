@@ -15,63 +15,14 @@ class Snapshot:
     """
     A class to manage both the global properties of snapshots and particle
     data.
-
-    Attributes
-    ----------
-    galaxy : int
-        The galaxy to analyze.
-    df : pd.DataFrame
-        A pandas data frame that contains the data of the particles
-        in this snapshot.
-    rerun : bool
-        A bool to indicate if this is a original run or a rerun.
-    resolution : int
-        The resolution level of the simulation.
-    snapnum : int
-        The snapshot number.
-    rotation_matrix : np.array
-        The rotation matrix of this snapshot.
-    subhalo_vel : np.array
-        The velocity of the main subhalo of this snapshot.
-    redshift : float
-        The redshift of this snapshot.
-    expansion_factor : float
-        The expansion factor of this snapshot.
-    time : float
-        The age of the universe of this snapshot.
-    _paths : Paths
-        An instance of the Paths class.
-    _halo_idxs : int
-        The index of the main halo in this snapshot.
-    _subhalo_idxs : int
-        The index of the main subhalo in this snapshot.
-
-    Methods
-    -------
-    keep_only_halo(int, int)
-        Remove all particles that do not belong to the indicated halo/subhalo
-        pair.
-    drop_types(list[int])
-        Remove all particles of the indicated types.
-    drop_winds()
-        Remove all stellar particles with negative formation time.
-    calc_extra_coordinates()
-        Calculate the cylindrical and spherical radius for each particle.
-    calc_birth_snapnum()
-        Calculate the snapshot number in which every star appears for the
-        first time.
-    calc_circularity()
-        This method calculates the circularity parameter for the stellar
-        particles in the main halo/subhalo.
-    keep_only_feats(feats)
-        This method removes all feats from the data frame, keeping only those
-        specified in the argument.
     """
 
     def __init__(self, galaxy: int, rerun: bool,
                  resolution: int, snapnum: int,
                  loadonlytype: list = [0, 1, 2, 3, 4, 5]) -> None:
         """
+        The class constructor.
+
         Parameters
         ----------
 
@@ -83,6 +34,8 @@ class Snapshot:
             The resolution level of the simulation.
         snapnum : int
             The snapshot number.
+        loadonlytype : list, optional
+            A list with the particle types to load.
         """
 
         self.df = pd.DataFrame()
@@ -198,6 +151,15 @@ class Snapshot:
 
 
     def _add_metals_to_dataframe(self, sf) -> None:
+        """
+        This method adds a feat for the metal fraction of each species to the
+        data frame.
+
+        Parameters
+        ----------
+        sf : Snapshot
+            The loaded snapshot file.
+        """
 
         is_baryon = (sf.type == 0) | (sf.type == 4)
 
@@ -210,6 +172,11 @@ class Snapshot:
             self.df[f"{metal}Fraction"] = metals[:, idx]
 
     def _add_reference_to_potential(self) -> None:
+        """
+        Change the raw potential to a potential with a reference, calculated
+        somewhere else.
+        """
+
         df = pd.read_csv(f"{self._paths.data}temporal_data.csv",
                          index_col="SnapshotNumber")
         ref_pot = df["ReferencePotential_(km/s)^2"].loc[self.snapnum]
@@ -217,6 +184,10 @@ class Snapshot:
         self.df["Potential"] = self.df["Potential"] - ref_pot  # (km/s)^2
 
     def calc_normalized_potential(self) -> None:
+        """
+        Normalize the potential to the range [-1, 0).
+        """
+
         if 4 not in self.df["PartTypes"].values:
             raise ValueError("Stars not found in the snapshot.")
 
@@ -230,6 +201,10 @@ class Snapshot:
         self.units["NormalizedPotential"] = "1"
 
     def calc_normalized_orbital_energy(self) -> None:
+        """
+        Normalize the specific orbital energy to the range [-1, 0).
+        """
+
         if 4 not in self.df["PartTypes"].values:
             raise ValueError("Stars not found in the snapshot.")
 
@@ -423,6 +398,13 @@ class Snapshot:
         self.df["StellarFormationSnapshotNumber"] = stellar_birth_snapnum
     
     def tag_particles_by_region(self) -> None:
+        """
+        Calculate the region to which each particle belongs based on their
+        circularity and normalized potential. The regions can be Cold Disc,
+        Warm Disc, Halo and Bulge. All particles belong to a region. If the
+        properties used are not found in the snapshot, it calls the methods
+        to calculate them.
+        """
 
         if "Circularity" not in self.df.columns.values:
             self.calc_circularity()
@@ -457,6 +439,17 @@ class Snapshot:
         self.df["RegionTag"] = pd.Categorical(region_tag)
 
     def calc_metal_abundance(self, of: str, to: str) -> None:
+        """
+        Calculates the abundance [X/Y] of metal x relative to metal Y.
+
+        Parameters
+        ----------
+        of : str
+            The metal to calculate the abundance of.
+        to : str
+            The metal to use as relative to.
+        """
+
         if (4 not in self.df["PartTypes"].values) \
             and (0 not in self.df["PartTypes"].values):
             raise ValueError("No gas nor star cells found.")
