@@ -1,3 +1,6 @@
 .vscode/
 **/__pycache__
 **/density_maps/
+auriga.egg-info
+auriga/__pycache__
+trash
