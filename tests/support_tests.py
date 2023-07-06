@@ -2,8 +2,7 @@ import unittest
 import numpy as np
 import sys
 import os
-sys.path.append(os.path.abspath("./source"))
-from support import find_idx_ksmallest
+from auriga.support import find_idx_ksmallest
 
 
 class SupportMethodsTests(unittest.TestCase):
