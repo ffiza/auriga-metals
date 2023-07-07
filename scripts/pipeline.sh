@@ -1,0 +1,17 @@
+#!/bin/sh
+
+python auriga/simulation_properties.py --simulations au1_or_l4 au2_or_l4 au3_or_l4 au4_or_l4 au5_or_l4 au6_or_l4 au7_or_l4 au8_or_l4 au9_or_l4 au10_or_l4 au11_or_l4 au12_or_l4 au13_or_l4 au14_or_l4 au15_or_l4 au16_or_l4 au17_or_l4 au18_or_l4 au19_or_l4 au20_or_l4 au21_or_l4 au22_or_l4 au23_or_l4 au24_or_l4 au25_or_l4 au26_or_l4 au27_or_l4 au28_or_l4 au29_or_l4 au30_or_l4 au5_re_l4 au6_re_l4 au9_re_l4 au13_re_l4 au17_re_l4 au23_re_l4 au24_re_l4 au26_re_l4 au28_re_l4
+
+python auriga/galaxy_tracker.py --simulations au2_or_l4 au3_or_l4 au4_or_l4 au5_or_l4 au6_or_l4 au7_or_l4 au8_or_l4 au9_or_l4 au10_or_l4 au12_or_l4 au13_or_l4 au14_or_l4 au15_or_l4 au16_or_l4 au17_or_l4 au18_or_l4 au19_or_l4 au20_or_l4 au21_or_l4 au22_or_l4 au23_or_l4 au24_or_l4 au25_or_l4 au26_or_l4 au27_or_l4 au28_or_l4 au29_or_l4 au30_or_l4 au5_re_l4 au6_re_l4 au9_re_l4 au13_re_l4 au17_re_l4 au23_re_l4 au24_re_l4 au26_re_l4 au28_re_l4 --n_part 32 --track no --halo_feat_name MainHaloIdx --subhalo_feat_name MainSubhaloIdx
+
+python auriga/galaxy_tracker.py --simulations au1_or_l4 au11_or_l4 --n_part 32 --track yes --halo_feat_name MainHaloIdx --subhalo_feat_name MainSubhaloIdx
+
+python auriga/galaxy_properties.py --simulations au1_or_l4 au2_or_l4 au3_or_l4 au4_or_l4 au5_or_l4 au6_or_l4 au7_or_l4 au8_or_l4 au9_or_l4 au10_or_l4 au11_or_l4 au12_or_l4 au13_or_l4 au14_or_l4 au15_or_l4 au16_or_l4 au17_or_l4 au18_or_l4 au19_or_l4 au20_or_l4 au21_or_l4 au22_or_l4 au23_or_l4 au24_or_l4 au25_or_l4 au26_or_l4 au27_or_l4 au28_or_l4 au29_or_l4 au30_or_l4 au5_re_l4 au6_re_l4 au9_re_l4 au13_re_l4 au17_re_l4 au23_re_l4 au24_re_l4 au26_re_l4 au28_re_l4
+
+python auriga/subhalo_velocity.py --simulations au1_or_l4 au2_or_l4 au3_or_l4 au4_or_l4 au5_or_l4 au6_or_l4 au7_or_l4 au8_or_l4 au9_or_l4 au10_or_l4 au11_or_l4 au12_or_l4 au13_or_l4 au14_or_l4 au15_or_l4 au16_or_l4 au17_or_l4 au18_or_l4 au19_or_l4 au20_or_l4 au21_or_l4 au22_or_l4 au23_or_l4 au24_or_l4 au25_or_l4 au26_or_l4 au27_or_l4 au28_or_l4 au29_or_l4 au30_or_l4 au5_re_l4 au6_re_l4 au9_re_l4 au13_re_l4 au17_re_l4 au23_re_l4 au24_re_l4 au26_re_l4 au28_re_l4
+
+python auriga/rotation_matrix.py --simulations au1_or_l4 au2_or_l4 au3_or_l4 au4_or_l4 au5_or_l4 au6_or_l4 au7_or_l4 au8_or_l4 au9_or_l4 au10_or_l4 au11_or_l4 au12_or_l4 au13_or_l4 au14_or_l4 au15_or_l4 au16_or_l4 au17_or_l4 au18_or_l4 au19_or_l4 au20_or_l4 au21_or_l4 au22_or_l4 au23_or_l4 au24_or_l4 au25_or_l4 au26_or_l4 au27_or_l4 au28_or_l4 au29_or_l4 au30_or_l4 au5_re_l4 au6_re_l4 au9_re_l4 au13_re_l4 au17_re_l4 au23_re_l4 au24_re_l4 au26_re_l4 au28_re_l4
+
+python auriga/density_maps.py --simulations au1_or_l4 au2_or_l4 au3_or_l4 au4_or_l4 au5_or_l4 au6_or_l4 au7_or_l4 au8_or_l4 au9_or_l4 au10_or_l4 au11_or_l4 au12_or_l4 au13_or_l4 au14_or_l4 au15_or_l4 au16_or_l4 au17_or_l4 au18_or_l4 au19_or_l4 au20_or_l4 au21_or_l4 au22_or_l4 au23_or_l4 au24_or_l4 au25_or_l4 au26_or_l4 au27_or_l4 au28_or_l4 au29_or_l4 au30_or_l4 au5_re_l4 au6_re_l4 au9_re_l4 au13_re_l4 au17_re_l4 au23_re_l4 au24_re_l4 au26_re_l4 au28_re_l4
+
+python auriga/reference_potential.py --simulations au1_or_l4 au2_or_l4 au3_or_l4 au4_or_l4 au5_or_l4 au6_or_l4 au7_or_l4 au8_or_l4 au9_or_l4 au10_or_l4 au11_or_l4 au12_or_l4 au13_or_l4 au14_or_l4 au15_or_l4 au16_or_l4 au17_or_l4 au18_or_l4 au19_or_l4 au20_or_l4 au21_or_l4 au22_or_l4 au23_or_l4 au24_or_l4 au25_or_l4 au26_or_l4 au27_or_l4 au28_or_l4 au29_or_l4 au30_or_l4 au5_re_l4 au6_re_l4 au9_re_l4 au13_re_l4 au17_re_l4 au23_re_l4 au24_re_l4 au26_re_l4 au28_re_l4
