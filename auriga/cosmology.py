@@ -84,7 +84,7 @@ class Cosmology:
         ----------
         a : float
             The expansion factor.
-        
+
         Returns
         -------
         float
@@ -102,7 +102,7 @@ class Cosmology:
         ----------
         a : float
             The expansion factor.
-        
+
         Returns
         -------
         float

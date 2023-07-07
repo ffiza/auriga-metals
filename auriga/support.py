@@ -161,8 +161,4 @@ def create_or_load_dataframe(df_path: str) -> pd.DataFrame:
         The dataframe.
     """
 
-    if exists(df_path):
-        df = pd.read_csv(df_path)
-    else:
-        df = pd.DataFrame()
-    return df
+    return pd.read_csv(df_path) if exists(df_path) else pd.DataFrame()

@@ -5,24 +5,6 @@ import json
 class Simulation:
     """
     A class used to manage global simulation properties.
-
-    Attributes
-    ----------
-    _rerun : bool
-        The type of simulation.
-    _resolution : int
-        The resolution of the simulation.
-    snapshot_numbers : np.array
-        An array with the snapshot numbers of each snapshot.
-    times : np.array
-        An array with the times (age of the universe in Gyr) of each
-        snapshot.
-    redshifts : np.array
-        An array with the redshift of each snapshot.
-    expansion_factors : np.array
-        An array with the expansion factor of each snapshot.
-    n_snapshots : int
-        The number of snapshots in this simulation.
     """
 
     def __init__(self, rerun: bool, resolution: int):
@@ -46,8 +28,10 @@ class Simulation:
 
             self.snapshot_numbers = np.array(
                 data[self._type]['SnapshotNumber'])
-            self.times = np.array(data[self._type]['Time_Gyr'])
-            self.redshifts = np.array(data[self._type]['Redshift'])
+            self.times = np.array(
+                data[self._type]['Time_Gyr'])
+            self.redshifts = np.array(
+                data[self._type]['Redshift'])
             self.expansion_factors = np.array(
                 data[self._type]['ExpansionFactor'])
 
