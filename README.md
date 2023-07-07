@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>The Auriga Project: Metal Distribution</h1>
+    <h1>The Distribution and Origin of Metals in the Auriga Simulations</h1>
 </div>
 
 <p align="center">
@@ -9,7 +9,15 @@
 Code written for an ongoing analysis of the distribution of metals in the galaxies
 from [the Auriga project](https://wwwmpa.mpa-garching.mpg.de/auriga/index.html).
 
-## Description
+## Introduction
+
+## Simulations
+
+### The Auriga Simulations
+
+### Tracer Particles
+
+## Analysis
 
 ### Tracking the Main Object
 
@@ -30,10 +38,18 @@ The halo/subhalo index pair can be found in the file ```main_object_idxs.csv``` 
 
 *Te be completed.*
 
-### The Galactic Decomposition
+### The Gravitational Potential
 
 *Te be completed.*
 
-## Usage
+### Galactic Decomposition
 
-*Te be completed.*
+## The Distribution of Metals
+
+## The Origin of Metals
+
+## Discussion and Conclusions
+
+<!-- ## Apenddices -->
+
+<!-- ### Appendix A: Some Title -->
