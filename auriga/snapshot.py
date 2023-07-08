@@ -129,8 +129,9 @@ class Snapshot:
                       rerun=self.rerun,
                       resolution=self.resolution)
 
-        df = pd.read_csv(os.path.abspath(f"{paths.results}temporal_data.csv"),
-                         index_col="SnapshotNumber")
+        df = pd.read_csv(
+            os.path.abspath(f"{paths.results_abs}/temporal_data.csv"),
+            index_col="SnapshotNumber")
         ref_pot = df["ReferencePotential_(km/s)^2"].loc[self.snapnum]
         self.potential -= ref_pot  # (km/s)^2
 
@@ -146,9 +147,9 @@ class Snapshot:
         self.r = np.linalg.norm(self.pos, axis=1)
 
         self.v_rho = (self.pos[:, 0] * self.vel[:, 0]
-                      + self.pos[:, 1] * self.vel[:, 1]) / self.rxy
+                      + self.pos[:, 1] * self.vel[:, 1]) / self.rho
         self.v_phi = (self.pos[:, 0] * self.vel[:, 1]
-                      - self.pos[:, 1] * self.vel[:, 0]) / self.rxy
+                      - self.pos[:, 1] * self.vel[:, 0]) / self.rho
 
     def add_circularity(self) -> None:
         """
@@ -213,9 +214,11 @@ class Snapshot:
         absolute value of the stellar particles in the main halo/subhalo.
         """
 
-        # BUG: This method should probably use the stars in the main obj.
+        is_main_obj = (self.halo == self.halo_idx) \
+            & (self.subhalo == self.subhalo_idx)
         is_real_star = (self.type == 4) & (self.stellar_formation_time > 0)
-        norm_pot = self.potential / np.abs(self.potential[is_real_star]).max()
+        norm_pot = self.potential / np.abs(
+            self.potential[is_real_star & is_main_obj]).max()
         self.normalized_potential = norm_pot
         self._has_normalized_potential = True
 
