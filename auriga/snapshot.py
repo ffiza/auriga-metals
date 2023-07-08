@@ -151,6 +151,11 @@ class Snapshot:
         self.rxy = np.linalg.norm(self.pos[:, 0:2], axis=1)
         self.r = np.linalg.norm(self.pos, axis=1)
 
+        self.v_radial = (self.pos[:, 0] * self.vel[:, 0]
+                         + self.pos[:, 1] * self.vel[:, 1]) / self.rxy
+        self.v_tangen = (self.pos[:, 0] * self.vel[:, 1]
+                         - self.pos[:, 1] * self.vel[:, 0]) / self.rxy
+
     def add_circularity(self) -> None:
         """
         This method calculates the circularity parameter for the stellar
