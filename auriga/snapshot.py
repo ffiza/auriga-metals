@@ -263,5 +263,5 @@ class Snapshot:
 
     def add_stellar_formation_snapshot(self):
         # TODO: Implement a method that calculates the first snapshot at
-        # which the stars are found in the simulation.
+        #  which the stars are found in the simulation.
         raise NotImplementedError("Method not yet implemented.")
