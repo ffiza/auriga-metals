@@ -25,7 +25,7 @@ The following table provides a description of each variable in the `settings.py`
 | `disc_min_circ` | - | `float` | The minimum circulariy of the (warm) disc. | 
 | `disc_std_circ` | - | `float` | The standard circularity of the cold disc. | 
 | `cold_disc_delta_circ` | - | `float` | The circularity dispersion of the cold disc. | 
-| `bulge_max_specific_potential` | - | `float` | The maximum specific potential of the bulge. | 
+| `bulge_max_specific_energy` | - | `float` | The maximum specific energy (orbital or potential) of the bulge. | 
 | `components` | - | `list` | A symbol for each galactic component. | 
 | `component_labels` | - | `dict` | The labels of each galactic component. | 
 | `component_colors` | - | `dict` | A color for each galactic component. | 

@@ -51,7 +51,7 @@ class Settings:
         self.disc_min_circ: float = 0.4
         self.disc_std_circ: float = 1.0
         self.cold_disc_delta_circ: float = 0.25
-        self.bulge_max_specific_potential: float = -0.75
+        self.bulge_max_specific_energy: float = -0.75
 
         # Galactic decomposition
         self.components: list = ["H", "B", "CD", "WD"]
