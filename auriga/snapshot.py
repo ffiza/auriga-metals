@@ -17,6 +17,8 @@ from auriga.parser import parse
 
 def read_raw_snapshot(simulation: str,
                       loadonlytype: list):
+    # FIXME: Add documentation.
+
     galaxy, rerun, resolution, snapnum = parse(simulation=simulation)
     paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
 
@@ -36,6 +38,8 @@ def read_raw_snapshot(simulation: str,
 
 class Snapshot:
     def __init__(self, simulation: str, loadonlytype: list):
+        # FIXME: Add documentation.
+
         galaxy, rerun, resolution, snapnum = parse(simulation=simulation)
         self.simulation = simulation
         self.loadonlytype = loadonlytype
@@ -102,6 +106,7 @@ class Snapshot:
         This method calculates the age of each star (not the birth time) in
         Gyr (age of the universe).
         """
+
         cosmology = Cosmology()
 
         stellar_formation_times = cosmology.expansion_factor_to_time(
@@ -109,6 +114,8 @@ class Snapshot:
         self.stellar_age = cosmology.present_time - stellar_formation_times
 
     def add_metals(self):
+        # FIXME: Add documentation.
+
         sf, _ = read_raw_snapshot(simulation=self.simulation,
                                   loadonlytype=self.loadonlytype)
 
@@ -123,6 +130,7 @@ class Snapshot:
         """
         Change the raw potential to a potential with a reference.
         """
+
         paths = Paths(galaxy=self.galaxy,
                       rerun=self.rerun,
                       resolution=self.resolution)
@@ -139,13 +147,15 @@ class Snapshot:
         This method calculates the radii of particles in cylindrical and
         spherical coordinates.
         """
+
         self.rxy = np.linalg.norm(self.pos[:, 0:2], axis=1)
         self.r = np.linalg.norm(self.pos, axis=1)
 
     def add_circularity(self) -> None:
         """
         This method calculates the circularity parameter for the stellar
-        particles in the main halo/subhalo.
+        particles in the main halo/subhalo. Stars not in the main object
+        or other particle types are assigned NaNs.
         """
 
         physics = Physics()
@@ -200,10 +210,11 @@ class Snapshot:
 
     def add_normalized_potential(self):
         """
-        This method calculates the normalized potential for the stellar
-        particles in the main halo/subhalo.
+        This method calculates the normalized potential using the maximum
+        absolute value of the stellar particles in the main halo/subhalo.
         """
 
+        # BUG: This method should probably use the stars in the main obj.
         is_real_star = (self.type == 4) & (self.stellar_formation_time > 0)
         norm_pot = self.potential / np.abs(self.potential[is_real_star]).max()
         self.normalized_potential = norm_pot
@@ -214,6 +225,7 @@ class Snapshot:
                                 disc_min_circ: float,
                                 disc_delta_disc: float,
                                 bulge_max_specific_energy: float):
+        # FIXME: Add documentation.
 
         if not self._has_circularity:
             self.add_circularity()
@@ -248,3 +260,8 @@ class Snapshot:
             & (self.circularity > disc_min_circ)
             & (self.halo == self.halo_idx)
             & (self.subhalo == self.subhalo_idx)] = 3
+
+    def add_stellar_formation_snapshot(self):
+        # TODO: Implement a method that calculates the first snapshot at
+        # which the stars are found in the simulation.
+        raise NotImplementedError("Method not yet implemented.")

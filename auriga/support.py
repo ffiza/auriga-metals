@@ -6,8 +6,10 @@ import pandas as pd
 from os.path import exists
 
 
-def find_indices(a: np.array, b: np.array,
-                 invalid_specifier: int = -1) -> np.array:
+def find_indices(a: np.array,
+                 b: np.array,
+                 invalid_specifier: int = -1,
+                 ) -> np.array:
     """"
     Returns an array with the indices of the elements of b
     in a. If an element of b is not in a, it returns
@@ -61,7 +63,8 @@ def timer(method: Callable) -> Callable:
 
 
 def get_bool_input(msg: str) -> bool:
-    """This method get the input from the user by displaying a message
+    """
+    This method get the input from the user by displaying a message
     and returns the result as a boolean.
 
     Parameters
@@ -87,8 +90,11 @@ def get_bool_input(msg: str) -> bool:
     return rsp
 
 
-def find_idx_ksmallest(arr: np.ndarray, k: int) -> np.ndarray:
-    """This method find the indizes of the k smallest numbers in arr.
+def find_idx_ksmallest(arr: np.ndarray,
+                       k: int,
+                       ) -> np.ndarray:
+    """
+    This method find the indizes of the k smallest numbers in arr.
 
     Parameters
     ----------
@@ -107,7 +113,9 @@ def find_idx_ksmallest(arr: np.ndarray, k: int) -> np.ndarray:
     return idx[:k]
 
 
-def make_snapshot_number(rerun: bool, resolution: int) -> int:
+def make_snapshot_number(rerun: bool,
+                         resolution: int,
+                         ) -> int:
     """
     This method calculates the number of snapshots in a given simulation.
 
