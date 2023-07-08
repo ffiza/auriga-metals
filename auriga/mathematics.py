@@ -20,8 +20,7 @@ def linear(x: np.array, slope: float, intercept: float) -> np.array:
         The result of the linear function.
     """
 
-    f = slope*x + intercept
-    return f
+    return slope * x + intercept
 
 
 def exponential(x: np.array, amplitude: float, scale: float) -> np.array:
@@ -44,5 +43,4 @@ def exponential(x: np.array, amplitude: float, scale: float) -> np.array:
         The result of the linear function.
     """
 
-    f = amplitude * np.exp(-x/scale)
-    return f
+    return amplitude * np.exp(-x / scale)

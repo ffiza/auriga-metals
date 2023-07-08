@@ -137,18 +137,14 @@ def make_snapshot_number(rerun: bool,
         If the resolution is not implemented.
     """
 
-    if resolution == 2 and rerun is False:
-        n_snapshots = 127 + 1
-        return n_snapshots
+    if resolution == 2 and not rerun:
+        return 127 + 1
     if resolution == 3:
-        n_snapshots = 63 + 1 if rerun is False else 127 + 1
-        return n_snapshots
+        return 127 + 1 if rerun else 63 + 1
     elif resolution == 4:
-        n_snapshots = 127 + 1 if rerun is False else 251 + 1
-        return n_snapshots
-    elif resolution == 5 and rerun is False:
-        n_snapshots = 63 + 1
-        return n_snapshots
+        return 251 + 1 if rerun else 127 + 1
+    elif resolution == 5 and not rerun:
+        return 63 + 1
     else:
         raise ValueError("Resolution value not implemented.")
 

@@ -6,7 +6,6 @@ os.environ["MKL_NUM_THREADS"] = "1"  # Limits threads in Numpy
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
-
 from auriga.snapshot import Snapshot
 from auriga.settings import Settings
 from auriga.paths import Paths

@@ -1,8 +1,6 @@
 from multiprocessing import Pool
 from support import make_snapshot_number
 from sys import stdout
-import matplotlib.pyplot as plt
-import pandas as pd
 import os
 os.environ["MKL_NUM_THREADS"] = "1"  # Limits threads in Numpy
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
@@ -10,8 +8,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 import argparse
 
-from loadmodules import gadget_readsnap, load_subfind
-from auriga.cosmology import Cosmology
+from loadmodules import load_subfind
 from auriga.settings import Settings
 from auriga.paths import Paths
 from auriga.support import timer, create_or_load_dataframe

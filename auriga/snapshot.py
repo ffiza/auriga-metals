@@ -1,17 +1,11 @@
 import pandas as pd
 import numpy as np
 import warnings
-import time
 import os
-import pathlib
-
 from loadmodules import gadget_readsnap, load_subfind
-
 from auriga.cosmology import Cosmology
-from auriga.simulation import Simulation
 from auriga.physics import Physics
 from auriga.paths import Paths
-from auriga.settings import Settings
 from auriga.parser import parse
 
 
@@ -126,7 +120,7 @@ class Snapshot:
             warnings.warn(message="No stars nor gas found in the simulation. "
                                   "Metals not loaded.")
 
-    def add_reference_to_potential():
+    def add_reference_to_potential(self):
         """
         Change the raw potential to a potential with a reference.
         """
@@ -148,13 +142,13 @@ class Snapshot:
         spherical coordinates.
         """
 
-        self.rxy = np.linalg.norm(self.pos[:, 0:2], axis=1)
+        self.rho = np.linalg.norm(self.pos[:, 0:2], axis=1)
         self.r = np.linalg.norm(self.pos, axis=1)
 
-        self.v_radial = (self.pos[:, 0] * self.vel[:, 0]
-                         + self.pos[:, 1] * self.vel[:, 1]) / self.rxy
-        self.v_tangen = (self.pos[:, 0] * self.vel[:, 1]
-                         - self.pos[:, 1] * self.vel[:, 0]) / self.rxy
+        self.v_rho = (self.pos[:, 0] * self.vel[:, 0]
+                      + self.pos[:, 1] * self.vel[:, 1]) / self.rxy
+        self.v_phi = (self.pos[:, 0] * self.vel[:, 1]
+                      - self.pos[:, 1] * self.vel[:, 0]) / self.rxy
 
     def add_circularity(self) -> None:
         """
@@ -228,7 +222,7 @@ class Snapshot:
     def tag_particles_by_region(self,
                                 disc_std_circ: float,
                                 disc_min_circ: float,
-                                disc_delta_disc: float,
+                                disc_delta_circ: float,
                                 bulge_max_specific_energy: float):
         # FIXME: Add documentation.
 
@@ -255,13 +249,13 @@ class Snapshot:
 
         # Tag cold disc particles
         region_tag[
-            (np.abs(self.circularity - disc_std_circ) <= cold_disc_delta_circ)
+            (np.abs(self.circularity - disc_std_circ) <= disc_delta_circ)
             & (self.halo == self.halo_idx)
             & (self.subhalo == self.subhalo_idx)] = 2
 
         # Tag warm disc particles
         region_tag[
-            (np.abs(self.circularity - disc_std_circ) > cold_disc_delta_circ)
+            (np.abs(self.circularity - disc_std_circ) > disc_delta_circ)
             & (self.circularity > disc_min_circ)
             & (self.halo == self.halo_idx)
             & (self.subhalo == self.subhalo_idx)] = 3

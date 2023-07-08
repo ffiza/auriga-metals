@@ -2,16 +2,13 @@ import numpy as np
 from scipy.stats import mode
 import pandas as pd
 from typing import Tuple
-from matplotlib import pyplot as plt
 import argparse
 from sys import stdout
-
 from loadmodules import gadget_readsnap, load_subfind
 from auriga.settings import Settings
 from auriga.support import find_indices, create_or_load_dataframe, timer
 from auriga.support import make_snapshot_number
 from auriga.paths import Paths
-from auriga.images import add_redshift, figure_setup
 from auriga.parser import parse
 
 

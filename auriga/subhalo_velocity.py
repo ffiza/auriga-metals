@@ -1,6 +1,5 @@
 from multiprocessing import Pool
 import pandas as pd
-from matplotlib import pyplot as plt
 import os
 import argparse
 from sys import stdout

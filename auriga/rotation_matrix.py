@@ -8,9 +8,7 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
-
 from loadmodules import gadget_readsnap, load_subfind
-
 from auriga.settings import Settings
 from auriga.paths import Paths
 from auriga.support import timer, make_snapshot_number
