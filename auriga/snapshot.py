@@ -10,8 +10,27 @@ from auriga.parser import parse
 
 
 def read_raw_snapshot(simulation: str,
-                      loadonlytype: list):
-    # FIXME: Add documentation.
+                      loadonlytype: list,
+                      ) -> tuple:
+    """
+    This method reads a raw version of the snapshot (with no post
+    processing) for a given simulation and a given list of particle
+    types.
+
+    Parameters
+    ----------
+    simulation : str
+        The simulation to read.
+    loadonlytype : list
+        A list with the particle types to load.
+
+    Returns
+    -------
+    sf
+        The snapshot.
+    sb
+        The SUBFIND catalogue.
+    """    
 
     galaxy, rerun, resolution, snapnum = parse(simulation=simulation)
     paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
@@ -32,7 +51,16 @@ def read_raw_snapshot(simulation: str,
 
 class Snapshot:
     def __init__(self, simulation: str, loadonlytype: list):
-        # FIXME: Add documentation.
+        """
+        The class constructor.
+
+        Parameters
+        ----------
+        simulation : str
+            The simulation to read.
+        loadonlytype : list
+            A list with the particle types to load.
+        """
 
         galaxy, rerun, resolution, snapnum = parse(simulation=simulation)
         self.simulation = simulation
@@ -45,6 +73,7 @@ class Snapshot:
         self._has_referenced_pot = False
         self._has_circularity = False
         self._has_normalized_potential = False
+        self._has_metals = False
 
         paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
 
@@ -95,10 +124,12 @@ class Snapshot:
         else:
             self.mass = sf.mass * 1e10
 
+        self.metal_abundance = {}
+
     def add_stellar_age(self):
         """
         This method calculates the age of each star (not the birth time) in
-        Gyr (age of the universe).
+        Gyr.
         """
 
         cosmology = Cosmology()
@@ -108,7 +139,10 @@ class Snapshot:
         self.stellar_age = cosmology.present_time - stellar_formation_times
 
     def add_metals(self):
-        # FIXME: Add documentation.
+        """
+        This method adds an array with the mass fraction of each metal to the
+        class.
+        """
 
         sf, _ = read_raw_snapshot(simulation=self.simulation,
                                   loadonlytype=self.loadonlytype)
@@ -119,6 +153,62 @@ class Snapshot:
         else:
             warnings.warn(message="No stars nor gas found in the simulation. "
                                   "Metals not loaded.")
+
+        self._has_metals = True
+
+    def add_metallicity(self):
+        """
+        This method calculates the metallicity Z = 1 - X - Y for the
+        particles in mass fraction.
+        """
+
+        if not self._has_metals:
+            self.add_metals()
+
+        self.metallicity = 1 - np.nansum(self.metals[:, :2], axis=1)
+
+    def add_metal_abundance(self, of: str, to: str):
+        """
+        Calculates the abundance [X/Y] of metal x relative to metal Y.
+
+        Parameters
+        ----------
+        of : str
+            The metal to calculate the abundance of.
+        to : str
+            The metal to use as relative to.
+        """
+
+        physics = Physics()
+
+        if of not in physics.metals or to not in physics.metals:
+            raise NotImplementedError("Metal not implemented in "
+                                      "the simulation.")
+
+        if 0 in self.loadonlytype or 4 in self.loadonlytype:
+            if not self._has_metals:
+                self.add_metals()
+
+            of_idx = physics.metals.index(of)
+            to_idx = physics.metals.index(to)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", RuntimeWarning)
+
+                ab = np.log10(self.metals[:, of_idx] / self.metals[:, to_idx])
+                ab -= np.log10(
+                    physics.atomic_numbers[of] / physics.atomic_numbers[to])
+                ab -= physics.solar_abundances[of] \
+                    - physics.solar_abundances[to]
+
+            # Apply correction for [Mg/H]
+            if of == "Mg" and to == "H":
+                ab += 0.4
+
+            self.metal_abundance[f"{of}/{to}"] = ab
+
+        else:
+            warnings.warn(message="No stars nor gas found in the simulation. "
+                                  "Abundance not calculated.")
 
     def add_reference_to_potential(self):
         """
