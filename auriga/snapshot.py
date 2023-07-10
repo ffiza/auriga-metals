@@ -225,9 +225,27 @@ class Snapshot:
     def tag_particles_by_region(self,
                                 disc_std_circ: float,
                                 disc_min_circ: float,
-                                disc_delta_circ: float,
+                                cold_disc_delta_circ: float,
                                 bulge_max_specific_energy: float):
-        # FIXME: Add documentation.
+        """
+        This method adds a tag for each particle that indicates to which
+        galactic component they belong (-1: does not belong to the main
+        subhalo, 0: belongs to the halo, 1: belongs to the bulge,
+        2: belongs to the cold disc, 3: belongs to the warm disc), base
+        on the input parameters.
+
+        Parameters
+        ----------
+        disc_std_circ : float
+            The standard circularity of the disc (usually 1.0).
+        disc_min_circ : float
+            The minimum circularity of the disc. This value separaes the
+            rotating components from the spheroidal components.
+        cold_disc_delta_circ : float
+            The deviation from the standard circularity for the cold disc.
+        bulge_max_specific_energy : float
+            The maximum specific energy of the bulge.
+        """
 
         if not self._has_circularity:
             self.add_circularity()
@@ -252,16 +270,18 @@ class Snapshot:
 
         # Tag cold disc particles
         region_tag[
-            (np.abs(self.circularity - disc_std_circ) <= disc_delta_circ)
+            (np.abs(self.circularity - disc_std_circ) <= cold_disc_delta_circ)
             & (self.halo == self.halo_idx)
             & (self.subhalo == self.subhalo_idx)] = 2
 
         # Tag warm disc particles
         region_tag[
-            (np.abs(self.circularity - disc_std_circ) > disc_delta_circ)
+            (np.abs(self.circularity - disc_std_circ) > cold_disc_delta_circ)
             & (self.circularity > disc_min_circ)
             & (self.halo == self.halo_idx)
             & (self.subhalo == self.subhalo_idx)] = 3
+
+        self.region_tag = region_tag
 
     def add_stellar_formation_snapshot(self):
         # TODO: Implement a method that calculates the first snapshot at
