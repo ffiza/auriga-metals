@@ -9,47 +9,25 @@
 Code written for an ongoing analysis of the distribution of metals in the galaxies
 from [the Auriga project](https://wwwmpa.mpa-garching.mpg.de/auriga/index.html).
 
-## Introduction
+## Description
 
-## Simulations
+This repository is organized as follows:
 
-### The Auriga Simulations
+- The `auriga/` directory contains all the code related to reading and analyzing the results of the simulations. The main script is `auriga/snapshot.py`, that has the principal methods used in the calculation of properties of interest.
+- The `docs/` directory contains all the documentation of the project.
+    - The `Data.md` file has a description of the files in the `results/` directory.
+    - The `Pipeline.md` file describes the order in which we perform the analysis of the simulations.
+    - The `Settings.md` file describes the variable of the class `Settings` defined in `auriga/settings.py`. This file acts as the configuration file and contains all the standard values for quantities of interest in out analysis.
+    - The `Analysis.md` contains a paper-like description of the analysis and results.
+- The `images/` directory contains important plots useful to this work.
+- The `results/` directory contains files (mostly `csv` files) with data calculated from the simulation of snapshots. As with the `images/` directory, it contains folders named with the name of each simulation, as explained below.
+- The `scripts/` directory contains notebooks and other scripts, mostly related to analysis and not calculations.
+- The `tests/` directory contains test written for different sections of the code.
 
-### Tracer Particles
+## Naming Convention
 
-## Analysis
+Throughout this repostiry, we name complete simulations as `AUXX_YY_LZ`, where `XX` is the number of simulation, `YY` indicates if the simulation is the original (`OR`) or the rerun version (`RE`) that includes tracer particles, and `Z` is the resolution number (typically 4).
 
-### Tracking the Main Object
+So, for example, the original version of galaxy Au17 in the resolution 4 level is labelled as `AU17_OR_L4`.
 
-We take the main object to be the most massive subhalo (index 0) in the most massive halo (index 0) at $z=0$. In order to keep track of this object, we adopt the following procedure.
-
-At $z=0$ (snapshot 127 of the original simulations), we find the 32 (set in the attribute ```n_track_dm_parts``` of the ```Settings``` class defined in ```source/auriga/settings.py```) most bound dark matter particles in the main object. Then, we load the previous snapshot (126 in the original simulations) and find the index of the halo and subhalo that contains most (using the mathematical mode) of the targeted dark matter particles and consider this to be the main object.
-
-This procedure is then applied to all the previous snapshots. The first snapshot
-to analyze (defined in the attribute ```first_snap``` of the ```Settings``` class defined in ```source/auriga/settings.py```) is number 30; for earlier snapshots (not considered in any analysis) the indices 0 and 0 are stored.
-
-The halo/subhalo index pair can be found in the file ```main_object_idxs.csv``` for each galaxy (these can be found in the ```data/``` directory).
-
-### Centering and Rotating the Galaxies
-
-*Te be completed.*
-
-### The Circularity Parameter
-
-*Te be completed.*
-
-### The Gravitational Potential
-
-*Te be completed.*
-
-### Galactic Decomposition
-
-## The Distribution of Metals
-
-## The Origin of Metals
-
-## Discussion and Conclusions
-
-<!-- ## Apenddices -->
-
-<!-- ### Appendix A: Some Title -->
+For individual snapshots, we extend the previous convention to `AUXX_YY_LZ_SNNN`, where `NNN` is the snapshot number. For example, snapshot 112 of galaxy Au5 in the rerun version and resolution level 4 is labelled as `AU5_RE_L4_S112`.
