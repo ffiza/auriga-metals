@@ -49,6 +49,35 @@ def read_raw_snapshot(simulation: str,
     return sf, sb
 
 
+def read_header(simulation: str,
+                ) -> tuple:
+    """
+    This method reads only the header of a given snapshot.
+
+    Parameters
+    ----------
+    simulation : str
+        The simulation to read.
+
+    Returns
+    -------
+    header
+        The snapshot header.
+    """
+
+    galaxy, rerun, resolution, snapnum = parse(simulation=simulation)
+    paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
+
+    header = gadget_readsnap(snapshot=snapnum,
+                             snappath=paths.snapshots,
+                             lazy_load=True,
+                             cosmological=False,
+                             applytransformationfacs=False,
+                             onlyHeader=True)
+
+    return header
+
+
 class Snapshot:
     def __init__(self, simulation: str, loadonlytype: list):
         """
@@ -373,7 +402,34 @@ class Snapshot:
 
         self.region_tag = region_tag
 
+    def _load_snapshot_exp_facts(self):
+        """
+        This method adds the cosmic time in Gyr (age of the universe) for
+        each snapshot.
+        """
+
+        expansion_factors = np.nan * np.ones(self.snapnum + 1)
+        for i in range(self.snapnum + 1):
+            header = read_header(
+                simulation=self.simulation.split("_s")[0] + f"_s{i}")
+            expansion_factors[i] = header.time
+
+        return expansion_factors
+
     def add_stellar_formation_snapshot(self):
-        # TODO: Implement a method that calculates the first snapshot at
-        #  which the stars are found in the simulation.
-        raise NotImplementedError("Method not yet implemented.")
+        """
+        This method calculates the snapshot at which each star is found for
+        the first time (the `formation snapshot`). If the particle is not a
+        star, it gest a -1.
+        """
+
+        if 4 not in self.loadonlytype:
+            raise ValueError("No stars found in snapshot.")
+
+        exp_facts = self._load_snapshot_exp_facts()
+        self._stellar_formation_snapshot = -1 * np.ones(
+            self.mass.shape[0], dtype=np.int8)
+
+        for i in range(self.snapnum + 1):
+            self._stellar_formation_snapshot[
+                self.stellar_formation_time > exp_facts[i - 1]] = i
