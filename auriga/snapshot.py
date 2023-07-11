@@ -30,7 +30,7 @@ def read_raw_snapshot(simulation: str,
         The snapshot.
     sb
         The SUBFIND catalogue.
-    """    
+    """
 
     galaxy, rerun, resolution, snapnum = parse(simulation=simulation)
     paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
