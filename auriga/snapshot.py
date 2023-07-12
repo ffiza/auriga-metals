@@ -163,9 +163,12 @@ class Snapshot:
 
         cosmology = Cosmology()
 
-        stellar_formation_times = cosmology.expansion_factor_to_time(
-            self.stellar_formation_time)
-        self.stellar_age = cosmology.present_time - stellar_formation_times
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=RuntimeWarning)
+            stellar_formation_times = cosmology.expansion_factor_to_time(
+                self.stellar_formation_time)
+        # Age should be relative to the time of the current snapshot!
+        self.stellar_age = self.time - stellar_formation_times
 
     def add_metals(self):
         """
