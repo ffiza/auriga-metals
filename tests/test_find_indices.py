@@ -30,6 +30,5 @@ class FindIndicesTest(unittest.TestCase):
         self.assertTrue((indices == results).all())
 
 
-
 if __name__ == '__main__':
     unittest.main()
