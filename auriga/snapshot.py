@@ -7,6 +7,8 @@ from auriga.cosmology import Cosmology
 from auriga.physics import Physics
 from auriga.paths import Paths
 from auriga.parser import parse
+from auriga.support import find_indices
+from auriga.settings import Settings
 
 
 def read_raw_snapshot(simulation: str,
@@ -132,6 +134,7 @@ class Snapshot:
         self.vel = (
             rotation_matrix @ (sf.vel * np.sqrt(sf.time)
                                - subhalo_vel).T).T
+        self.ids = sf.id
 
         self.expansion_factor = sf.time
         self.time = Cosmology().redshift_to_time(sf.redshift)
@@ -419,20 +422,50 @@ class Snapshot:
 
         return expansion_factors
 
-    def add_stellar_formation_snapshot(self):
+    def _calculate_stellar_formation_snapshot(self):
         """
         This method calculates the snapshot at which each star is found for
         the first time (the `formation snapshot`). If the particle is not a
-        star, it gest a -1.
+        star, it gets a -1.
         """
 
         if 4 not in self.loadonlytype:
             raise ValueError("No stars found in snapshot.")
 
         exp_facts = self._load_snapshot_exp_facts()
-        self._stellar_formation_snapshot = -1 * np.ones(
+        stellar_formation_snapshot = -1 * np.ones(
             self.mass.shape[0], dtype=np.int8)
 
         for i in range(self.snapnum + 1):
-            self._stellar_formation_snapshot[
+            stellar_formation_snapshot[
                 self.stellar_formation_time > exp_facts[i - 1]] = i
+
+        return stellar_formation_snapshot
+
+    def add_stellar_origin(self):
+        """
+        This method calculates the halo and subhalo in which each star was
+        born. If the particle is not a star or the star was born at very early
+        times, it gets a -1. The first column indicates the halo index and the
+        second the subhalo index.
+        """
+
+        settings = Settings()
+
+        self.stellar_origin_idx = -1 * np.ones((self.mass.shape[0], 2),
+                                               dtype=np.int32)
+        stellar_formation_snapshot = \
+            self._calculate_stellar_formation_snapshot()
+        for i in range(settings.first_snap, self.snapnum + 1):
+            is_star_born_here = (self.type == 4) \
+                & (self.stellar_formation_time > 0) \
+                & (stellar_formation_snapshot == i)
+            ids_born_here = self.ids[is_star_born_here]
+            sf, _ = read_raw_snapshot(
+                simulation=self.simulation.split("_s")[0] + f"_s{i}",
+                loadonlytype=[4])
+            idxs = find_indices(a=sf.id, b=ids_born_here)
+            if idxs.min() == -1:
+                raise ValueError("-1 found in idxs.")
+            self.stellar_origin_idx[is_star_born_here, 0] = sf.halo[idxs]
+            self.stellar_origin_idx[is_star_born_here, 1] = sf.subhalo[idxs]
