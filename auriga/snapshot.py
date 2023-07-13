@@ -235,9 +235,9 @@ class Snapshot:
                 ab -= physics.solar_abundances[of] \
                     - physics.solar_abundances[to]
 
-            # Apply correction for [Mg/H]
-            if of == "Mg" and to == "H":
-                ab += 0.4
+            # # Apply correction for [Mg/H]
+            # if of == "Mg" and to == "H":
+            #     ab += 0.4
 
             self.metal_abundance[f"{of}/{to}"] = ab
 
