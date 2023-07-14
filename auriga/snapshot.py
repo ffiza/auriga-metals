@@ -268,13 +268,16 @@ class Snapshot:
         spherical coordinates.
         """
 
-        self.rho = np.linalg.norm(self.pos[:, 0:2], axis=1)
-        self.r = np.linalg.norm(self.pos, axis=1)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
 
-        self.v_rho = (self.pos[:, 0] * self.vel[:, 0]
-                      + self.pos[:, 1] * self.vel[:, 1]) / self.rho
-        self.v_phi = (self.pos[:, 0] * self.vel[:, 1]
-                      - self.pos[:, 1] * self.vel[:, 0]) / self.rho
+            self.rho = np.linalg.norm(self.pos[:, 0:2], axis=1)
+            self.r = np.linalg.norm(self.pos, axis=1)
+
+            self.v_rho = (self.pos[:, 0] * self.vel[:, 0]
+                          + self.pos[:, 1] * self.vel[:, 1]) / self.rho
+            self.v_phi = (self.pos[:, 0] * self.vel[:, 1]
+                          - self.pos[:, 1] * self.vel[:, 0]) / self.rho
 
     def add_circularity(self) -> None:
         """
