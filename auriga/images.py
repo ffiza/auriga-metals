@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from auriga.cosmology import Cosmology
 
 
@@ -53,3 +54,48 @@ def add_redshift(ax: plt.Axes) -> None:
         ax2.set_xlabel('$z$')
     else:
         ax2.set_xticklabels([])
+
+
+def set_axs_configuration(xlim: tuple, ylim: tuple,
+                          xticks: list, yticks: list,
+                          xlabel: str, ylabel: str,
+                          axs: np.ndarray, n_used: int):
+    """
+    This method configures the axes properly for large figures.
+
+    Parameters
+    ----------
+    xlim : tuple
+        The limits of the x-axis.
+    ylim : tuple
+        The limits of the y-axis.
+    xticks : list
+        The ticks of the x-axis.
+    yticks : list
+        The ticks of the y-axis.
+    xlabel : str
+        The label of the x-axis.
+    ylabel : str
+        The label of the y-axis.
+    axs : np.ndarray
+        An array with all the axes.
+    n_used : int
+        The number of panels used.
+    """
+    for ax in axs.flat:
+        ax.tick_params(which='both', direction="in")
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+
+    row_idx = (n_used - 1) // axs.shape[1]
+    col_idx = n_used - row_idx * axs.shape[1] - 1
+
+    for i in range(axs.shape[0]):
+        axs[i, 0].set_ylabel(ylabel)
+        axs[i, 0].set_yticks(yticks)
+        for j in range(axs.shape[1]):
+            if (i == row_idx and j <= col_idx) \
+                    or (i == row_idx - 1 and j > col_idx):
+                axs[i, j].xaxis.set_tick_params(labelbottom=True)
+                axs[i, j].set_xlabel(xlabel)
+                axs[i, j].set_xticks(xticks)
