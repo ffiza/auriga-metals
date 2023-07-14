@@ -19,7 +19,7 @@ This repository is organized as follows:
     - The `Pipeline.md` file describes the order in which we perform the analysis of the simulations.
     - The `Settings.md` file describes the variable of the class `Settings` defined in `auriga/settings.py`. This file acts as the configuration file and contains all the standard values for quantities of interest in out analysis.
     - The `Analysis.md` contains a paper-like description of the analysis and results.
-- The `images/` directory contains important plots. It contains one folder for each simulation, named as explained below. Plots with more than one simulation are store in the root directory.
+- The `images/` directory contains important plots.
 - The `results/` directory contains files (mostly `csv` files) with results. It contains one folder for each simulation, named as explained below.
 - The `scripts/` directory contains notebooks and other scripts.
 - The `tests/` directory contains test written for different sections of the code.
