@@ -105,6 +105,7 @@ class Snapshot:
         self._has_circularity = False
         self._has_normalized_potential = False
         self._has_metals = False
+        self._has_stellar_formation_snapshot = False
 
         paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
 
@@ -425,7 +426,7 @@ class Snapshot:
 
         return expansion_factors
 
-    def _calculate_stellar_formation_snapshot(self):
+    def calculate_stellar_formation_snapshot(self):
         """
         This method calculates the snapshot at which each star is found for
         the first time (the `formation snapshot`). If the particle is not a
@@ -436,14 +437,14 @@ class Snapshot:
             raise ValueError("No stars found in snapshot.")
 
         exp_facts = self._load_snapshot_exp_facts()
-        stellar_formation_snapshot = -1 * np.ones(
+        self.stellar_formation_snapshot = -1 * np.ones(
             self.mass.shape[0], dtype=np.int8)
 
         for i in range(self.snapnum + 1):
-            stellar_formation_snapshot[
+            self.stellar_formation_snapshot[
                 self.stellar_formation_time > exp_facts[i - 1]] = i
 
-        return stellar_formation_snapshot
+        self._has_stellar_formation_snapshot = True
 
     def add_stellar_origin(self):
         """
@@ -457,12 +458,12 @@ class Snapshot:
 
         self.stellar_origin_idx = -1 * np.ones((self.mass.shape[0], 2),
                                                dtype=np.int32)
-        stellar_formation_snapshot = \
-            self._calculate_stellar_formation_snapshot()
+        if not self._has_stellar_formation_snapshot:
+            self.calculate_stellar_formation_snapshot()
         for i in range(settings.first_snap, self.snapnum + 1):
             is_star_born_here = (self.type == 4) \
                 & (self.stellar_formation_time > 0) \
-                & (stellar_formation_snapshot == i)
+                & (self.stellar_formation_snapshot == i)
             if is_star_born_here.sum() != 0:
                 ids_born_here = self.ids[is_star_born_here]
                 sf, _ = read_raw_snapshot(
