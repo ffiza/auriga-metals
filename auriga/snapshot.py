@@ -463,12 +463,14 @@ class Snapshot:
             is_star_born_here = (self.type == 4) \
                 & (self.stellar_formation_time > 0) \
                 & (stellar_formation_snapshot == i)
-            ids_born_here = self.ids[is_star_born_here]
-            sf, _ = read_raw_snapshot(
-                simulation=self.simulation.split("_s")[0] + f"_s{i}",
-                loadonlytype=[4])
-            idxs = find_indices(a=sf.id, b=ids_born_here)
-            if idxs.min() == -1:
-                raise ValueError("-1 found in idxs.")
-            self.stellar_origin_idx[is_star_born_here, 0] = sf.halo[idxs]
-            self.stellar_origin_idx[is_star_born_here, 1] = sf.subhalo[idxs]
+            if is_star_born_here.sum() != 0:
+                ids_born_here = self.ids[is_star_born_here]
+                sf, _ = read_raw_snapshot(
+                    simulation=self.simulation.split("_s")[0] + f"_s{i}",
+                    loadonlytype=[4])
+                idxs = find_indices(a=sf.id, b=ids_born_here)
+                if idxs.min() == -1:
+                    raise ValueError("-1 found in idxs.")
+                self.stellar_origin_idx[is_star_born_here, 0] = sf.halo[idxs]
+                self.stellar_origin_idx[
+                    is_star_born_here, 1] = sf.subhalo[idxs]
