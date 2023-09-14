@@ -10,7 +10,7 @@ def find_indices(a: np.array,
                  b: np.array,
                  invalid_specifier: int = -1,
                  ) -> np.array:
-    """"
+    """
     Returns an array with the indices of the elements of b
     in a. If an element of b is not in a, it returns
     invalid_specifier for that element.

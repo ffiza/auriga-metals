@@ -55,6 +55,10 @@ class Settings:
 
         # Galactic decomposition
         self.components: list = ["H", "B", "CD", "WD"]
+        self.component_tags: dict = {"H": 0,
+                                     "B": 1,
+                                     "CD": 2,
+                                     "WD": 3}
         self.component_labels: dict = {"H": "Halo",
                                        "B": "Bulge",
                                        "CD": "Cold Disc",
