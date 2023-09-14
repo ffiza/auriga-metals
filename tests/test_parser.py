@@ -45,5 +45,6 @@ class ParserTests(unittest.TestCase):
         self.assertFalse(rerun)
         self.assertEqual(resolution, 4)
 
+
 if __name__ == '__main__':
     unittest.main()

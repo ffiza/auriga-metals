@@ -266,7 +266,9 @@ class Snapshot:
     def add_extra_coordinates(self):
         """
         This method calculates the radii of particles in cylindrical and
-        spherical coordinates.
+        spherical coordinates. Names are: `rho` (cilyndrical radius),
+        `r` (spherical radius), `v_rho` (velocity in the `rho`
+        direction), and `v_phi` (tangential velocity).
         """
 
         with warnings.catch_warnings():
@@ -475,3 +477,37 @@ class Snapshot:
                 self.stellar_origin_idx[is_star_born_here, 0] = sf.halo[idxs]
                 self.stellar_origin_idx[
                     is_star_born_here, 1] = sf.subhalo[idxs]
+
+    def get_idxs_of_ids(self, ids: np.ndarray) -> np.ndarray:
+        """
+        Return a NumPy array with the indices in the `self.ids` array of each
+        ID in the `ids` array. If the ID is not present in `self.ids` (in the
+        case, for example, of a star that wasn't alive in this snapshot), its
+        index is a -1.
+
+        Parameters
+        ----------
+        ids : np.ndarray
+            A NumPy array of type `uint64` with the indices of the target
+            particles.
+
+        Returns
+        -------
+        idxs : np.ndarray
+            A NumPy array of type `uint64` with the indices of the target IDs
+            in the `self.ids` array.
+        """
+
+        if not isinstance(ids, np.ndarray):
+            raise TypeError("`ids` must be of type `np.ndarray`.")
+
+        if ids.dtype != "uint64":
+            raise TypeError("`ids` must be of data type `uint64`.")
+
+        idxs = find_indices(a=self.ids, b=ids, invalid_specifier=-1)
+
+        if idxs.min() == -1:
+            warnings.warn("Not all particles were found in this snapshot.",
+                          RuntimeWarning)
+
+        return idxs.astype("uint64")
