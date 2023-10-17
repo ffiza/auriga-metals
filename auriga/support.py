@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib.collections import LineCollection
 import time
 from typing import Callable
 from sys import stdout
@@ -166,3 +167,19 @@ def create_or_load_dataframe(df_path: str) -> pd.DataFrame:
     """
 
     return pd.read_csv(df_path) if exists(df_path) else pd.DataFrame()
+
+
+def multi_color_line(x: np.ndarray, y: np.ndarray,
+                     c: np.ndarray, vmax: float, vmin: float,
+                     lw: float, cmap: str) -> LineCollection:
+    points = np.array([x, y]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+    cmap = mpl.colormaps[cmap]
+    norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+    colors = list()
+    for val in c:
+        c = cmap(norm(val))
+        colors.append(c)
+
+    return LineCollection(segments, linewidth=lw, colors=colors)
