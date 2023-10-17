@@ -510,4 +510,4 @@ class Snapshot:
             warnings.warn("Not all particles were found in this snapshot.",
                           RuntimeWarning)
 
-        return idxs.astype("uint64")
+        return idxs
