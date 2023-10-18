@@ -171,7 +171,7 @@ def create_or_load_dataframe(df_path: str) -> pd.DataFrame:
 
 def multi_color_line(x: np.ndarray, y: np.ndarray,
                      c: np.ndarray, vmax: float, vmin: float,
-                     lw: float, cmap: str) -> LineCollection:
+                     lw: float, cmap: str, return_params: bool = False):
     points = np.array([x, y]).T.reshape(-1, 1, 2)
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
@@ -182,4 +182,9 @@ def multi_color_line(x: np.ndarray, y: np.ndarray,
         c = cmap(norm(val))
         colors.append(c)
 
-    return LineCollection(segments, linewidth=lw, colors=colors)
+    lc = LineCollection(segments, linewidth=lw, colors=colors)
+
+    if not return_params:
+        return lc
+    else:
+        return lc, norm, cmap
