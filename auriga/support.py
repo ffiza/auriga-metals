@@ -173,6 +173,37 @@ def create_or_load_dataframe(df_path: str) -> pd.DataFrame:
 def multi_color_line(x: np.ndarray, y: np.ndarray,
                      c: np.ndarray, vmax: float, vmin: float,
                      lw: float, cmap: str, return_params: bool = False):
+    """
+    Create a line with different colors using a color map.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        The x-coordinates of each point.
+    y : np.ndarray
+        The y-coordinates of each point.
+    c : np.ndarray
+        The value to define the colors of the segments.
+    vmax : float
+        The max value for the color map normalisation.
+    vmin : float
+        The min value for the color map normalisation.
+    lw : float
+        The line width.
+    cmap : str
+        The color map.
+    return_params : bool, optional
+        If True, return the normalisation and the color map., by default False.
+
+    Returns
+    -------
+    lc : LineCollection
+        The line collection.
+    norm
+        The normalisation of the color map. Only if `return_params` is True.
+    cmap
+        The color map. Only if `return_params` is True.
+    """
     points = np.array([x, y]).T.reshape(-1, 1, 2)
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
