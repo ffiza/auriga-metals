@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib as mpl
 from matplotlib.collections import LineCollection
 import time
 from typing import Callable
@@ -182,7 +183,8 @@ def multi_color_line(x: np.ndarray, y: np.ndarray,
         c = cmap(norm(val))
         colors.append(c)
 
-    lc = LineCollection(segments, linewidth=lw, colors=colors)
+    lc = LineCollection(segments, linewidth=lw, colors=colors,
+                        capstyle="round")
 
     if not return_params:
         return lc
