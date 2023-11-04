@@ -7,7 +7,7 @@ from auriga.cosmology import Cosmology
 from auriga.physics import Physics
 from auriga.paths import Paths
 from auriga.parser import parse
-from auriga.support import find_indices
+from auriga.support import find_indices, make_snapshot_number
 from auriga.settings import Settings
 
 
@@ -106,6 +106,8 @@ class Snapshot:
         self._has_normalized_potential = False
         self._has_metals = False
         self._has_stellar_formation_snapshot = False
+
+        self.stellar_origin_idx: np.ndarray = None
 
         paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
 
@@ -511,3 +513,53 @@ class Snapshot:
                           RuntimeWarning)
 
         return idxs
+
+    def tag_in_situ_stars(self) -> None:
+        """
+        Add the property `is_in_situ`, that indicates if the star was born in
+        the galaxy (`1`) or not (`0`). All particles that are not stars
+        get a `-1` value.
+        """
+
+        settings = Settings()
+
+        paths = Paths(galaxy=self.galaxy,
+                      rerun=self.rerun,
+                      resolution=self.resolution)
+
+        self.is_in_situ = np.zeros((self.mass.shape[0]), dtype=np.int8)
+        self.is_in_situ[self.type != 4] = -1
+
+        if 4 in self.type:
+            is_star = self.type == 4
+            is_not_wind = self.stellar_formation_time > 0
+
+            self.is_in_situ[is_star & ~is_not_wind] = -1
+
+            n_snapshots = make_snapshot_number(self.rerun, self.resolution)
+            if self.snapnum != n_snapshots - 1:
+                warnings.warn("Tagging in-situ stars in snapshot other than "
+                              "the last.", RuntimeWarning)
+
+            if self.stellar_origin_idx is None:
+                self.add_stellar_origin()
+
+            # Load main halo and subhalo indices
+            main_obj_idxs = pd.read_csv(
+                f"{paths.results_abs}/temporal_data.csv",
+                usecols=["MainHaloIdx", "MainSubhaloIdx"]).to_numpy()
+
+            for i in range(settings.first_snap, self.snapnum + 1):
+                is_born_here = self.stellar_formation_snapshot == i
+                is_star_born_here = is_star & is_not_wind & is_born_here
+
+                if is_star_born_here.sum() > 0:
+                    this_halo_idx = main_obj_idxs[i, 0]
+                    this_subhalo_idx = main_obj_idxs[i, 1]
+                    is_in_situ = \
+                        (self.stellar_origin_idx[is_star_born_here, 0]
+                         == this_halo_idx) \
+                        & (self.stellar_origin_idx[is_star_born_here, 1]
+                           == this_subhalo_idx)
+
+                    self.is_in_situ[is_star_born_here] = is_in_situ
