@@ -59,7 +59,9 @@ def add_redshift(ax: plt.Axes) -> None:
 def set_axs_configuration(xlim: tuple, ylim: tuple,
                           xticks: list, yticks: list,
                           xlabel: str, ylabel: str,
-                          axs: np.ndarray, n_used: int):
+                          axs: np.ndarray, n_used: int,
+                          xscale: str = "linear", yscale: str = "linear",
+                          xticklabels: list = None, yticklabels: list = None):
     """
     This method configures the axes properly for large figures.
 
@@ -81,11 +83,19 @@ def set_axs_configuration(xlim: tuple, ylim: tuple,
         An array with all the axes.
     n_used : int
         The number of panels used.
+    xscale : str
+        The scale of the x-axis. `linear` by default.
+    yscale : str
+        The scale of the y-axis. `linear` by default.
     """
     for ax in axs.flat:
         ax.tick_params(which='both', direction="in")
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
+        if xticklabels is not None: ax.set_xticklabels(xticklabels)
+        if yticklabels is not None: ax.set_yticklabels(yticklabels)
 
     row_idx = (n_used - 1) // axs.shape[1]
     col_idx = n_used - row_idx * axs.shape[1] - 1
