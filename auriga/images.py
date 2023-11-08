@@ -94,8 +94,6 @@ def set_axs_configuration(xlim: tuple, ylim: tuple,
         ax.set_ylim(ylim)
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)
-        if xticklabels is not None: ax.set_xticklabels(xticklabels)
-        if yticklabels is not None: ax.set_yticklabels(yticklabels)
 
     row_idx = (n_used - 1) // axs.shape[1]
     col_idx = n_used - row_idx * axs.shape[1] - 1
@@ -109,3 +107,7 @@ def set_axs_configuration(xlim: tuple, ylim: tuple,
                 axs[i, j].xaxis.set_tick_params(labelbottom=True)
                 axs[i, j].set_xlabel(xlabel)
                 axs[i, j].set_xticks(xticks)
+    
+    for ax in axs.flat:  # After using set_xticks() and set_yticks()
+        if xticklabels is not None: ax.set_xticklabels(xticklabels)
+        if yticklabels is not None: ax.set_yticklabels(yticklabels)
