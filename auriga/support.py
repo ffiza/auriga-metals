@@ -7,6 +7,8 @@ from sys import stdout
 import pandas as pd
 from os.path import exists
 
+from auriga.parser import parse
+
 
 def find_indices(a: np.array,
                  b: np.array,
@@ -221,3 +223,33 @@ def multi_color_line(x: np.ndarray, y: np.ndarray,
         return lc
     else:
         return lc, norm, cmap
+
+def get_name_of_previous_snapshot(simulation: str) -> str:
+    """
+    This method takes a simulation using the format auW_XX_LY_SZZZ and returns
+    the preceding snapshot.
+
+    Parameters
+    ----------
+    simulation : str
+        The simulation name.
+
+    Returns
+    -------
+    str
+        The previous snapshot of the simulation.
+    """
+
+    try:
+        galaxy, rerun, resolution, snapshot = parse(simulation)
+    except ValueError:
+        raise ValueError(f"{simulation} is an invalid format for this "
+                         f"method. Format should include snapshot number, "
+                         f"for example: `au6_or_l4_s127`.")
+
+    if snapshot == 0:
+        raise ValueError(f"{simulation} is the first snapshot of this "
+                         f"simulation.")
+
+    type_txt = "or" if not rerun else "re"
+    return f"au{galaxy}_{type_txt}_l{resolution}_s{snapshot - 1}"
