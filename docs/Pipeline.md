@@ -98,7 +98,3 @@ To calculate the reference potential with the standard values (for the original 
     python auriga/reference_potential.py --simulation au1_or_l4
 ```
 To print a help docstring, use `python auriga/reference_potential.py -h`.
-
-## Galactic Decomposition
-
-## 
