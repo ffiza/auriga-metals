@@ -8,6 +8,7 @@ from auriga.physics import Physics
 from auriga.paths import Paths
 from auriga.parser import parse
 from auriga.support import find_indices, make_snapshot_number
+from auriga.support import get_name_of_previous_snapshot
 from auriga.settings import Settings
 
 
@@ -102,12 +103,13 @@ class Snapshot:
         self.snapnum = snapnum
 
         self._has_referenced_pot = False
-        self._has_circularity = False
         self._has_normalized_potential = False
-        self._has_metals = False
-        self._has_stellar_formation_snapshot = False
 
+        self.stellar_formation_snapshot: np.ndarray = None
+        self.metals: np.ndarray = None
+        self.circularity: np.ndarray = None
         self.stellar_origin_idx: np.ndarray = None
+        self.region_tag: np.ndarray = None
 
         paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
 
@@ -192,15 +194,13 @@ class Snapshot:
             warnings.warn(message="No stars nor gas found in the simulation. "
                                   "Metals not loaded.")
 
-        self._has_metals = True
-
     def add_metallicity(self):
         """
         This method calculates the metallicity Z = 1 - X - Y for the
         particles in mass fraction.
         """
 
-        if not self._has_metals:
+        if self.metals is None:
             self.add_metals()
 
         self.metallicity = 1 - np.nansum(self.metals[:, :2], axis=1)
@@ -224,7 +224,7 @@ class Snapshot:
                                       "the simulation.")
 
         if 0 in self.loadonlytype or 4 in self.loadonlytype:
-            if not self._has_metals:
+            if self.metals is None:
                 self.add_metals()
 
             of_idx = physics.metals.index(of)
@@ -339,7 +339,6 @@ class Snapshot:
         del jz, jc, is_galaxy, is_star
 
         self.circularity = circularity
-        self._has_circularity = True
 
     def add_normalized_potential(self):
         """
@@ -364,7 +363,7 @@ class Snapshot:
         This method adds a tag for each particle that indicates to which
         galactic component they belong (-1: does not belong to the main
         subhalo, 0: belongs to the halo, 1: belongs to the bulge,
-        2: belongs to the cold disc, 3: belongs to the warm disc), base
+        2: belongs to the cold disc, 3: belongs to the warm disc), based
         on the input parameters.
 
         Parameters
@@ -380,7 +379,7 @@ class Snapshot:
             The maximum specific energy of the bulge.
         """
 
-        if not self._has_circularity:
+        if self.circularity is None:
             self.add_circularity()
         if not self._has_referenced_pot:
             self.add_reference_to_potential()
@@ -418,8 +417,8 @@ class Snapshot:
 
     def _load_snapshot_exp_facts(self):
         """
-        This method adds the cosmic time in Gyr (age of the universe) for
-        each snapshot.
+        This method returns an array with the expansion factor of each
+        snapshot.
         """
 
         expansion_factors = np.nan * np.ones(self.snapnum + 1)
@@ -448,8 +447,6 @@ class Snapshot:
             self.stellar_formation_snapshot[
                 self.stellar_formation_time > exp_facts[i - 1]] = i
 
-        self._has_stellar_formation_snapshot = True
-
     def add_stellar_origin(self):
         """
         This method calculates the halo and subhalo in which each star was
@@ -462,7 +459,7 @@ class Snapshot:
 
         self.stellar_origin_idx = -1 * np.ones((self.mass.shape[0], 2),
                                                dtype=np.int32)
-        if not self._has_stellar_formation_snapshot:
+        if self.stellar_formation_snapshot is None:
             self.calculate_stellar_formation_snapshot()
         for i in range(settings.first_snap, self.snapnum + 1):
             is_star_born_here = (self.type == 4) \
@@ -563,3 +560,92 @@ class Snapshot:
                            == this_subhalo_idx)
 
                     self.is_in_situ[is_star_born_here] = is_in_situ
+    
+    def calculate_sfr(self) -> float:
+        """
+        Calculate the star formation rate (SFR) between this snapshot and the
+        previous one using the formation time of the stars for the subhalo.
+        Units are Msun / yr.
+
+        Returns
+        -------
+        float
+            The SFR of the subhalo in Msun / yr.
+
+        Raises
+        ------
+        ValueError
+            If no stars are found in this snapshot.
+        """
+        if 4 not in self.type:
+            raise ValueError("No stars loaded in this snapshot.")
+        
+        cosmology = Cosmology()
+
+        # Get the expansion factor of the previous snapshot
+        prev_simulation = get_name_of_previous_snapshot(self.simulation)
+        prev_header = read_header(prev_simulation)
+        prev_exp_fact = prev_header.time
+        prev_time = cosmology.expansion_factor_to_time(prev_exp_fact)
+
+        # Count mass of stars born after the previous snapshot
+        is_star = self.type == 4
+        is_not_wind = self.stellar_formation_time > 0
+        is_new = self.stellar_formation_time > prev_exp_fact
+        is_main_obj = (self.halo == self.halo_idx) \
+            & (self.subhalo == self.subhalo_idx)
+        sf_mass = self.mass[
+            is_star & is_not_wind & is_new & is_main_obj].sum()  # Msun
+
+        dt = self.time - prev_time  # Gyr
+
+        sfr = sf_mass / dt  # Msun / Gyr
+        sfr *= 1E-9  # Msun / yr
+
+        return sfr
+
+    def calculate_sfr_by_region(self) -> list:
+        """
+        Calculate the star formation rate (SFR) between this snapshot and the
+        previous one using the formation time of the stars, for each galactic
+        component in Msun / yr.
+
+        Returns
+        -------
+        list
+            The SFR for the halo, bulge, cold disc, and warm disc (in that
+            order) in Msun / yr.
+        """
+        if 4 not in self.type:
+            raise ValueError("No stars loaded in this snapshot.")
+
+        # Check if stars are tagged by region
+        if self.region_tag is None:
+            raise RuntimeError("Use `tag_particles_by_region() first.")
+
+        cosmology = Cosmology()
+        settings = Settings()
+
+        # Get the expansion factor of the previous snapshot
+        prev_simulation = get_name_of_previous_snapshot(self.simulation)
+        prev_header = read_header(prev_simulation)
+        prev_exp_fact = prev_header.time
+        prev_time = cosmology.expansion_factor_to_time(prev_exp_fact)
+
+        # Count mass of stars born after the previous snapshot
+        is_star = self.type == 4
+        is_not_wind = self.stellar_formation_time > 0
+        is_new = self.stellar_formation_time > prev_exp_fact
+
+        dt = self.time - prev_time  # Gyr
+
+        sfr_by_region = []
+        for region_tag in settings.component_tags.values():
+            is_region = self.region_tag == region_tag
+            sf_mass = self.mass[
+                is_star & is_not_wind & is_new & is_region].sum()
+            sfr = sf_mass / dt  # Msun / Gyr
+            sfr *= 1E-9  # Msun / yr
+            sfr_by_region.append(sfr)
+
+        return sfr_by_region
