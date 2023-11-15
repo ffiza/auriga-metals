@@ -26,3 +26,7 @@ The following table provides a description of each variable stored in the `tempo
 | `VirialRadius00_ckpc` | $\mathrm{ckpc}$ | $R_{200}$ | The virial radius of halo 0 and subhalo 0 (calculated as the radius in which the density is 200 times the critical density of the universe). |
 | `VirialMass00_1E10Msun` | $10^{10} ~ \mathrm{M}_\odot$ | $M_{200}$ | The virial mass  of halo 0 and subhalo 0 (all the mass inside the virial radius). |
 | `ReferencePotential_(km/s)^2` | $\left( \mathrm{km}/\mathrm{s} \right)^2$ | $V_\mathrm{ref}$ | The reference gravitational potential calculated using dark matter particles at a given distance of the centre of the main object. |
+| `SFR_H_Msun/yr` | $\mathrm{M}_\odot ~ \mathrm{yr}^{-1}$ | - | The SFR of the halo using the current decomposition parameters. |
+| `SFR_B_Msun/yr` | $\mathrm{M}_\odot ~ \mathrm{yr}^{-1}$ | - | The SFR of the bulge using the current decomposition parameters. |
+| `SFR_CD_Msun/yr` | $\mathrm{M}_\odot ~ \mathrm{yr}^{-1}$ | - | The SFR of the cold disc using the current decomposition parameters. |
+| `SFR_WD_Msun/yr` | $\mathrm{M}_\odot ~ \mathrm{yr}^{-1}$ | - | The SFR of the warm disc using the current decomposition parameters. |
