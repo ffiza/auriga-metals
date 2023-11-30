@@ -110,6 +110,8 @@ class Snapshot:
         self.circularity: np.ndarray = None
         self.stellar_origin_idx: np.ndarray = None
         self.region_tag: np.ndarray = None
+        self.stellar_photometrics: np.ndarray = None
+        self.stellar_luminosities: np.ndarray = None
 
         paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
 
@@ -177,6 +179,64 @@ class Snapshot:
                 self.stellar_formation_time)
         # Age should be relative to the time of the current snapshot!
         self.stellar_age = self.time - stellar_formation_times
+
+    def add_stellar_photometrics(self):
+        """
+        This method adds an array with the stellar photometric data of
+        each band to the class.
+        """
+
+        if self.stellar_photometrics is None:
+            if 4 not in self.loadonlytype:
+                warnings.warn(message="No stars found in the simulation. "
+                                      "Stellar photometrics not loaded.")
+            else:
+                sf, _ = read_raw_snapshot(simulation=self.simulation,
+                                          loadonlytype=self.loadonlytype)
+                stellar_photometrics = np.nan * np.ones((self.type.shape[0],
+                                                         8))
+                stellar_photometrics[self.type == 4] = sf.gsph
+                self.stellar_photometrics = stellar_photometrics
+        else:
+            warnins.warn("Stellar photometrics already found in snapshot",
+                         RuntimeWarning)
+
+    def add_luminosities(self, band: str):
+        """
+        This method adds an array with the luminosities of each star using
+        the indicated band.
+
+        Parameters
+        ----------
+        band : str
+            The band to use for the calculation of the luminosity. Possible
+            options are `U`, `B`, `V`, `K`, `g`, `r`, `i`, `z`.
+        """
+
+        optical_bands = ['U', 'B', 'V', 'K', 'g', 'r', 'i', 'z']
+        physics = Physics()
+
+        if band not in optical_bands:
+            raise ValueError("Selected band not recognized. Allowed "
+                             "bands are U, B, V, K, g, r, i, z.")
+
+        if self.stellar_luminosities is None:
+            if 4 not in self.loadonlytype:
+                warnings.warn(message="No stars found in the simulation. "
+                                      "Stellar luminosities not calculated.")
+            else:
+                if self.stellar_photometrics is None:
+                    self.add_stellar_photometrics()
+                
+                self.stellar_luminosities = np.nan * np.ones(self.type.shape)
+
+                band_idx = optical_bands.index(band)
+                self.stellar_luminosities[self.type == 4] = \
+                    physics.magnitudes_to_luminosities(
+                        m=self.stellar_photometrics[:, band_idx])
+        else:
+            warnings.warn("Stellar luminosities already found in snapshot",
+                          RuntimeWarning)
 
     def add_metals(self):
         """
