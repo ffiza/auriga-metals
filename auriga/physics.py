@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Physics:
     """
     A class to manage physics constants and methods.
@@ -24,6 +27,10 @@ class Physics:
         Table 5 of Asplund et al. 2009).
     atomic_numbers : dict
         A dictionary with the atomic number of each metal.
+    solar_luminosity : float
+        The luminosity of the Sun in W.
+    solar_magnitude : float
+        The absolute bolometric luminosity of the sun.
     """
 
     def __init__(self) -> None:
@@ -43,6 +50,23 @@ class Physics:
         self.atomic_numbers: dict = {'H': 1, 'He': 4, 'C': 12,
                                      'N': 14, 'O': 16, 'Ne': 20,
                                      'Mg': 24, 'Si': 28, 'Fe': 56}
+
+        self.solar_luminosity: float = 3.828E26
+        self.solar_magnitude: float = 4.74
+
+    def magnitudes_to_luminosities(self, m: np.ndarray):
+        """
+        Return the luminosities for a given array of absolute bolotmetric
+        magnitudes.
+
+        Parameters
+        ----------
+        m : np.ndarray
+            The luminosities in W.
+        """
+        l = self.solar_luminosity \
+            * np.power(10, 0.4 * (self.solar_magnitude - m))
+        return l
 
 # 3He, 12C, 24Mg, 16O, 56Fe, 28Si, H, 14N, 20Ne, 32S, 40Ca, 62Zn, 56N
 # Woosley & Woosley
