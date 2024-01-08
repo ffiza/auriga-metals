@@ -1,0 +1,19 @@
+{
+    "DOI": "10.1051/0004-6361/201834050",
+    "ADSURL": "https://ui.adsabs.harvard.edu/abs/2018A&A...618A.160L",
+    "Data":
+    {
+        "BootstrapSlope": -0.0447,
+        "BootstrapSlopeErr": 0.0066,
+        "LeastSquaresSlope": -0.040,
+        "LeastSquaresSlopeErr": 0.002
+    },
+    "Units":
+    {
+        "BootstrapSlope": "dex/kpc",
+        "BootstrapSlopeErr": "dex/kpc",
+        "LeastSquaresSlope": "dex/kpc",
+        "LeastSquaresSlopeErr": "dex/kpc"
+    },
+    "Notes": "With the bootstrap method, we obtain a slope of −0.0447 +/- 0.0066 dex/kpc for the gradient (see Fig. 6). [...] The agreement remains reasonable with the total least squares method (Fig. 8), which gives a (shallower) slope of –0.040 +/- 0.002 dex/kpc. The range in radius goes from R_G ~ 6 kpc to R_G ~ 14 kpc."
+}
