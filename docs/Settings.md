@@ -29,4 +29,5 @@ The following table provides a description of each variable in the `settings.py`
 | `components` | - | `list` | A symbol for each galactic component. | 
 | `component_labels` | - | `dict` | The labels of each galactic component. | 
 | `component_colors` | - | `dict` | A color for each galactic component. | 
-| `component_colormaps` | - | `dict` | A color map for each galactic component. | 
+| `component_colormaps` | - | `dict` | A color map for each galactic component. |
+| `photometric_bands` | - | `list` | A list of all the photometric bands available in the Auriga simulations. Further details can be found [here](https://www.tng-project.org/data/docs/specifications/#parttype4:~:text=Stellar%20magnitudes%20in,%2C%20section%203.2.1.). |
