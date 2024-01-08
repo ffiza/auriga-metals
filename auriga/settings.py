@@ -71,3 +71,5 @@ class Settings:
                                           "B": "Greens",
                                           "CD": "Reds",
                                           "WD": "Oranges"}
+
+        self.photometric_bands: list = ['U', 'B', 'V', 'K', 'g', 'r', 'i', 'z']
