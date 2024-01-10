@@ -10,6 +10,7 @@ from auriga.parser import parse
 from auriga.support import find_indices, make_snapshot_number
 from auriga.support import get_name_of_previous_snapshot
 from auriga.settings import Settings
+from auriga.coordinates import cart2cyl, cart2cyl_vel
 
 
 def read_raw_snapshot(simulation: str,
@@ -336,13 +337,14 @@ class Snapshot:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
 
-            self.rho = np.linalg.norm(self.pos[:, 0:2], axis=1)
+            self.rho, _, _ = cart2cyl(
+                self.pos[:, 0], self.pos[:, 1], self.pos[:, 2])
             self.r = np.linalg.norm(self.pos, axis=1)
 
-            self.v_rho = (self.pos[:, 0] * self.vel[:, 0]
-                          + self.pos[:, 1] * self.vel[:, 1]) / self.rho
-            self.v_phi = (self.pos[:, 0] * self.vel[:, 1]
-                          - self.pos[:, 1] * self.vel[:, 0]) / self.rho
+            self.v_rho, self.v_phi, _ = cart2cyl_vel(
+                self.pos[:, 0], self.pos[:, 1], self.pos[:, 2],
+                self.vel[:, 0], self.vel[:, 1], self.vel[:, 2]
+            )
 
     def add_circularity(self) -> None:
         """
