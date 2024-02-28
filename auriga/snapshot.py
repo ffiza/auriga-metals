@@ -113,6 +113,8 @@ class Snapshot:
         self.region_tag: np.ndarray = None
         self.stellar_photometrics: np.ndarray = None
         self.stellar_luminosities: np.ndarray = None
+        self.temperature: np.ndarray = None
+        self.h_number_density: np.ndarray = None
 
         paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
 
@@ -165,6 +167,18 @@ class Snapshot:
             self.mass = sf.mass * 1e10
 
         self.metal_abundance = {}
+
+        # Properties for gas-related calculations
+        if 0 in loadonlytype:
+            # Electron abundance data
+            self.elec_abundance = np.nan * np.ones(sf.type.shape[0])
+            self.elec_abundance[self.type == 0] = sf.ne
+
+            # Internal energy data
+            self.internal_energy = np.nan * np.ones(sf.type.shape[0])
+            self.internal_energy[self.type == 0] = sf.u  # (km/s)^2
+
+            self.density = sf.rho  # 10^10 Msun / cMpc^3
 
     def add_stellar_age(self):
         """
@@ -711,3 +725,43 @@ class Snapshot:
             sfr_by_region.append(sfr)
 
         return sfr_by_region
+
+    def calculate_gas_temperature(self) -> None:
+        """
+        Calculate the temmperature of the gas particles (in K). Other
+        particle types receive NaNs.
+        """
+
+        if 0 not in self.type:
+            raise ValueError("No gas particles loaded in this snapshot.")
+
+        if self.metals is None:
+            self.add_metals()
+        
+        x_hydrogen = self.metals[:, 0]
+        y_helium = (1 - x_hydrogen) / (4 * x_hydrogen)
+        mu = (1 + 4 * y_helium) / (1 + y_helium + self.elec_abundance)
+
+        self.temperature = np.nan * np.ones(self.type.shape[0])
+        self.temperature[self.type == 0] = (5 / 3 - 1) * self.internal_energy \
+            * mu * 1.6726  / 1.3806 * 1e-8 * 1e10  # K
+
+    def calculate_hydrogen_number_density(self) -> None:
+        """
+        Calculate the hydrogen number density for the gas particles. Other
+        particle types receive NaNs.
+        """
+
+        if 0 not in self.type:
+            raise ValueError("No gas particles loaded in this snapshot.")
+
+        physics = Physics()
+
+        hydrogen_density = self.metals[self.type == 0, 0] * self.density
+        # 10^10 Msun / cMpc^3
+        hydrogen_density /= self.expansion_factor**3  # 10^10 Msun / Mpc^3
+
+        self.h_number_density = np.nan * np.ones(self.type.shape[0])
+        self.h_number_density[self.type == 0] = \
+            physics.solar_mass / physics.proton_mass / 2.938 \
+                * hydrogen_density * 1E-6  # cm^(-3)
