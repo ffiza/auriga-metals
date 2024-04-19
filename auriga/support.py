@@ -253,3 +253,36 @@ def get_name_of_previous_snapshot(simulation: str) -> str:
 
     type_txt = "or" if not rerun else "re"
     return f"au{galaxy}_{type_txt}_l{resolution}_s{snapshot - 1}"
+
+
+def get_present_day_disc_radius_of_galaxy(simulation: str) -> float:
+    """
+    This method returns the disc radius at z=0 in kpc for the given galaxy.
+
+    Paramters
+    ---------
+    simulation : str
+        The simulation name.
+    
+    Returns
+    -------
+    float
+        The disc radius at z=0 in kpc.
+    """
+
+    try:
+        galaxy, rerun, resolution = parse(simulation)
+    except ValueError:
+        raise ValueError(f"{simulation} is an invalid format for this "
+                         f"method. Format should include snapshot number, "
+                         f"for example: `au6_or_l4`.")
+    
+    if rerun is True:
+        raise ValueError("No data available for reruns.")
+    
+    if resolution != 4:
+        raise ValueError("No data available for resolutions other than 4.")
+
+    data = pd.read_csv("../data/iza_2022.csv")
+    return data["DiscRadius_kpc"][data["Galaxy"] == galaxy].iloc[0]
+
