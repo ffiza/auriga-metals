@@ -17,11 +17,18 @@ au6_or_l4_s127_03.pdf
     DISC_STD_CIRC                1.00
     DISC_MIN_CIRC                0.30 *
     COLD_DISC_DELTA_CIRC         0.25
-    BULGE_MAX_SPECIFIC_ENERGY   -0.60
+    BULGE_MAX_SPECIFIC_ENERGY   -0.60 *
 
 au6_or_l4_s127_04.pdf
 
     DISC_STD_CIRC                1.00
-    DISC_MIN_CIRC                0.30
+    DISC_MIN_CIRC                0.30 *
     COLD_DISC_DELTA_CIRC         0.30 *
-    BULGE_MAX_SPECIFIC_ENERGY   -0.60
+    BULGE_MAX_SPECIFIC_ENERGY   -0.60 *
+
+au6_or_l4_s127_05.pdf
+
+    DISC_STD_CIRC                1.00
+    DISC_MIN_CIRC                0.50 *
+    COLD_DISC_DELTA_CIRC         0.25
+    BULGE_MAX_SPECIFIC_ENERGY   -0.75
