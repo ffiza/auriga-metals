@@ -1,0 +1,902 @@
+{
+    "au1_or_l4_s127": {
+        "BarWidths": [
+            0.4931687331925569,
+            0.6290970916419893,
+            0.6707674433615181,
+            0.7251284051752162,
+            0.9831597813758758
+        ],
+        "NumericalLabels": [
+            "$\\textbf{49.3\\%}$",
+            "$\\textbf{62.9\\%}$",
+            "$\\textbf{67.1\\%}$",
+            "$\\textbf{72.5\\%}$",
+            "$\\textbf{98.3\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Cold\nDisc",
+            "Warm\nDisc",
+            "Galaxy",
+            "Bulge"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:red",
+            "tab:orange",
+            "tab:gray",
+            "tab:green"
+        ]
+    },
+    "au2_or_l4_s127": {
+        "BarWidths": [
+            0.3408704256648844,
+            0.8386565703772836,
+            0.8483216405354232,
+            0.8584556900019203,
+            0.9172914865626762
+        ],
+        "NumericalLabels": [
+            "$\\textbf{34.1\\%}$",
+            "$\\textbf{83.9\\%}$",
+            "$\\textbf{84.8\\%}$",
+            "$\\textbf{85.8\\%}$",
+            "$\\textbf{91.7\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Warm\nDisc",
+            "Bulge",
+            "Galaxy",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:orange",
+            "tab:green",
+            "tab:gray",
+            "tab:red"
+        ]
+    },
+    "au3_or_l4_s127": {
+        "BarWidths": [
+            0.4164441686270548,
+            0.6585953699978335,
+            0.7838074068928791,
+            0.8546476298004922,
+            0.9754379995282636
+        ],
+        "NumericalLabels": [
+            "$\\textbf{41.6\\%}$",
+            "$\\textbf{65.9\\%}$",
+            "$\\textbf{78.4\\%}$",
+            "$\\textbf{85.5\\%}$",
+            "$\\textbf{97.5\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Warm\nDisc",
+            "Galaxy",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:orange",
+            "tab:gray",
+            "tab:red"
+        ]
+    },
+    "au4_or_l4_s127": {
+        "BarWidths": [
+            0.46900498539779933,
+            0.5889762548935211,
+            0.6143797872707351,
+            0.6489220095340628,
+            0.8700662267809881
+        ],
+        "NumericalLabels": [
+            "$\\textbf{46.9\\%}$",
+            "$\\textbf{58.9\\%}$",
+            "$\\textbf{61.4\\%}$",
+            "$\\textbf{64.9\\%}$",
+            "$\\textbf{87.0\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au5_or_l4_s127": {
+        "BarWidths": [
+            0.3220045189990558,
+            0.8899869923767059,
+            0.9187281347675061,
+            0.9544933169775852,
+            0.9915976293574557
+        ],
+        "NumericalLabels": [
+            "$\\textbf{32.2\\%}$",
+            "$\\textbf{89.0\\%}$",
+            "$\\textbf{91.9\\%}$",
+            "$\\textbf{95.4\\%}$",
+            "$\\textbf{99.2\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Bulge",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:green",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au6_or_l4_s127": {
+        "BarWidths": [
+            0.3014060485045135,
+            0.8041198730055577,
+            0.8845209063208221,
+            0.913706242239889,
+            0.9696102087535758
+        ],
+        "NumericalLabels": [
+            "$\\textbf{30.1\\%}$",
+            "$\\textbf{80.4\\%}$",
+            "$\\textbf{88.5\\%}$",
+            "$\\textbf{91.4\\%}$",
+            "$\\textbf{97.0\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au7_or_l4_s127": {
+        "BarWidths": [
+            0.3194219922877414,
+            0.6447176643042987,
+            0.6509259519328896,
+            0.7386786958259579,
+            0.8503760523154446
+        ],
+        "NumericalLabels": [
+            "$\\textbf{31.9\\%}$",
+            "$\\textbf{64.5\\%}$",
+            "$\\textbf{65.1\\%}$",
+            "$\\textbf{73.9\\%}$",
+            "$\\textbf{85.0\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au8_or_l4_s127": {
+        "BarWidths": [
+            0.5474882415714794,
+            0.8148457561374715,
+            0.8281181450715682,
+            0.8442006897876356,
+            0.8477648482972981
+        ],
+        "NumericalLabels": [
+            "$\\textbf{54.7\\%}$",
+            "$\\textbf{81.5\\%}$",
+            "$\\textbf{82.8\\%}$",
+            "$\\textbf{84.4\\%}$",
+            "$\\textbf{84.8\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Warm\nDisc",
+            "Galaxy",
+            "Bulge",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:orange",
+            "tab:gray",
+            "tab:green",
+            "tab:red"
+        ]
+    },
+    "au9_or_l4_s127": {
+        "BarWidths": [
+            0.6810516818522613,
+            0.9370635191489716,
+            0.9371496195938451,
+            0.9634285065883721,
+            0.9914959088048115
+        ],
+        "NumericalLabels": [
+            "$\\textbf{68.1\\%}$",
+            "$\\textbf{93.7\\%}$",
+            "$\\textbf{93.7\\%}$",
+            "$\\textbf{96.3\\%}$",
+            "$\\textbf{99.1\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au10_or_l4_s127": {
+        "BarWidths": [
+            0.610814363386509,
+            0.9532798176557478,
+            0.9871871599564744,
+            0.9937164435770764,
+            0.9964308661441342
+        ],
+        "NumericalLabels": [
+            "$\\textbf{61.1\\%}$",
+            "$\\textbf{95.3\\%}$",
+            "$\\textbf{98.7\\%}$",
+            "$\\textbf{99.4\\%}$",
+            "$\\textbf{99.6\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Warm\nDisc",
+            "Bulge",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:orange",
+            "tab:green",
+            "tab:red"
+        ]
+    },
+    "au11_or_l4_s127": {
+        "BarWidths": [
+            0.14753941824518685,
+            0.6889143174915515,
+            0.7167237963346111,
+            0.752940168639017,
+            0.9159468111934143
+        ],
+        "NumericalLabels": [
+            "$\\textbf{14.8\\%}$",
+            "$\\textbf{68.9\\%}$",
+            "$\\textbf{71.7\\%}$",
+            "$\\textbf{75.3\\%}$",
+            "$\\textbf{91.6\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au12_or_l4_s127": {
+        "BarWidths": [
+            0.21371840257339225,
+            0.8039460799507914,
+            0.8355784920122946,
+            0.8694006370700631,
+            0.9659231422935687
+        ],
+        "NumericalLabels": [
+            "$\\textbf{21.4\\%}$",
+            "$\\textbf{80.4\\%}$",
+            "$\\textbf{83.6\\%}$",
+            "$\\textbf{86.9\\%}$",
+            "$\\textbf{96.6\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Bulge",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:green",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au13_or_l4_s127": {
+        "BarWidths": [
+            0.458963319082901,
+            0.8554168264041119,
+            0.9131326949384405,
+            0.9385694255089316,
+            0.9680317030084543
+        ],
+        "NumericalLabels": [
+            "$\\textbf{45.9\\%}$",
+            "$\\textbf{85.5\\%}$",
+            "$\\textbf{91.3\\%}$",
+            "$\\textbf{93.9\\%}$",
+            "$\\textbf{96.8\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Warm\nDisc",
+            "Bulge",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:orange",
+            "tab:green",
+            "tab:red"
+        ]
+    },
+    "au14_or_l4_s127": {
+        "BarWidths": [
+            0.4922389156599229,
+            0.7945832694144198,
+            0.8138676040255913,
+            0.9065663865517807,
+            0.9520264373278172
+        ],
+        "NumericalLabels": [
+            "$\\textbf{49.2\\%}$",
+            "$\\textbf{79.5\\%}$",
+            "$\\textbf{81.4\\%}$",
+            "$\\textbf{90.7\\%}$",
+            "$\\textbf{95.2\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Warm\nDisc",
+            "Galaxy",
+            "Cold\nDisc",
+            "Bulge"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:orange",
+            "tab:gray",
+            "tab:red",
+            "tab:green"
+        ]
+    },
+    "au15_or_l4_s127": {
+        "BarWidths": [
+            0.3085750079965881,
+            0.7528660395354492,
+            0.8462003282570185,
+            0.8813382753700866,
+            0.9742647830999878
+        ],
+        "NumericalLabels": [
+            "$\\textbf{30.9\\%}$",
+            "$\\textbf{75.3\\%}$",
+            "$\\textbf{84.6\\%}$",
+            "$\\textbf{88.1\\%}$",
+            "$\\textbf{97.4\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au16_or_l4_s127": {
+        "BarWidths": [
+            0.35892589017589016,
+            0.8590193342635041,
+            0.878255999410863,
+            0.8940782347187171,
+            0.9466688118235128
+        ],
+        "NumericalLabels": [
+            "$\\textbf{35.9\\%}$",
+            "$\\textbf{85.9\\%}$",
+            "$\\textbf{87.8\\%}$",
+            "$\\textbf{89.4\\%}$",
+            "$\\textbf{94.7\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Warm\nDisc",
+            "Galaxy",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:orange",
+            "tab:gray",
+            "tab:red"
+        ]
+    },
+    "au17_or_l4_s127": {
+        "BarWidths": [
+            0.7722225113181037,
+            0.9764427546928445,
+            0.9807953240789061,
+            0.9813003800781569,
+            0.9967093330569519
+        ],
+        "NumericalLabels": [
+            "$\\textbf{77.2\\%}$",
+            "$\\textbf{97.6\\%}$",
+            "$\\textbf{98.1\\%}$",
+            "$\\textbf{98.1\\%}$",
+            "$\\textbf{99.7\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Cold\nDisc",
+            "Warm\nDisc",
+            "Bulge"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:red",
+            "tab:orange",
+            "tab:green"
+        ]
+    },
+    "au18_or_l4_s127": {
+        "BarWidths": [
+            0.5788564336759111,
+            0.957669426633478,
+            0.9764880616330679,
+            0.9769179660345325,
+            0.9875378456889115
+        ],
+        "NumericalLabels": [
+            "$\\textbf{57.9\\%}$",
+            "$\\textbf{95.8\\%}$",
+            "$\\textbf{97.6\\%}$",
+            "$\\textbf{97.7\\%}$",
+            "$\\textbf{98.8\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Bulge",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:green",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au19_or_l4_s127": {
+        "BarWidths": [
+            0.565483599494051,
+            0.7419572414432257,
+            0.7476170005980861,
+            0.771947108953538,
+            0.9147280473587008
+        ],
+        "NumericalLabels": [
+            "$\\textbf{56.5\\%}$",
+            "$\\textbf{74.2\\%}$",
+            "$\\textbf{74.8\\%}$",
+            "$\\textbf{77.2\\%}$",
+            "$\\textbf{91.5\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Warm\nDisc",
+            "Galaxy",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:orange",
+            "tab:gray",
+            "tab:red"
+        ]
+    },
+    "au20_or_l4_s127": {
+        "BarWidths": [
+            0.4310307388974299,
+            0.5952178940012096,
+            0.6492802029076926,
+            0.6783372131692716,
+            0.7267869085350404
+        ],
+        "NumericalLabels": [
+            "$\\textbf{43.1\\%}$",
+            "$\\textbf{59.5\\%}$",
+            "$\\textbf{64.9\\%}$",
+            "$\\textbf{67.8\\%}$",
+            "$\\textbf{72.7\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Warm\nDisc",
+            "Galaxy",
+            "Cold\nDisc",
+            "Bulge"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:orange",
+            "tab:gray",
+            "tab:red",
+            "tab:green"
+        ]
+    },
+    "au21_or_l4_s127": {
+        "BarWidths": [
+            0.26285467120312855,
+            0.7212988269440077,
+            0.8004259456244496,
+            0.8256925529317715,
+            0.9495981287616071
+        ],
+        "NumericalLabels": [
+            "$\\textbf{26.3\\%}$",
+            "$\\textbf{72.1\\%}$",
+            "$\\textbf{80.0\\%}$",
+            "$\\textbf{82.6\\%}$",
+            "$\\textbf{95.0\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au22_or_l4_s127": {
+        "BarWidths": [
+            0.7303416798826569,
+            0.9668055764012805,
+            0.9849028875561028,
+            0.9852959206362071,
+            0.9943035784648064
+        ],
+        "NumericalLabels": [
+            "$\\textbf{73.0\\%}$",
+            "$\\textbf{96.7\\%}$",
+            "$\\textbf{98.5\\%}$",
+            "$\\textbf{98.5\\%}$",
+            "$\\textbf{99.4\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Bulge",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:green",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au23_or_l4_s127": {
+        "BarWidths": [
+            0.2830827710138323,
+            0.8798714651984337,
+            0.893556917699859,
+            0.9032806538753146,
+            0.9727343080210568
+        ],
+        "NumericalLabels": [
+            "$\\textbf{28.3\\%}$",
+            "$\\textbf{88.0\\%}$",
+            "$\\textbf{89.4\\%}$",
+            "$\\textbf{90.3\\%}$",
+            "$\\textbf{97.3\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Warm\nDisc",
+            "Bulge",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:orange",
+            "tab:green",
+            "tab:red"
+        ]
+    },
+    "au24_or_l4_s127": {
+        "BarWidths": [
+            0.44716640325129825,
+            0.8733442008832214,
+            0.8823871530582571,
+            0.9272251555723175,
+            0.951286789526679
+        ],
+        "NumericalLabels": [
+            "$\\textbf{44.7\\%}$",
+            "$\\textbf{87.3\\%}$",
+            "$\\textbf{88.2\\%}$",
+            "$\\textbf{92.7\\%}$",
+            "$\\textbf{95.1\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc",
+            "Bulge"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:orange",
+            "tab:red",
+            "tab:green"
+        ]
+    },
+    "au25_or_l4_s127": {
+        "BarWidths": [
+            0.26193798228878956,
+            0.8763138362822324,
+            0.9319829853598673,
+            0.9473675611381965,
+            0.986609439879053
+        ],
+        "NumericalLabels": [
+            "$\\textbf{26.2\\%}$",
+            "$\\textbf{87.6\\%}$",
+            "$\\textbf{93.2\\%}$",
+            "$\\textbf{94.7\\%}$",
+            "$\\textbf{98.7\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au26_or_l4_s127": {
+        "BarWidths": [
+            0.49868965167691787,
+            0.8265109269208588,
+            0.8633766923246154,
+            0.9130080035024835,
+            0.9726620168526955
+        ],
+        "NumericalLabels": [
+            "$\\textbf{49.9\\%}$",
+            "$\\textbf{82.7\\%}$",
+            "$\\textbf{86.3\\%}$",
+            "$\\textbf{91.3\\%}$",
+            "$\\textbf{97.3\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au27_or_l4_s127": {
+        "BarWidths": [
+            0.4335139109236544,
+            0.8033448593901669,
+            0.8738656219316463,
+            0.9169541228492143,
+            0.9775289446058817
+        ],
+        "NumericalLabels": [
+            "$\\textbf{43.4\\%}$",
+            "$\\textbf{80.3\\%}$",
+            "$\\textbf{87.4\\%}$",
+            "$\\textbf{91.7\\%}$",
+            "$\\textbf{97.8\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au28_or_l4_s127": {
+        "BarWidths": [
+            0.5116319701103391,
+            0.7312568036546674,
+            0.7898394850046851,
+            0.8536928977840795,
+            0.9504888396079578
+        ],
+        "NumericalLabels": [
+            "$\\textbf{51.2\\%}$",
+            "$\\textbf{73.1\\%}$",
+            "$\\textbf{79.0\\%}$",
+            "$\\textbf{85.4\\%}$",
+            "$\\textbf{95.0\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au29_or_l4_s127": {
+        "BarWidths": [
+            0.5843665192342382,
+            0.5925322016413119,
+            0.6234759767860952,
+            0.6960814467708961,
+            0.827541406826259
+        ],
+        "NumericalLabels": [
+            "$\\textbf{58.4\\%}$",
+            "$\\textbf{59.3\\%}$",
+            "$\\textbf{62.3\\%}$",
+            "$\\textbf{69.6\\%}$",
+            "$\\textbf{82.8\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Bulge",
+            "Galaxy",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:green",
+            "tab:gray",
+            "tab:orange",
+            "tab:red"
+        ]
+    },
+    "au30_or_l4_s127": {
+        "BarWidths": [
+            0.26275349937569825,
+            0.6612055281912339,
+            0.6941343916287277,
+            0.818590279523623,
+            0.9133787084604619
+        ],
+        "NumericalLabels": [
+            "$\\textbf{26.3\\%}$",
+            "$\\textbf{66.1\\%}$",
+            "$\\textbf{69.4\\%}$",
+            "$\\textbf{81.9\\%}$",
+            "$\\textbf{91.3\\%}$"
+        ],
+        "ComponentLabel": [
+            "Halo",
+            "Galaxy",
+            "Bulge",
+            "Warm\nDisc",
+            "Cold\nDisc"
+        ],
+        "Colors": [
+            "tab:blue",
+            "tab:gray",
+            "tab:green",
+            "tab:orange",
+            "tab:red"
+        ]
+    }
+}
