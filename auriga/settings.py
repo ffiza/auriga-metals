@@ -32,7 +32,10 @@ class Settings:
                                               16, 17, 18, 21, 22, 23, 24, 25,
                                               26, 27],
                              "NotMilkyWayLike": [4, 7, 12, 15, 20],
-                             "Excluded": [1, 5, 19, 28, 29, 30]}
+                             "Excluded": [1, 5, 19, 28, 29, 30],
+                             "InsideOut": [2, 3, 6, 7, 8, 9, 12, 15, 16,
+                                           18, 20, 21, 24, 25, 26, 27],
+                             "NotInsideOut": [4, 10, 11, 13, 14, 17, 22, 23]}
 
         # Parameters to calculate the reference potential
         self.infinity_factor: float = 3.0
