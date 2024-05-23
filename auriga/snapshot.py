@@ -713,6 +713,9 @@ class Snapshot:
         is_not_wind = self.stellar_formation_time > 0
         is_new = self.stellar_formation_time > prev_exp_fact
 
+        # There is no need to keep stars only in the main object because
+        # all the stars assigned to a component belong to the main object.
+
         dt = self.time - prev_time  # Gyr
 
         sfr_by_region = []
