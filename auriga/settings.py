@@ -77,5 +77,9 @@ class Settings:
                                           "B": "Greens",
                                           "CD": "Reds",
                                           "WD": "Oranges"}
+        self.component_markers: dict = {"H": "s",
+                                        "B": "v",
+                                        "CD": "P",
+                                        "WD": "D"}
 
         self.photometric_bands: list = ['U', 'B', 'V', 'K', 'g', 'r', 'i', 'z']
