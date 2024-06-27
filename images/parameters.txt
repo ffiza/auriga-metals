@@ -38,3 +38,10 @@ _06
     DISC_MIN_CIRC                0.40
     COLD_DISC_DELTA_CIRC         0.25
     BULGE_MAX_SPECIFIC_ENERGY   -0.50 *
+
+_07
+
+    DISC_STD_CIRC                1.00
+    DISC_MIN_CIRC                0.50 *
+    COLD_DISC_DELTA_CIRC         0.25
+    BULGE_MAX_SPECIFIC_ENERGY   -0.60 *
