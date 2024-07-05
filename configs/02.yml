@@ -8,3 +8,5 @@ ABUNDANCE_MAPS:
   N_BINS:                     200
   MIN_PART_COUNT:             1
   MAX_PART_COUNT:             1000
+ABUNDANCE_DISTRIBUTION:
+  N_BINS:                     50
