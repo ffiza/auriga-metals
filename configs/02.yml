@@ -1,0 +1,10 @@
+RUN_NAME:                     "02"
+FILE_SUFFIX:                  "_02"
+DISC_MIN_CIRC:                0.4
+DISC_STD_CIRC:                1.0
+COLD_DISC_DELTA_CIRC:         0.25
+BULGE_MAX_SPECIFIC_ENERGY:    -0.6
+ABUNDANCE_MAPS:
+  N_BINS:                     200
+  MIN_PART_COUNT:             1
+  MAX_PART_COUNT:             1000
