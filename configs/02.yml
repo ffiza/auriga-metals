@@ -10,3 +10,11 @@ ABUNDANCE_MAPS:
   MAX_PART_COUNT:             1000
 ABUNDANCE_DISTRIBUTION:
   N_BINS:                     50
+AGE_METALLICITY_RELATION:
+  N_BINS_AGE:                 14
+  N_BINS_MAP:                 200
+  MAP_VMIN:                   1.0
+  MAP_VMAX:                   1000.0
+  AGE_MIN:                    0.0
+  AGE_MAX:                    14.0
+  DECIMALS:                   6
