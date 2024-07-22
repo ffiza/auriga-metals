@@ -154,3 +154,20 @@ def double_gaussian(x: np.ndarray,
     gauss1 = gaussian(x, amplitude1, mean1, scale1)
     gauss2 = gaussian(x, amplitude2, mean2, scale2)
     return gauss1 + gauss2
+
+
+def mad(x: np.ndarray) -> float:
+    """
+    Return a median absolute deviation.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        An array with the input values.
+
+    Returns
+    -------
+    float
+        The median absolute deviation.
+    """
+    return np.median(np.abs(x - np.median(x)))
