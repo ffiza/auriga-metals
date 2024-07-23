@@ -18,3 +18,10 @@ AGE_METALLICITY_RELATION:
   AGE_MIN:                    0.0
   AGE_MAX:                    14.0
   DECIMALS:                   6
+GAS_ABUNDANCE_EVOLUTION:
+  N_BINS_ABUNDANCE:           50
+  N_BINS_TIME:                28
+  TIME_MIN:                   0.0
+  TIME_MAX:                   14.0
+  ABUNDANCE_MIN:              -2.5
+  ABUNDANCE_MAX:              1.5
