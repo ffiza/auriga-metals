@@ -745,8 +745,7 @@ class Snapshot:
         y_helium = (1 - x_hydrogen) / (4 * x_hydrogen)
         mu = (1 + 4 * y_helium) / (1 + y_helium + self.elec_abundance)
 
-        self.temperature = np.nan * np.ones(self.type.shape[0])
-        self.temperature[self.type == 0] = (5 / 3 - 1) * self.internal_energy \
+        self.temperature = (5 / 3 - 1) * self.internal_energy \
             * mu * 1.6726  / 1.3806 * 1e-8 * 1e10  # K
 
     def calculate_hydrogen_number_density(self) -> None:
