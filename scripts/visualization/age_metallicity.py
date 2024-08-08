@@ -22,11 +22,12 @@ def make_plot(config: dict):
     facts = [1, 2, -1, -2]
     lss = ["--", ":", '--', ':']
 
-    fig = plt.figure(figsize=(7.4, 2.0))
+    fig = plt.figure(figsize=(8.0, 2.0))
     gs = fig.add_gridspec(nrows=1, ncols=5, hspace=0.0, wspace=0.0)
     axs = gs.subplots(sharex=True, sharey=True)
 
     for ax in axs.flat:
+        ax.grid(True, ls='-', lw=0.25, c="gainsboro")
         ax.set_xlim(0, 14)
         ax.set_xticks([2, 4, 6, 8, 10, 12])
         ax.set_xlabel("Stellar Age [Gyr]")
@@ -79,7 +80,7 @@ def make_plot(config: dict):
 
     axs[0].text(
         x=0.05, y=0.05, size=8.0, ha="left", va="bottom",
-        s=r"$\textbf{All}$", c="black", transform=ax.transAxes)
+        s=r"$\textbf{All}$", c="black", transform=axs[0].transAxes)
     for i in range(len(settings.components)):
         ax = axs[i + 1]
         ax.text(
