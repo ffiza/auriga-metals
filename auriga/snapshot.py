@@ -213,8 +213,8 @@ class Snapshot:
                 stellar_photometrics[self.type == 4] = sf.gsph
                 self.stellar_photometrics = stellar_photometrics
         else:
-            warnins.warn("Stellar photometrics already found in snapshot",
-                         RuntimeWarning)
+            warnings.warn("Stellar photometrics already found in snapshot",
+                          RuntimeWarning)
 
     def add_luminosities(self, band: str):
         """
