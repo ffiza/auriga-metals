@@ -343,7 +343,7 @@ class Snapshot:
     def add_extra_coordinates(self):
         """
         This method calculates the radii of particles in cylindrical and
-        spherical coordinates. Names are: `rho` (cilyndrical radius),
+        spherical coordinates. Names are: `rho` (cylindrical radius),
         `r` (spherical radius), `v_rho` (velocity in the `rho`
         direction), and `v_phi` (tangential velocity).
         """
