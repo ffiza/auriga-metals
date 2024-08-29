@@ -28,17 +28,16 @@ class Settings:
                                  4: 'viridis'}
 
         # Milky Way-like groups
-        self.groups: dict = {"MilkyWayLike": [2, 3, 6, 8, 9, 10, 11, 13, 14,
-                                              16, 17, 18, 21, 22, 23, 24, 25,
-                                              26, 27],
-                             "NotMilkyWayLike": [4, 7, 12, 15, 20],
-                             "Excluded": [1, 5, 19, 28, 29, 30],
-                             "InsideOut": [2, 3, 6, 7, 8, 9, 12, 15, 16,
-                                           18, 20, 21, 24, 25, 26, 27],
-                             "NotInsideOut": [4, 10, 11, 13, 14, 17, 22, 23],
-                             "Included": [2, 3, 4, 6, 7, 8, 9, 10, 12, 13,
-                                          14, 15, 16, 17, 18, 20, 21, 22,
-                                          23, 24, 25, 26, 27]}
+        self.groups: dict = {
+            "MilkyWayLike": [2, 3, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 21, 22,
+                             23, 24, 25, 26, 27],
+            "NotMilkyWayLike": [4, 7, 12, 15, 20],
+            "Excluded": [1, 5, 19, 28, 29, 30],
+            "InsideOut": [2, 3, 6, 7, 8, 9, 12, 15, 16, 18, 20, 21, 24, 25, 26,
+                          27],
+            "NotInsideOut": [4, 10, 11, 13, 14, 17, 22, 23],
+            "Included": [2, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18,
+                         20, 21, 22, 23, 24, 25, 26, 27]}
 
         # Parameters to calculate the reference potential
         self.infinity_factor: float = 3.0
@@ -61,25 +60,15 @@ class Settings:
 
         # Galactic decomposition
         self.components: list = ["H", "B", "CD", "WD"]
-        self.component_tags: dict = {"H": 0,
-                                     "B": 1,
-                                     "CD": 2,
-                                     "WD": 3}
-        self.component_labels: dict = {"H": "Halo",
-                                       "B": "Bulge",
-                                       "CD": "Cold Disc",
-                                       "WD": "Warm Disc"}
-        self.component_colors: dict = {"H": "tab:blue",
-                                       "B": "tab:green",
-                                       "CD": "tab:red",
-                                       "WD": "tab:orange"}
-        self.component_colormaps: dict = {"H": "Blues",
-                                          "B": "Greens",
-                                          "CD": "Reds",
-                                          "WD": "Oranges"}
-        self.component_markers: dict = {"H": "s",
-                                        "B": "v",
-                                        "CD": "P",
-                                        "WD": "D"}
+        self.component_tags: dict = {
+            "H": 0, "B": 1, "CD": 2, "WD": 3}
+        self.component_labels: dict = {
+            "H": "Halo", "B": "Bulge", "CD": "Cold Disc", "WD": "Warm Disc"}
+        self.component_colors: dict = {
+            "H": "#1f77b4", "B": "#2ca02c", "CD": "#d62728", "WD": "#ff7f0e"}
+        self.component_colormaps: dict = {
+            "H": "Blues", "B": "Greens", "CD": "Reds", "WD": "Oranges"}
+        self.component_markers: dict = {
+            "H": "s", "B": "v", "CD": "P", "WD": "D"}
 
         self.photometric_bands: list = ['U', 'B', 'V', 'K', 'g', 'r', 'i', 'z']
