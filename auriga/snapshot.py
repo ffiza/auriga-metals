@@ -282,7 +282,7 @@ class Snapshot:
 
     def add_metal_abundance(self, of: str, to: str):
         """
-        Calculates the abundance [X/Y] of metal x relative to metal Y.
+        Calculates the abundance [X/Y] of metal X relative to metal Y.
 
         Parameters
         ----------
