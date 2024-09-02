@@ -18,3 +18,8 @@ AGE_METALLICITY_RELATION:
   AGE_MIN:                    0.0
   AGE_MAX:                    14.0
   DECIMALS:                   6
+ABUNDANCE_PROFILES:
+  N_BINS:                     100
+  MIN_RADIUS_CKPC:            0.0
+  MAX_RADIUS_CKPC:            50.0
+  
