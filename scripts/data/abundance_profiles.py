@@ -3,6 +3,8 @@ from scipy.stats import binned_statistic
 import pandas as pd
 import yaml
 import argparse
+from scipy.stats import linregress
+import json
 
 from auriga.snapshot import Snapshot
 from auriga.settings import Settings
@@ -124,22 +126,45 @@ def calculate_profile(simulation: str, config: dict):
     return data
 
 
+def fit_profiles(sample: list, config: dict):
+    gal_data = pd.read_csv("data/iza_2022.csv")
+    for simulation in sample:
+        galaxy = parse(simulation)[0]
+        disc_radius = gal_data["DiscRadius_kpc"][gal_data["Galaxy"] == galaxy]
+        short_sim = "_".join(simulation.split("_")[:-1])
+        df = pd.read_csv(f"results/{short_sim}/"
+                         f"abundance_profile{config['FILE_SUFFIX']}.csv")
+        mask = df["CylindricalRadius_ckpc"] <= disc_radius.values[0]
+        x = df["CylindricalRadius_ckpc"][mask]
+        y = df["[Fe/H]_CD_Stars"][mask]
+        lreg = linregress(x=x, y=y)
+        reg_dict = {"slope": lreg.slope,
+                    "intercept": lreg.intercept,
+                    "rvalue": lreg.rvalue,
+                    "pvalue": lreg.pvalue,
+                    "stderr": lreg.stderr,
+                    "intercept_stderr": lreg.intercept_stderr}
+        with open(f"results/{short_sim}/FeH_abundance_profile_fit.json",
+                  'w') as f:
+            json.dump(reg_dict, f)
+
+
 def main():
     settings = Settings()
 
     # Get arguments from user
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--config", type=str, required=True)
-    # args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str, required=True)
+    args = parser.parse_args()
 
     # Load configuration file
-    # config = yaml.safe_load(open(f"configs/{args.config}.yml"))
-    config = yaml.safe_load(open(f"configs/02.yml"))
+    config = yaml.safe_load(open(f"configs/{args.config}.yml"))
 
     # Run the analysis
     sample = [f"au{i}_or_l4_s127" for i in settings.groups["Included"]]
     for simulation in sample:
         calculate_profile(simulation, config)
+    fit_profiles(sample, config)
 
 
 if __name__ == "__main__":
