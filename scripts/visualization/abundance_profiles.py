@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import yaml
 import matplotlib.pyplot as plt
+import json
 import argparse
 
 from auriga.settings import Settings
@@ -44,22 +45,59 @@ def plot_abundance_profile(sample: list, config: dict, abundance: tuple):
 
         ax.plot(df["CylindricalRadius_ckpc"], df["[Fe/H]_CD_Stars"],
                 lw=1.0, color=settings.component_colors["CD"],
-                zorder=15)
+                zorder=15, label="Data")
 
         ax.text(
-            x=0.95, y=0.95, size=7.0,
+            x=1, y=-0.5, size=7.0,
             s=r"$\texttt{" + f"Au{galaxy}" + "}$",
-            ha='right', va='top', transform=ax.transAxes)
+            ha='left', va='center')
 
         disc_radius = gal_data["DiscRadius_kpc"][gal_data["Galaxy"] == galaxy]
         ax.plot([disc_radius] * 2, ax.get_ylim(), lw=1.0, ls=":", c="k")
         ax.text(
-            x=disc_radius.values[0] + 5, y=0.3, size=6.0,
+            x=disc_radius.values[0] + 2, y=0.3, size=6.0,
             s=r"$R_\mathrm{d}$" + "\n" + f"{disc_radius.values[0]} \n kpc",
-            ha='center', va='top')
+            ha='left', va='top')
+        
+        # region LinearRegression
+        with open(f"results/{simulation}/FeH_abundance_profile_fit.json",
+                  'r') as f:
+            lreg = json.load(f)
+        ax.plot(
+            df["CylindricalRadius_ckpc"],
+            df["CylindricalRadius_ckpc"] * lreg["slope"] + lreg["intercept"],
+            color=settings.component_colors["CD"], ls="--", lw=1.0,
+            label="This Work")
+        # endregion
 
-        if i == 0:
-            ax.legend(loc="upper left", framealpha=0, fontsize=5.0)
+        # region LiteratureFits
+        with open(f"data/lemasle_2018.json", 'r') as f:
+            reg = json.load(f)
+        ax.plot(
+            df["CylindricalRadius_ckpc"],
+            df["CylindricalRadius_ckpc"] * reg["Data"]["LeastSquaresSlope"] + lreg["intercept"],
+            color="blue", ls="--", lw=0.5, label="Lemasle et al. (2018)")
+        with open(f"data/genovali_2014.json", 'r') as f:
+            reg = json.load(f)
+        ax.plot(
+            df["CylindricalRadius_ckpc"],
+            df["CylindricalRadius_ckpc"] * reg["Data"]["Slope"] + lreg["intercept"],
+            color="purple", ls="--", lw=0.5, label="Genovali et al. (2014)")
+        with open(f"data/lemasle_2008.json", 'r') as f:
+            reg = json.load(f)
+        ax.plot(
+            df["CylindricalRadius_ckpc"],
+            df["CylindricalRadius_ckpc"] * reg["Data"]["Slope"] + lreg["intercept"],
+            color="green", ls="--", lw=0.5, label="Lemasle et al. (2008)")
+        with open(f"data/lemasle_2007.json", 'r') as f:
+            reg = json.load(f)
+        ax.plot(
+            df["CylindricalRadius_ckpc"],
+            df["CylindricalRadius_ckpc"] * reg["Data"]["Slope"] + lreg["intercept"],
+            color="orange", ls="--", lw=0.5, label="Lemasle et al. (2007)")
+        # endregion
+
+    axs[1, 3].legend(loc="upper right", framealpha=0, fontsize=3.5)
 
     fig.savefig(
         f"images/abundance_profiles/"
