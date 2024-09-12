@@ -34,11 +34,11 @@ class Physics:
     """
 
     def __init__(self) -> None:
-        self.solar_metallicity: float = 0.0127
+        self.solar_metallicity: float = 0.0134
         self.gravitational_constant: float = 4.3E-3
         self.proton_mass: float = 1.67262192369
         self.solar_mass: float = 1.98847
-        self.critical_temperature: float = 2E4
+        self.critical_temperature: float = 2.0E4
         self.star_forming_density: float = 0.13
 
         # Metals
