@@ -130,7 +130,7 @@ def plot_fit_stats(sample: list, config: dict):
                 x=-0.105, y=0 - 0.02 * i, size=6.0, color="gray",
                 ha="right", va="center", s=f"Au{galaxy}")
             ax.annotate('', xy=(0.02, 0 - 0.02 * i),
-                        xytext=(0.075, 0 - 0.02 * i),
+                        xytext=(0.08, 0 - 0.02 * i),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
             slope_err = round_to_1(lreg["stderr"])
@@ -158,7 +158,7 @@ def plot_fit_stats(sample: list, config: dict):
         ax.text(x=-0.105, y=- 0.02 * 23, size=6.0, color="purple",
                 ha="right", va="center", s="Genovali et al. (2014)")
         ax.annotate('', xy=(0.02, - 0.02 * 23),
-                        xytext=(0.075, - 0.02 * 23),
+                        xytext=(0.08, - 0.02 * 23),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
         slope_err = reg["Data"]["SlopeErr"]
@@ -177,7 +177,7 @@ def plot_fit_stats(sample: list, config: dict):
         ax.text(x=-0.105, y=- 0.02 * 24, size=6.0, color="orange",
                 ha="right", va="center", s="Lemasle et al. (2007)")
         ax.annotate('', xy=(0.02, - 0.02 * 24),
-                        xytext=(0.075, - 0.02 * 24),
+                        xytext=(0.08, - 0.02 * 24),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
         slope_err = reg["Data"]["SlopeErr"]
@@ -196,7 +196,7 @@ def plot_fit_stats(sample: list, config: dict):
         ax.text(x=-0.105, y=- 0.02 * 25, size=6.0, color="green",
                 ha="right", va="center", s="Lemasle et al. (2008)")
         ax.annotate('', xy=(0.02, - 0.02 * 25),
-                        xytext=(0.075, - 0.02 * 25),
+                        xytext=(0.08, - 0.02 * 25),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
         slope_err = reg["Data"]["SlopeErr"]
@@ -216,7 +216,7 @@ def plot_fit_stats(sample: list, config: dict):
         ax.text(x=-0.105, y=- 0.02 * 26, size=6.0, color="blue",
                 ha="right", va="center", s="Lemasle et al. (2018)")
         ax.annotate('', xy=(0.02, - 0.02 * 26),
-                        xytext=(0.075, - 0.02 * 26),
+                        xytext=(0.08, - 0.02 * 26),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
         slope_err = reg["Data"]["BootstrapSlopeErr"]
