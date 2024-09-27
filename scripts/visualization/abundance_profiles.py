@@ -8,9 +8,10 @@ import argparse
 from auriga.settings import Settings
 from auriga.parser import parse
 from auriga.images import figure_setup
+from auriga.mathematics import round_to_1, get_decimal_places
 
 
-def plot_abundance_profile(sample: list, config: dict, abundance: tuple):
+def plot_abundance_profile(sample: list, config: dict):
     settings = Settings()
 
     # region ReadDiscSize
@@ -105,6 +106,133 @@ def plot_abundance_profile(sample: list, config: dict, abundance: tuple):
     plt.close(fig)
 
 
+def plot_fit_stats(sample: list, config: dict):
+    fig, ax = plt.subplots(figsize=(3.5, 4.5), ncols=1)
+
+    ax.set_xlim(-0.1, 0.02)
+    ax.set_ylim(-0.53, 0.02)
+    ax.set_xlabel(r"$\nabla \mathrm{[Fe/H]}$ [dex/ckpc]")
+    ax.set_yticks([- i * 0.02 for i in range(28)])
+    ax.set_yticklabels([])
+    ax.grid(True, ls='-', lw=0.25, c='gainsboro')
+
+    for i, simulation in enumerate(sample):
+        with open(f"results/{simulation}/FeH_abundance_profile_fit.json",
+                  'r') as f:
+            lreg = json.load(f)
+            ax.errorbar(
+                lreg["slope"], 0 - 0.02 * i,
+                xerr=lreg["stderr"], color="gray",
+                markeredgecolor="white", capsize=2, capthick=1,
+                marker='o', markersize=4, linestyle='none', zorder=10)
+            galaxy = parse(sample[i])[0]
+            ax.text(
+                x=-0.105, y=0 - 0.02 * i, size=6.0, color="gray",
+                ha="right", va="center", s=f"Au{galaxy}")
+            ax.annotate('', xy=(0.02, 0 - 0.02 * i),
+                        xytext=(0.075, 0 - 0.02 * i),
+                        arrowprops=dict(
+                            arrowstyle="-", color='gainsboro', lw=0.25))
+            slope_err = round_to_1(lreg["stderr"])
+            slope_val = np.round(lreg["slope"], get_decimal_places(slope_err))
+            ax.text(x=0.04, y=0 - 0.02 * i, size=6.0, color="black",
+                    ha="center", va="bottom",
+                    s=r"$-$" + f"{np.abs(slope_val)}" + " $\pm$ " \
+                        + f"{slope_err}")
+            pvalue_str = str(np.round(lreg["pvalue"])) \
+                if lreg["pvalue"] >= 0.001 else r"$<0.001$"
+            ax.text(x=0.07, y=0 - 0.02 * i, size=6.0, color="black",
+                    ha="center", va="bottom", s=pvalue_str)
+
+    ax.text(x=0.04, y=0.02, size=6.0, color="black",
+            ha="center", va="bottom", s="Slope [dex/ckpc]")
+    ax.text(x=0.07, y=0.02, size=6.0, color="black",
+            ha="center", va="bottom", s=f"$p$-value")
+
+    with open(f"data/genovali_2014.json", 'r') as f:
+        reg = json.load(f)
+        ax.errorbar(
+            reg["Data"]["Slope"], - 0.02 * 23, xerr=reg["Data"]["SlopeErr"],
+            markeredgecolor="white", capsize=2, capthick=1, color="purple",
+            marker='o', markersize=4, linestyle='none', zorder=10)
+        ax.text(x=-0.105, y=- 0.02 * 23, size=6.0, color="purple",
+                ha="right", va="center", s="Genovali et al. (2014)")
+        ax.annotate('', xy=(0.02, - 0.02 * 23),
+                        xytext=(0.075, - 0.02 * 23),
+                        arrowprops=dict(
+                            arrowstyle="-", color='gainsboro', lw=0.25))
+        slope_err = reg["Data"]["SlopeErr"]
+        slope_val = reg["Data"]["Slope"]
+        ax.text(x=0.04, y=- 0.02 * 23, size=6.0, color="purple",
+                ha="center", va="bottom",
+                s=r"$-$" + f"{np.abs(slope_val)}" + " $\pm$ " \
+                    + f"{slope_err}")
+
+    with open(f"data/lemasle_2007.json", 'r') as f:
+        reg = json.load(f)
+        ax.errorbar(
+            reg["Data"]["Slope"], - 0.02 * 24, xerr=reg["Data"]["SlopeErr"],
+            markeredgecolor="white", capsize=2, capthick=1, color="orange",
+            marker='o', markersize=4, linestyle='none', zorder=10)
+        ax.text(x=-0.105, y=- 0.02 * 24, size=6.0, color="orange",
+                ha="right", va="center", s="Lemasle et al. (2007)")
+        ax.annotate('', xy=(0.02, - 0.02 * 24),
+                        xytext=(0.075, - 0.02 * 24),
+                        arrowprops=dict(
+                            arrowstyle="-", color='gainsboro', lw=0.25))
+        slope_err = reg["Data"]["SlopeErr"]
+        slope_val = reg["Data"]["Slope"]
+        ax.text(x=0.04, y=- 0.02 * 24, size=6.0, color="orange",
+                ha="center", va="bottom",
+                s=r"$-$" + f"{np.abs(slope_val)}" + " $\pm$ " \
+                    + f"{slope_err}")
+
+    with open(f"data/lemasle_2008.json", 'r') as f:
+        reg = json.load(f)
+        ax.errorbar(
+            reg["Data"]["Slope"], - 0.02 * 25, xerr=reg["Data"]["SlopeErr"],
+            markeredgecolor="white", capsize=2, capthick=1, color="green",
+            marker='o', markersize=4, linestyle='none', zorder=10)
+        ax.text(x=-0.105, y=- 0.02 * 25, size=6.0, color="green",
+                ha="right", va="center", s="Lemasle et al. (2008)")
+        ax.annotate('', xy=(0.02, - 0.02 * 25),
+                        xytext=(0.075, - 0.02 * 25),
+                        arrowprops=dict(
+                            arrowstyle="-", color='gainsboro', lw=0.25))
+        slope_err = reg["Data"]["SlopeErr"]
+        slope_val = reg["Data"]["Slope"]
+        ax.text(x=0.04, y=- 0.02 * 25, size=6.0, color="green",
+                ha="center", va="bottom",
+                s=r"$-$" + f"{np.abs(slope_val)}" + " $\pm$ " \
+                    + f"{slope_err}")
+
+    with open(f"data/lemasle_2018.json", 'r') as f:
+        reg = json.load(f)
+        ax.errorbar(
+            reg["Data"]["BootstrapSlope"], - 0.02 * 26,
+            xerr=reg["Data"]["BootstrapSlopeErr"], color="blue",
+            markeredgecolor="white", capsize=2, capthick=1,
+            marker='o', markersize=4, linestyle='none', zorder=10)
+        ax.text(x=-0.105, y=- 0.02 * 26, size=6.0, color="blue",
+                ha="right", va="center", s="Lemasle et al. (2018)")
+        ax.annotate('', xy=(0.02, - 0.02 * 26),
+                        xytext=(0.075, - 0.02 * 26),
+                        arrowprops=dict(
+                            arrowstyle="-", color='gainsboro', lw=0.25))
+        slope_err = reg["Data"]["BootstrapSlopeErr"]
+        slope_val = reg["Data"]["BootstrapSlope"]
+        ax.text(x=0.04, y=- 0.02 * 26, size=6.0, color="blue",
+                ha="center", va="bottom",
+                s=r"$-$" + f"{np.abs(slope_val)}" + " $\pm$ " \
+                    + f"{slope_err}")
+
+    ax.plot([0] * 2, ax.get_ylim(), ls="--", lw=0.75, color='k', zorder=10)
+
+    fig.savefig(
+        f"images/abundance_profiles/gradients.pdf")
+    plt.close(fig)
+
+
 def main():
     settings = Settings()
     sample = [f"au{i}_or_l4" for i in settings.groups["Included"]]
@@ -119,7 +247,9 @@ def main():
 
     # Create figures
     figure_setup()
-    plot_abundance_profile(sample, config, ("Fe", "H"))
+    # plot_abundance_profile(sample, config)
+    plot_fit_stats(sample, config)
+
 
 
 if __name__ == "__main__":
