@@ -1,4 +1,5 @@
 import numpy as np
+from math import log10, floor
 
 
 def linear(x: np.array, slope: float, intercept: float) -> np.array:
@@ -171,3 +172,40 @@ def mad(x: np.ndarray) -> float:
         The median absolute deviation.
     """
     return np.median(np.abs(x - np.median(x)))
+
+
+def round_to_1(x: float) -> float:
+    """
+    Rounds a number to one significant digit.
+
+    Parameters
+    ----------
+    x : float
+        The number to round.
+    
+    Returns
+    -------
+    float
+        The result of rounding.
+    """
+    return round(x, -int(floor(log10(abs(x)))))
+
+
+def get_decimal_places(x: float) -> int:
+    """
+    Returns the number of decimal places in a number. Note that an integer
+    will have at least one decimal place by default.
+
+    Parameters
+    ----------
+    x : float
+        A float to calculate decimal places.
+    
+    Returns
+    -------
+    int
+        The number of decimal places.
+    """
+    if isinstance(x, int): x = float(x)
+    return len(str(x).split(".")[1])
+
