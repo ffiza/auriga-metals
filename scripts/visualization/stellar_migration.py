@@ -448,36 +448,36 @@ def main():
 
     # Create figures
     figure_setup()
-    plot_migration_matrix(simulation="au6_or_l4", config=config)
-    plot_migration_matrix_for_sample(sample=sample, config=config)
-    plot_migration_matrix_for_sample_median(sample=sample, config=config)
-    plot_stellar_age_distribution(simulation="au6_or_l4", config=config)
-    plot_stellar_age_distribution_for_sample_median(sample=sample,
-                                                    config=config)
-    plot_abundance_distribution(
-        simulation="au6_or_l4", abundance=("Fe", "H"), config=config,
-        xlim=(-2.5, 1), ylim=(0, 0.12),
-        xticks=[-2, -1, 0], yticks=[0.02 * i for i in range(6)])
+    # plot_migration_matrix(simulation="au6_or_l4", config=config)
+    # plot_migration_matrix_for_sample(sample=sample, config=config)
+    # plot_migration_matrix_for_sample_median(sample=sample, config=config)
+    # plot_stellar_age_distribution(simulation="au6_or_l4", config=config)
+    # plot_stellar_age_distribution_for_sample_median(sample=sample,
+    #                                                 config=config)
+    # plot_abundance_distribution(
+    #     simulation="au6_or_l4", abundance=("Fe", "H"), config=config,
+    #     xlim=(-2.5, 1), ylim=(0, 0.12),
+    #     xticks=[-2, -1, 0], yticks=[0.02 * i for i in range(6)])
     plot_abundance_distribution(
         simulation="au6_or_l4", abundance=("O", "H"), config=config,
-        xlim=(-2.5, 1), ylim=(0, 0.12),
-        xticks=[-2, -1, 0], yticks=[0.02 * i for i in range(6)])
-    plot_abundance_distribution(
-        simulation="au6_or_l4", abundance=("O", "Fe"), config=config,
-        xlim=(0.1, 0.4), ylim=(0, 0.12),
-        xticks=[0.1, 0.2, 0.3], yticks=[0.02 * i for i in range(6)])
-    plot_abundance_distribution_for_sample_median(
-        sample=sample, abundance=("Fe", "H"), config=config,
-        xlim=(-2.5, 1), ylim=(0, 0.12),
-        xticks=[-2, -1, 0], yticks=[0.02 * i for i in range(6)])
+        xlim=(-2, 1.5), ylim=(0, 0.12),
+        xticks=[-2, -1, 0, 1], yticks=[0.02 * i for i in range(6)])
+    # plot_abundance_distribution(
+    #     simulation="au6_or_l4", abundance=("O", "Fe"), config=config,
+    #     xlim=(0.1, 0.4), ylim=(0, 0.12),
+    #     xticks=[0.1, 0.2, 0.3], yticks=[0.02 * i for i in range(6)])
+    # plot_abundance_distribution_for_sample_median(
+    #     sample=sample, abundance=("Fe", "H"), config=config,
+    #     xlim=(-2.5, 1), ylim=(0, 0.12),
+    #     xticks=[-2, -1, 0], yticks=[0.02 * i for i in range(6)])
     plot_abundance_distribution_for_sample_median(
         sample=sample, abundance=("O", "H"), config=config,
-        xlim=(-2.5, 1), ylim=(0, 0.12),
-        xticks=[-2, -1, 0], yticks=[0.02 * i for i in range(6)])
-    plot_abundance_distribution_for_sample_median(
-        sample=sample, abundance=("O", "Fe"), config=config,
-        xlim=(0.1, 0.4), ylim=(0, 0.12),
-        xticks=[0.1, 0.2, 0.3], yticks=[0.02 * i for i in range(6)])
+        xlim=(-2, 1.5), ylim=(0, 0.12),
+        xticks=[-2, -1, 0, 1], yticks=[0.02 * i for i in range(6)])
+    # plot_abundance_distribution_for_sample_median(
+    #     sample=sample, abundance=("O", "Fe"), config=config,
+    #     xlim=(0.1, 0.4), ylim=(0, 0.12),
+        # xticks=[0.1, 0.2, 0.3], yticks=[0.02 * i for i in range(6)])
 
 
 if __name__ == "__main__":
