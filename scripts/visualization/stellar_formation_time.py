@@ -28,7 +28,7 @@ axs = gs.subplots(sharex=True, sharey=True)
 for ax in axs.flatten():
     ax.tick_params(which='both', direction="in")
     ax.set_xlim(0, 14)
-    ax.set_ylim(0, 0.3)
+    ax.set_ylim(0, 0.12)
     ax.set_xticks([2, 4, 6, 8, 10, 12])
     ax.set_xlabel('Stellar Age [Gyr]')
     ax.set_ylabel(r"$f_{\star, \mathrm{ex-situ}}$")
