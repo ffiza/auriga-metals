@@ -1,19 +1,14 @@
 {
     "DOI": "10.1051/0004-6361/201323198",
     "ADSURL": "https://ui.adsabs.harvard.edu/abs/2014A&A...566A..37G",
-    "Data":
-    {
-        "Slope": -0.051,
-        "SlopeErr": 0.003,
-        "Intercept": 0.49,
-        "InterceptErr": 0.03
-    },
-    "Units":
-    {
-        "Slope": "dex/kpc",
-        "SlopeErr": "dex/kpc",
-        "Intercept": "dex",
-        "InterceptErr": "dex"
-    },
-    "Notes": "The current data set covers a range in Galactocentric distances of more than 10 kpc (4 <= RG <= 15 kpc). We estimated the metallicity gradient (dashed line) and we found [Fe/H] = 0.49 +/- 0.03 − 0.051 +/- 0.003 RG / kpc. The new slope and zero-point agree quite well with similar estimates available in the literature (Luck & Lambert 2011; Lemasle et al. 2013)."
+    "Label": "Genovali et al. (2014)",
+    "SlopeValue": -0.051,
+    "SlopeErrValue": 0.003,
+    "InterceptValue": 0.49,
+    "InterceptErrValue": 0.03,
+    "SlopeUnit": "dex/kpc",
+    "SlopeErrUnit": "dex/kpc",
+    "InterceptUnit": "dex",
+    "InterceptErrUnit": "dex",
+    "Notes": ["Stars in 4 kpc <= RG <= 15 kpc)."]
 }

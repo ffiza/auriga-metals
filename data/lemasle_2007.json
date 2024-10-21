@@ -1,17 +1,14 @@
 {
     "DOI": "10.1051/0004-6361:20066375",
     "ADSURL": "https://ui.adsabs.harvard.edu/abs/2007A&A...467..283L",
-    "Data":
-    {
-        "Slope": -0.061,
-        "SlopeErr": 0.019,
-        "CorrCoeff": 0.441
-    },
-    "Units":
-    {
-        "Slope": "dex/kpc",
-        "SlopeErr": "dex/kpc",
-        "CorrCoeff": "1"
-    },
-    "Notes": "Data plotted in the top panel of Fig. 7 show that the slope is –0.061 dex/kpc in the region ranging from ~8 to ~12 kpc."
+    "Label": "Lemasle et al. (2007)",
+    "SlopeValue": -0.061,
+    "SlopeErrValue": 0.019,
+    "CorrCoeffValue": 0.441,
+    "SlopeUnit": "dex/kpc",
+    "SlopeErrUnit": "dex/kpc",
+    "CorrCoeffUnit": "1",
+    "Notes": ["Observations of classical Cepheids.",
+              "Abundances calculated with the classical LTE atmosphere models.",
+              "Stars in 8 kpc <= R_G <= 12 kpc)."]
 }

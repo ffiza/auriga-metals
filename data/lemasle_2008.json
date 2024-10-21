@@ -1,15 +1,11 @@
 {
     "DOI": "10.1051/0004-6361:200810192",
     "ADSURL": "https://ui.adsabs.harvard.edu/abs/2008A&A...490..613L",
-    "Data":
-    {
-        "Slope": -0.023,
-        "SlopeErr": 0.007
-    },
-    "Units":
-    {
-        "Slope": "dex/kpc",
-        "SlopeErr": "dex/kpc"
-    },
-    "Notes": "The 63 stars of this sample are located between 8 and 15 kpc from the Galactic center (see Fig. 3). We investigated at first the working hypothesis of a linear gradient and calculated the iron Galactic gradient using the entire Cepheid sample. We found a slope of –0.023 +/- 0.007 dex/kpc that is shallower than previous studies."
+    "Label": "Lemasle et al. (2008)",
+    "SlopeValue": -0.023,
+    "SlopeErrValue": 0.007,
+    "SlopeUnit": "dex/kpc",
+    "SlopeErrUnity": "dex/kpc",
+    "Notes": ["Observations of classical Cepheids.",
+              "Stars in 8 kpc <= RG <= 15 kpc)."]
 }
