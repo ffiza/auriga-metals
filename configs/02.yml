@@ -22,4 +22,6 @@ ABUNDANCE_PROFILES:
   N_BINS:                     100
   MIN_RADIUS_CKPC:            0.0
   MAX_RADIUS_CKPC:            50.0
-  
+ABUNDANCE_PROFILE_FIT:
+  MIN_RADIUS_CKPC:            4.0
+  MAX_RADIUS_CKPC:            15.0
