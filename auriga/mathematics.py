@@ -1,5 +1,6 @@
 import numpy as np
 from math import log10, floor
+from decimal import Decimal
 
 
 def linear(x: np.array, slope: float, intercept: float) -> np.array:
@@ -207,5 +208,5 @@ def get_decimal_places(x: float) -> int:
         The number of decimal places.
     """
     if isinstance(x, int): x = float(x)
-    return len(str(x).split(".")[1])
+    return len(str(Decimal(str(x))).split(".")[1])
 
