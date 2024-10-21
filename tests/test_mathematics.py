@@ -51,7 +51,10 @@ class MathTests(unittest.TestCase):
     def test_decimals_06(self):
         x = -0.0747830001
         self.assertEqual(10, get_decimal_places(x))
-
+    
+    def test_decimals_07(self):
+        x = 0.00009
+        self.assertEqual(5, get_decimal_places(x))
 
 if __name__ == '__main__':
     unittest.main()
