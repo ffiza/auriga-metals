@@ -224,6 +224,7 @@ def multi_color_line(x: np.ndarray, y: np.ndarray,
     else:
         return lc, norm, cmap
 
+
 def get_name_of_previous_snapshot(simulation: str) -> str:
     """
     This method takes a simulation using the format auW_XX_LY_SZZZ and returns
@@ -286,3 +287,22 @@ def get_present_day_disc_radius_of_galaxy(simulation: str) -> float:
     data = pd.read_csv("../data/iza_2022.csv")
     return data["DiscRadius_kpc"][data["Galaxy"] == galaxy].iloc[0]
 
+
+def float_to_latex(x: float) -> str:
+    """
+    Return a LaTeX string with the correctly formatted minus sign.
+
+    Paramters
+    ---------
+    x : float
+        A float to convert to string.
+    
+    Returns
+    -------
+    float
+        The LaTeX string.
+    """
+    if x < 0.0:
+        return "$-$" + str(np.abs(x))
+    else:
+        return str(x)
