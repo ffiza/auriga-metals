@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import json
 import argparse
 from decimal import Decimal
+from scipy.stats import pearsonr
 
 from auriga.settings import Settings
 from auriga.parser import parse
@@ -181,6 +182,52 @@ def plot_fit_stats(sample: list, config: dict):
     plt.close(fig)
 
 
+def plot_fit_vs_insideoutparam(sample: list, config: dict):
+    fig, ax = plt.subplots(figsize=(3, 3), ncols=1)
+
+    ax.grid(True, ls='-', lw=0.25, c='gainsboro')
+    ax.set_axisbelow(True)
+    ax.set_xlim(-0.04, 0.01)
+    ax.set_ylim(-1.5, 4.5)
+    ax.set_xlabel(r"$\nabla \mathrm{[Fe/H]}$ [dex/ckpc]")
+    ax.set_ylabel(r"$\eta_\mathrm{Net}$ [Gyr]")
+
+    data = np.nan * np.ones((len(sample), 4))
+
+    for i, simulation in enumerate(sample):
+        galaxy = parse(simulation)[0]
+        with open(f"results/{simulation}/"
+                  f"FeH_abundance_profile_stars_fit{config['FILE_SUFFIX']}"
+                  f".json",
+                  'r') as f:
+            d = json.load(f)
+            data[i, 0] = d["slope"]
+            data[i, 1] = d["stderr"]
+        with open("data/iza_2024.json", "r") as f:
+            d = json.load(f)
+            data[i, 2] = d["InsideOutParameter_Gyr"][f"Au{galaxy}"]
+            data[i, 3] = d["InsideOutParameterError_Gyr"][f"Au{galaxy}"]
+
+    ax.errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3],
+                markeredgecolor="white", capsize=2, capthick=1, color="black",
+                marker='o', markersize=4, linestyle='none', zorder=10)
+
+    corr = pearsonr(data[:, 0], data[:, 2])
+    ax.text(x=0.05, y=0.95, size=8.0, color="black",
+            ha="left", va="center", s=r"$r$: " \
+                + str(np.round(corr[0], 2)),
+            transform=ax.transAxes)
+    ax.text(x=0.05, y=0.9, size=8.0, color="black",
+            ha="left", va="center", s=r"$p$-value: " \
+                + str(np.round(corr[1], 3)),
+            transform=ax.transAxes)
+
+    fig.savefig(
+        f"images/abundance_profiles/"
+        f"gradients_vs_insideout{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
 def main():
     settings = Settings()
     sample = [f"au{i}_or_l4" for i in settings.groups["Included"]]
@@ -196,7 +243,8 @@ def main():
     # Create figures
     figure_setup()
     # plot_abundance_profile(sample, config)
-    plot_fit_stats(sample, config)
+    # plot_fit_stats(sample, config)
+    plot_fit_vs_insideoutparam(sample, config)
 
 
 if __name__ == "__main__":
