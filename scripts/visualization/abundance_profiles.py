@@ -20,7 +20,7 @@ REF_PATHS = ["data/lemasle_2007.json",
 REF_COLORS = ["orange", "green", "purple", "blue"]
 
 
-def plot_abundance_profile(sample: list, config: dict):
+def plot_iron_abundance_profile(sample: list, config: dict):
     settings = Settings()
 
     # region ReadDiscSize
@@ -104,6 +104,56 @@ def plot_abundance_profile(sample: list, config: dict):
 
     fig.savefig(
         f"images/abundance_profiles/FeH_included{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
+def plot_oxygen_abundance_profile(sample: list, config: dict):
+    settings = Settings()
+
+    fig = plt.figure(figsize=(7, 8))
+    gs = fig.add_gridspec(nrows=6, ncols=4, hspace=0.0, wspace=0.0)
+    axs = gs.subplots(sharex=True, sharey=True)
+
+    for ax in axs.flat:
+        ax.tick_params(which='both', direction="in")
+        if ax == axs[-1, -1]: ax.axis("off")
+        ax.set_xlim(0, 16)
+        ax.set_ylim(-0.6, 0.6)
+        ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
+        ax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
+        ax.grid(True, ls='-', lw=0.25, c="gainsboro")
+        ax.set_axisbelow(True)
+        if ax.get_subplotspec().is_last_row() or ax == axs[-2, -1]:
+            ax.set_xlabel(r"$r_{xy}$ [ckpc]")
+            ax.tick_params(labelbottom=True)
+        if ax.get_subplotspec().is_first_col():
+            ax.set_ylabel("Abundance")
+
+    for i, simulation in enumerate(sample):
+        galaxy = parse(simulation)[0]
+        df = pd.read_csv(
+            f"results/{simulation}/"
+            f"abundance_profile{config['FILE_SUFFIX']}.csv")
+        ax = axs.flatten()[i]
+
+        ax.plot(df["CylindricalRadius_ckpc"], df["[Fe/H]_CD_Stars"],
+                lw=1.0, color=settings.component_colors["CD"],
+                zorder=15, ls="-", label="[Fe/H]")        
+        ax.plot(df["CylindricalRadius_ckpc"], df["[O/H]_CD_Stars"],
+                lw=1.0, color=settings.component_colors["CD"],
+                zorder=15, ls="--", label="[O/H]")
+
+        ax.text(
+            x=0.95, y=0.95, size=7.0,
+            s=r"$\texttt{" + f"Au{galaxy}" + "}$",
+            ha="right", va="top", transform=ax.transAxes)
+
+    axs[1, 3].legend(loc="lower left", framealpha=0, fontsize=5.0,
+                     bbox_to_anchor=(0.05, 0.05), borderpad=0,
+                     borderaxespad=0)
+
+    fig.savefig(
+        f"images/abundance_profiles/OH_included{config['FILE_SUFFIX']}.pdf")
     plt.close(fig)
 
 
@@ -242,9 +292,10 @@ def main():
 
     # Create figures
     figure_setup()
-    # plot_abundance_profile(sample, config)
+    # plot_iron_abundance_profile(sample, config)
+    plot_oxygen_abundance_profile(sample, config)
     # plot_fit_stats(sample, config)
-    plot_fit_vs_insideoutparam(sample, config)
+    # plot_fit_vs_insideoutparam(sample, config)
 
 
 if __name__ == "__main__":
