@@ -38,9 +38,8 @@ def read_data(simulation: str, config: dict) -> pd.DataFrame:
         bulge_max_specific_energy=config["BULGE_MAX_SPECIFIC_ENERGY"])
 
     is_real_star = (s.type == 4) & (s.stellar_formation_time > 0)
-    is_gas = (s.type == 0)
     is_main_obj = (s.halo == s.halo_idx) & (s.subhalo == s.subhalo_idx)
-    mask = is_main_obj & (is_gas | is_real_star)
+    mask = is_main_obj & is_real_star
 
     props = {
         "ParticleType": s.type[mask],
@@ -48,7 +47,9 @@ def read_data(simulation: str, config: dict) -> pd.DataFrame:
         "[Fe/H]": s.metal_abundance["Fe/H"][mask],
         "[O/H]": s.metal_abundance["O/H"][mask],
         "[O/Fe]": s.metal_abundance["O/Fe"][mask],
-        "ComponentTag": s.region_tag[mask]}
+        "ComponentTag": s.region_tag[mask],
+        "Circularity": s.circularity[mask],
+        "NormalizedPotential": s.normalized_potential[mask]}
 
     df = pd.DataFrame(props)
     df[~np.isfinite(df)] = np.nan
@@ -82,40 +83,20 @@ def calculate_profile(simulation: str, config: dict):
         data[f"[{of}/{to}]_Stars"] = binned_stat
         for i, c in enumerate(settings.components):
             is_component = df["ComponentTag"] == i
+            is_finite = np.isfinite(df[f"[{of}/{to}]"])
             data[f"[{of}/{to}]_{c}_Stars"] = binned_statistic(
-                x=df["CylindricalRadius_ckpc"][is_star & is_component],
-                values=df[f"[{of}/{to}]"][is_star & is_component],
+                x=df["CylindricalRadius_ckpc"][
+                    is_star & is_component & is_finite],
+                values=df[f"[{of}/{to}]"][
+                    is_star & is_component & is_finite],
                 statistic=np.nanmean,
                 bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
                 range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
                     config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
     # endregion
 
-    # region Gas
-    is_gas = df["ParticleType"] == 0
-    for of, to in abundances:
-        binned_stat = binned_statistic(
-            x=df["CylindricalRadius_ckpc"][is_gas],
-            values=df[f"[{of}/{to}]"][is_gas],
-            statistic=np.nanmean,
-            bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
-            range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
-                config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
-        bin_centers = bin_edges[1:] - np.diff(bin_edges)[0] / 2
-        data["CylindricalRadius_ckpc"] = bin_centers
-        data[f"[{of}/{to}]_Gas"] = binned_stat
-        for i, c in enumerate(settings.components):
-            is_component = df["ComponentTag"] == i
-            data[f"[{of}/{to}]_{c}_Gas"] = binned_statistic(
-                x=df["CylindricalRadius_ckpc"][is_gas & is_component],
-                values=df[f"[{of}/{to}]"][is_gas & is_component],
-                statistic=np.nanmean,
-                bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
-                range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
-                       config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
-    # endregion
-
     data = pd.DataFrame(data)
+    data = data.round(6)
     data.to_csv(f"{paths.results}/"
                 f"abundance_profile{config['FILE_SUFFIX']}.csv",
                 index=False)
