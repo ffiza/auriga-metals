@@ -3,8 +3,7 @@ from scipy.stats import binned_statistic
 import pandas as pd
 import yaml
 import argparse
-from scipy.stats import linregress
-import json
+from multiprocessing import Pool
 
 from auriga.snapshot import Snapshot
 from auriga.settings import Settings
@@ -61,7 +60,6 @@ def calculate_profile(simulation: str, config: dict):
     settings = Settings()
     galaxy, rerun, resolution, _ = parse(simulation)
     label = f"Au{galaxy}"
-    print(f"{label.rjust(4)}... ", end="")
     paths = Paths(galaxy, rerun, resolution)
     abundances = [("Fe", "H"), ("O", "H"), ("O", "Fe")]
 
@@ -86,7 +84,7 @@ def calculate_profile(simulation: str, config: dict):
             is_component = df["ComponentTag"] == i
             data[f"[{of}/{to}]_{c}_Stars"] = binned_statistic(
                 x=df["CylindricalRadius_ckpc"][is_star & is_component],
-                values=df["[Fe/H]"][is_star & is_component],
+                values=df[f"[{of}/{to}]"][is_star & is_component],
                 statistic=np.nanmean,
                 bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
                 range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
@@ -110,7 +108,7 @@ def calculate_profile(simulation: str, config: dict):
             is_component = df["ComponentTag"] == i
             data[f"[{of}/{to}]_{c}_Gas"] = binned_statistic(
                 x=df["CylindricalRadius_ckpc"][is_gas & is_component],
-                values=df["[Fe/H]"][is_gas & is_component],
+                values=df[f"[{of}/{to}]"][is_gas & is_component],
                 statistic=np.nanmean,
                 bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
                 range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
@@ -122,7 +120,7 @@ def calculate_profile(simulation: str, config: dict):
                 f"abundance_profile{config['FILE_SUFFIX']}.csv",
                 index=False)
     
-    print("Ok.")
+    print(f"{label.rjust(4)}... Ok.")
     return data
 
 
@@ -138,9 +136,8 @@ def main():
     config = yaml.safe_load(open(f"configs/{args.config}.yml"))
 
     # Run the analysis
-    sample = [f"au{i}_or_l4_s127" for i in settings.groups["Included"]]
-    for simulation in sample:
-        calculate_profile(simulation, config)
+    args = [(f"au{i}_or_l4_s127", config) for i in settings.groups["Included"]]
+    Pool(8).starmap(calculate_profile, args)
 
 
 if __name__ == "__main__":
