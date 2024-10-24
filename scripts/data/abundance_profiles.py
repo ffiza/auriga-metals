@@ -68,7 +68,6 @@ def calculate_profile(simulation: str, config: dict):
 
     data = {}
 
-    # region Stars
     is_star = df["ParticleType"] == 4
     for of, to in abundances:
         binned_stat, bin_edges, _ = binned_statistic(
@@ -81,6 +80,13 @@ def calculate_profile(simulation: str, config: dict):
         bin_centers = bin_edges[1:] - np.diff(bin_edges)[0] / 2
         data["CylindricalRadius_ckpc"] = bin_centers
         data[f"[{of}/{to}]_Stars"] = binned_stat
+        data[f"[{of}/{to}]_Stars_Std"] = binned_statistic(
+            x=df["CylindricalRadius_ckpc"][is_star],
+            values=df[f"[{of}/{to}]"][is_star],
+            statistic=np.nanstd,
+            bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
+            range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
+                config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
         for i, c in enumerate(settings.components):
             is_component = df["ComponentTag"] == i
             is_finite = np.isfinite(df[f"[{of}/{to}]"])
@@ -93,7 +99,15 @@ def calculate_profile(simulation: str, config: dict):
                 bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
                 range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
                     config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
-    # endregion
+            data[f"[{of}/{to}]_{c}_Stars_Std"] = binned_statistic(
+                x=df["CylindricalRadius_ckpc"][
+                    is_star & is_component & is_finite],
+                values=df[f"[{of}/{to}]"][
+                    is_star & is_component & is_finite],
+                statistic=np.nanstd,
+                bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
+                range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
+                    config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
 
     data = pd.DataFrame(data)
     data = data.round(6)

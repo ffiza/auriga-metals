@@ -56,6 +56,11 @@ def plot_iron_abundance_profile(sample: list, config: dict):
         ax.plot(df["CylindricalRadius_ckpc"], df["[Fe/H]_CD_Stars"],
                 lw=1.0, color=settings.component_colors["CD"],
                 zorder=15)
+        ax.fill_between(
+            x=df["CylindricalRadius_ckpc"],
+            y1=df["[Fe/H]_CD_Stars"] - df["[Fe/H]_CD_Stars_Std"],
+            y2=df["[Fe/H]_CD_Stars"] + df["[Fe/H]_CD_Stars_Std"],
+            color=settings.component_colors["CD"], zorder=1, alpha=0.3, lw=0)
 
         ax.text(
             x=0.95, y=0.95, size=7.0,
@@ -76,7 +81,7 @@ def plot_iron_abundance_profile(sample: list, config: dict):
         ax.plot(
             df["CylindricalRadius_ckpc"],
             df["CylindricalRadius_ckpc"] * lreg["slope"] + lreg["intercept"],
-            color=settings.component_colors["CD"], ls="--", lw=1.0,
+            color=settings.component_colors["CD"], ls="--", lw=0.5,
             label="This Work")
         # endregion
 
@@ -98,8 +103,8 @@ def plot_iron_abundance_profile(sample: list, config: dict):
                     color=ref_color, ls="--", lw=0.5, label=reg["Label"])
         # endregion
 
-    axs[1, 3].legend(loc="lower left", framealpha=0, fontsize=3.5,
-                     bbox_to_anchor=(0.05, 0.05), borderpad=0,
+    axs[5, 2].legend(loc="lower left", framealpha=0, fontsize=5.0,
+                     bbox_to_anchor=(1.05, 0.05), borderpad=0,
                      borderaxespad=0)
 
     fig.savefig(
@@ -292,8 +297,8 @@ def main():
 
     # Create figures
     figure_setup()
-    # plot_iron_abundance_profile(sample, config)
-    plot_oxygen_abundance_profile(sample, config)
+    plot_iron_abundance_profile(sample, config)
+    # plot_oxygen_abundance_profile(sample, config)
     # plot_fit_stats(sample, config)
     # plot_fit_vs_insideoutparam(sample, config)
 
