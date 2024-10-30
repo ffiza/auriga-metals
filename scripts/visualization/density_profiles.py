@@ -87,9 +87,9 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
         # ax.grid(True, ls='-', lw=0.25, c="gainsboro")
         ax.tick_params(which='both', direction="in")
         if ax == axs[-1, -1]: ax.axis("off")
-        ax.set_xlim(0, 50)
+        ax.set_xlim(0, 1.0)
         ax.set_ylim(1, 2E4)
-        ax.set_xticks([10, 20, 30, 40])
+        ax.set_xticks([0.2, 0.4, 0.6, 0.8])
         ax.set_yscale("log")
         ax.set_yticks([1E1, 1E2, 1E3, 1E4])
         ax.set_axisbelow(True)
@@ -97,9 +97,11 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
     for i, simulation in enumerate(sample):
         galaxy = parse(simulation)[0]
         ax = axs.flatten()[i]
+        disc_radius = gal_data["DiscRadius_kpc"][gal_data["Galaxy"] == galaxy]
+        disc_radius = disc_radius.values[0]
 
         #region Grid
-        for x in [10, 20, 30, 40]:
+        for x in [0.2, 0.4, 0.6, 0.8]:
             ax.plot([x] * 2, ax.get_ylim(), lw=0.25, color="gainsboro",
                     ls="-", zorder=-20)
         #endregion
@@ -108,7 +110,7 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
         df = pd.read_csv(
             f"results/{simulation}/"
             f"density_profile{config['FILE_SUFFIX']}.csv")
-        ax.plot(df["CylindricalRadius_ckpc"],
+        ax.plot(df["CylindricalRadius_ckpc"] / disc_radius,
                 df["SurfaceDensity_Type4_CD_Msun/ckpc^2"],
                 lw=1.0, color=settings.component_colors["CD"], ls="-",
                 zorder=16, label=r"$\Sigma_\mathrm{CD}$")
@@ -125,7 +127,8 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
         df = pd.read_csv(
             f"results/{simulation}/"
             f"abundance_profile{config['FILE_SUFFIX']}.csv")
-        ax2.plot(df["CylindricalRadius_ckpc"], df["[Fe/H]_CD_Stars"],
+        ax2.plot(df["CylindricalRadius_ckpc"] / disc_radius,
+                 df["[Fe/H]_CD_Stars"],
                  lw=1.0, color=settings.component_colors["CD"], ls="--",
                  zorder=15, label="[Fe/H]$_\mathrm{CD}$")
         #endregion
@@ -135,16 +138,15 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
             s=r"$\texttt{" + f"Au{galaxy}" + "}$",
             ha="right", va="top", transform=ax.transAxes)
 
-        disc_radius = gal_data["DiscRadius_kpc"][gal_data["Galaxy"] == galaxy]
         ax2.text(
             x=0.05, y=0.95, size=6.0,
-            s=r"$R_\mathrm{d}$: " + f"{disc_radius.values[0]} kpc",
+            s=r"$R_\mathrm{d}$: " + f"{disc_radius} kpc",
             ha="left", va="top", transform=ax.transAxes, zorder=20)
-        ax2.plot([disc_radius] * 2, ax2.get_ylim(), ls=":", lw=1.0,
-                 color="black")
+        # ax2.plot([disc_radius] * 2, ax2.get_ylim(), ls=":", lw=1.0,
+        #          color="black")
 
         if ax.get_subplotspec().is_last_row() or ax == axs[-2, -1]:
-            ax.set_xlabel(r"$r_{xy}$ [ckpc]")
+            ax.set_xlabel(r"$r_{xy} / R_\mathrm{d}$")
             ax.tick_params(labelbottom=True)
         if ax.get_subplotspec().is_first_col():
             ax.set_ylabel(r"$\Sigma$ [$\mathrm{M}_\odot \, \mathrm{pc}^{-2}$]")
@@ -164,7 +166,7 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
 
     fig.savefig(
         "images/density_profiles/"
-        f"density_profiles_with_abundance{config['FILE_SUFFIX']}.pdf")
+        f"density_profiles_with_abundance_norm{config['FILE_SUFFIX']}.pdf")
     plt.close(fig)
 
 
