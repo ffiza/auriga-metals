@@ -84,7 +84,7 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
     axs = gs.subplots(sharex=True, sharey=True)
 
     for ax in axs.flat:
-        ax.grid(True, ls='-', lw=0.25, c="gainsboro")
+        # ax.grid(True, ls='-', lw=0.25, c="gainsboro")
         ax.tick_params(which='both', direction="in")
         if ax == axs[-1, -1]: ax.axis("off")
         ax.set_xlim(0, 50)
@@ -98,6 +98,12 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
         galaxy = parse(simulation)[0]
         ax = axs.flatten()[i]
 
+        #region Grid
+        for x in [10, 20, 30, 40]:
+            ax.plot([x] * 2, ax.get_ylim(), lw=0.25, color="gainsboro",
+                    ls="-", zorder=-20)
+        #endregion
+
         #region Surfance Density
         df = pd.read_csv(
             f"results/{simulation}/"
@@ -110,11 +116,11 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
 
         #region Abundance Profile
         ax2 = ax.twinx()
-        ax2.set_ylim(-0.5, 0.5)
+        ax2.set_ylim(-0.6, 0.6)
         ax2.set_yscale("linear")
         ax2.tick_params(axis="y", direction="in")
         ax2.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
-        ax2.grid(True, ls='--', lw=0.25, c="gainsboro")
+        # ax2.grid(True, ls='--', lw=0.25, c="gainsboro")
         ax2.set_zorder(1.0)
         df = pd.read_csv(
             f"results/{simulation}/"
