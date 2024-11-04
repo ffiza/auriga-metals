@@ -1,11 +1,14 @@
+import numpy as np
 import pandas as pd
 import yaml
 import matplotlib.pyplot as plt
 import argparse
+import json
 
 from auriga.settings import Settings
 from auriga.parser import parse
 from auriga.images import figure_setup
+from auriga.support import float_to_latex
 
 
 def plot_density_profile(sample: list, config: dict):
@@ -133,6 +136,22 @@ def plot_density_profile_with_abundance(sample: list, config: dict):
                  zorder=15, label="[Fe/H]$_\mathrm{CD}$")
         #endregion
     
+        # region LinearRegression
+        with open(f"results/{simulation}/FeH_abundance_profile_stars_"
+                  f"fit{config['FILE_SUFFIX']}.json",
+                  'r') as f:
+            lreg = json.load(f)
+        ax2.plot(
+            df["CylindricalRadius_ckpc"] / disc_radius,
+            df["CylindricalRadius_ckpc"] * lreg["slope"] + lreg["intercept"],
+            color="black", ls="--", lw=0.5)
+        ax2.text(x=0.05, y=0.05, size=6.0, ha="left", va="bottom",
+                 s=r"$\nabla \mathrm{[Fe/H]} = $ " \
+                    + float_to_latex(np.round(lreg['slope'], 3)) \
+                        + " $\mathrm{kpc}^{-1}$",
+                 transform=ax2.transAxes)
+        # endregion
+
         ax2.text(
             x=0.95, y=0.95, size=7.0,
             s=r"$\texttt{" + f"Au{galaxy}" + "}$",
@@ -184,7 +203,7 @@ def main():
 
     # Create figures
     figure_setup()
-    # plot_density_profile(sample, config)
+    plot_density_profile(sample, config)
     plot_density_profile_with_abundance(sample, config)
 
 

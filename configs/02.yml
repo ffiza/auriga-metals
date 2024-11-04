@@ -23,8 +23,8 @@ ABUNDANCE_PROFILES:
   MIN_RADIUS_CKPC:            0.0
   MAX_RADIUS_CKPC:            50.0
 ABUNDANCE_PROFILE_FIT:
-  MIN_RADIUS_CKPC:            4.0
-  MAX_RADIUS_CKPC:            15.0
+  MIN_DISC_RADIUS_FRAC:       0.2
+  MAX_DISC_RADIUS_FRAC:       1.0
 DENSITY_PROFILES:
   N_BINS:                     100
   MIN_RADIUS_CKPC:            0.0

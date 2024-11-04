@@ -34,14 +34,14 @@ def plot_iron_abundance_profile(sample: list, config: dict):
     for ax in axs.flat:
         ax.tick_params(which='both', direction="in")
         if ax == axs[-1, -1]: ax.axis("off")
-        ax.set_xlim(0, 16)
+        ax.set_xlim(0, 1)
         ax.set_ylim(-0.6, 0.6)
-        ax.set_xticks([2, 4, 6, 8, 10, 12, 14])
+        ax.set_xticks([.2, .4, .6, .8])
         ax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
         ax.grid(True, ls='-', lw=0.25, c="gainsboro")
         ax.set_axisbelow(True)
         if ax.get_subplotspec().is_last_row() or ax == axs[-2, -1]:
-            ax.set_xlabel(r"$r_{xy}$ [ckpc]")
+            ax.set_xlabel(r"$r_{xy} / R_\mathrm{d}$")
             ax.tick_params(labelbottom=True)
         if ax.get_subplotspec().is_first_col():
             ax.set_ylabel("[Fe/H]")
@@ -52,60 +52,69 @@ def plot_iron_abundance_profile(sample: list, config: dict):
             f"results/{simulation}/"
             f"abundance_profile{config['FILE_SUFFIX']}.csv")
         ax = axs.flatten()[i]
+        disc_radius = gal_data[
+            "DiscRadius_kpc"][gal_data["Galaxy"] == galaxy].values[0]
+        min_radius_frac = config[
+            "ABUNDANCE_PROFILE_FIT"]["MIN_DISC_RADIUS_FRAC"]
+        max_radius_frac = config[
+            "ABUNDANCE_PROFILE_FIT"]["MAX_DISC_RADIUS_FRAC"]
 
-        ax.plot(df["CylindricalRadius_ckpc"], df["[Fe/H]_CD_Stars"],
+        ax.plot(df["CylindricalRadius_ckpc"] / disc_radius,
+                df["[Fe/H]_CD_Stars"],
                 lw=1.0, color=settings.component_colors["CD"],
-                zorder=15)
-        ax.fill_between(
-            x=df["CylindricalRadius_ckpc"],
-            y1=df["[Fe/H]_CD_Stars"] - df["[Fe/H]_CD_Stars_Std"],
-            y2=df["[Fe/H]_CD_Stars"] + df["[Fe/H]_CD_Stars_Std"],
-            color=settings.component_colors["CD"], zorder=1, alpha=0.3, lw=0)
+                zorder=15, label="Data")
+        # ax.fill_between(
+        #     x=df["CylindricalRadius_ckpc"],
+        #     y1=df["[Fe/H]_CD_Stars"] - df["[Fe/H]_CD_Stars_Std"],
+        #     y2=df["[Fe/H]_CD_Stars"] + df["[Fe/H]_CD_Stars_Std"],
+        #     color=settings.component_colors["CD"], zorder=1, alpha=0.3, lw=0)
 
         ax.text(
             x=0.95, y=0.95, size=7.0,
             s=r"$\texttt{" + f"Au{galaxy}" + "}$",
             ha="right", va="top", transform=ax.transAxes)
 
-        disc_radius = gal_data["DiscRadius_kpc"][gal_data["Galaxy"] == galaxy]
         ax.text(
-            x=0.05, y=0.95, size=6.0,
-            s=r"$R_\mathrm{d}$: " + f"{disc_radius.values[0]} kpc",
-            ha="left", va="top", transform=ax.transAxes)
-        
+            x=0.05, y=0.05, size=6.0,
+            s=r"$R_\mathrm{d}$: " + f"{disc_radius} kpc",
+            ha="left", va="bottom", transform=ax.transAxes)
+        ax.fill_between(
+            x=[min_radius_frac, max_radius_frac],
+            y1=[ax.get_ylim()[0]] * 2,
+            y2=[ax.get_ylim()[1]] * 2,
+            color="black", zorder=1, alpha=0.05, lw=0)
+
         # region LinearRegression
         with open(f"results/{simulation}/FeH_abundance_profile_stars_"
                   f"fit{config['FILE_SUFFIX']}.json",
                   'r') as f:
             lreg = json.load(f)
         ax.plot(
-            df["CylindricalRadius_ckpc"],
+            df["CylindricalRadius_ckpc"] / disc_radius,
             df["CylindricalRadius_ckpc"] * lreg["slope"] + lreg["intercept"],
             color=settings.component_colors["CD"], ls="--", lw=0.5,
-            label="This Work")
+            label="Regression")
         # endregion
 
-        # region LiteratureFits
-        for i in range(len(REF_PATHS)):
-            ref_path = REF_PATHS[i]
-            ref_color = REF_COLORS[i]
-            with open(ref_path, 'r') as f:
-                reg = json.load(f)
-                # Define intercept
-                min_radius = config["ABUNDANCE_PROFILE_FIT"]["MIN_RADIUS_CKPC"]
-                max_radius = config["ABUNDANCE_PROFILE_FIT"]["MAX_RADIUS_CKPC"]
-                xm = np.mean([min_radius, max_radius])
-                ym = lreg["intercept"] + lreg["slope"] * xm
-                intercept = ym - reg["SlopeValue"] * xm
-                ax.plot(
-                    ax.get_xlim(),
-                    np.array(ax.get_xlim()) * reg["SlopeValue"] + intercept,
-                    color=ref_color, ls="--", lw=0.5, label=reg["Label"])
-        # endregion
+        # # region LiteratureFits
+        # for i in range(len(REF_PATHS)):
+        #     ref_path = REF_PATHS[i]
+        #     ref_color = REF_COLORS[i]
+        #     with open(ref_path, 'r') as f:
+        #         reg = json.load(f)
+        #         # Define intercept
+        #         xm = np.mean([min_radius_frac * disc_radius,
+        #                       max_radius_frac * disc_radius])
+        #         ym = lreg["intercept"] + lreg["slope"] * xm
+        #         intercept = ym - reg["SlopeValue"] * xm
+        #         ax.plot(
+        #             ax.get_xlim(),
+        #             np.array(np.array(ax.get_xlim()) * disc_radius) \
+        #                 * reg["SlopeValue"] + intercept,
+        #             color=ref_color, ls="--", lw=0.5, label=reg["Label"])
+        # # endregion
 
-    axs[5, 2].legend(loc="lower left", framealpha=0, fontsize=5.0,
-                     bbox_to_anchor=(1.05, 0.05), borderpad=0,
-                     borderaxespad=0)
+    axs[0, 0].legend(loc="upper left", framealpha=0, fontsize=6.0)
 
     fig.savefig(
         f"images/abundance_profiles/FeH_included{config['FILE_SUFFIX']}.pdf")
@@ -283,6 +292,52 @@ def plot_fit_vs_insideoutparam(sample: list, config: dict):
     plt.close(fig)
 
 
+def plot_fit_vs_barfraction(sample: list, config: dict):
+    fig, ax = plt.subplots(figsize=(3, 3), ncols=1)
+
+    ax.grid(True, ls='-', lw=0.25, c='gainsboro')
+    ax.set_axisbelow(True)
+    ax.set_xlim(-0.04, 0.01)
+    ax.set_ylim(-1.5, 4.5)
+    ax.set_xlabel(r"$\nabla \mathrm{[Fe/H]}$ [dex/ckpc]")
+    ax.set_ylabel(r"$\eta_\mathrm{Net}$ [Gyr]")
+
+    data = np.nan * np.ones((len(sample), 4))
+
+    for i, simulation in enumerate(sample):
+        galaxy = parse(simulation)[0]
+        with open(f"results/{simulation}/"
+                  f"FeH_abundance_profile_stars_fit{config['FILE_SUFFIX']}"
+                  f".json",
+                  'r') as f:
+            d = json.load(f)
+            data[i, 0] = d["slope"]
+            data[i, 1] = d["stderr"]
+        with open("data/iza_2024.json", "r") as f:
+            d = json.load(f)
+            data[i, 2] = d["InsideOutParameter_Gyr"][f"Au{galaxy}"]
+            data[i, 3] = d["InsideOutParameterError_Gyr"][f"Au{galaxy}"]
+
+    ax.errorbar(data[:, 0], data[:, 2], xerr=data[:, 1], yerr=data[:, 3],
+                markeredgecolor="white", capsize=2, capthick=1, color="black",
+                marker='o', markersize=4, linestyle='none', zorder=10)
+
+    corr = pearsonr(data[:, 0], data[:, 2])
+    ax.text(x=0.05, y=0.95, size=8.0, color="black",
+            ha="left", va="center", s=r"$r$: " \
+                + str(np.round(corr[0], 2)),
+            transform=ax.transAxes)
+    ax.text(x=0.05, y=0.9, size=8.0, color="black",
+            ha="left", va="center", s=r"$p$-value: " \
+                + str(np.round(corr[1], 3)),
+            transform=ax.transAxes)
+
+    fig.savefig(
+        f"images/abundance_profiles/"
+        f"gradients_vs_insideout{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
 def main():
     settings = Settings()
     sample = [f"au{i}_or_l4" for i in settings.groups["Included"]]
@@ -298,9 +353,9 @@ def main():
     # Create figures
     figure_setup()
     plot_iron_abundance_profile(sample, config)
-    # plot_oxygen_abundance_profile(sample, config)
-    # plot_fit_stats(sample, config)
-    # plot_fit_vs_insideoutparam(sample, config)
+    plot_oxygen_abundance_profile(sample, config)
+    plot_fit_stats(sample, config)
+    plot_fit_vs_insideoutparam(sample, config)
 
 
 if __name__ == "__main__":

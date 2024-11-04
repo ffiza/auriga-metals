@@ -8,6 +8,7 @@ import json
 
 from auriga.snapshot import Snapshot
 from auriga.settings import Settings
+from auriga.parser import parse
 
 
 def read_data(simulation: str, config: dict) -> pd.DataFrame:
@@ -54,13 +55,19 @@ def read_data(simulation: str, config: dict) -> pd.DataFrame:
 
 
 def fit_profiles(simulation: str, config: dict):
+    galaxy = parse(simulation)[0]
     settings = Settings()
     short_sim = "_".join(simulation.split("_")[:-1])
 
     df = read_data(simulation, config)
+    gal_data = pd.read_csv("data/iza_2022.csv")
+    disc_radius = gal_data["DiscRadius_kpc"][gal_data["Galaxy"] == galaxy]
+    disc_radius = disc_radius.values[0]
 
-    min_radius = config["ABUNDANCE_PROFILE_FIT"]["MIN_RADIUS_CKPC"]
-    max_radius = config["ABUNDANCE_PROFILE_FIT"]["MAX_RADIUS_CKPC"]
+    min_radius = config[
+        "ABUNDANCE_PROFILE_FIT"]["MIN_DISC_RADIUS_FRAC"] * disc_radius
+    max_radius = config[
+        "ABUNDANCE_PROFILE_FIT"]["MAX_DISC_RADIUS_FRAC"] * disc_radius
     mask = (df["CylindricalRadius_ckpc"] <= max_radius) & \
         (df["CylindricalRadius_ckpc"] >= min_radius) & \
             (df["ComponentTag"] == settings.component_tags["CD"])
