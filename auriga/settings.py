@@ -65,7 +65,10 @@ class Settings:
         self.component_labels: dict = {
             "H": "Halo", "B": "Bulge", "CD": "Cold Disc", "WD": "Warm Disc"}
         self.component_colors: dict = {
-            "H": "#1f77b4", "B": "#2ca02c", "CD": "#d62728", "WD": "#ff7f0e"}
+            "H": "tab:blue",
+            "B": "tab:green",
+            "CD": "tab:red",
+            "WD": "tab:orange"}
         self.component_colormaps: dict = {
             "H": "Blues", "B": "Greens", "CD": "Reds", "WD": "Oranges"}
         self.component_markers: dict = {
