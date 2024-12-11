@@ -434,6 +434,235 @@ def plot_abundance_distribution_for_sample_median(
     plt.close(fig)
 
 
+def plot_present_day_distribution_for_sample_median(sample: list,
+                                                    config: dict):
+    settings = Settings()
+
+    # Stellar ages
+    dfs = []
+    for simulation in sample:
+        df = pd.read_csv(
+            f"results/{simulation}/"
+            f"stellar_migration_age_distribution{config['FILE_SUFFIX']}.csv")
+        dfs.append(df)
+    df_concat = pd.concat(dfs)
+    stellar_age = df_concat.groupby(df_concat.index).median()
+
+    # Iron abundance
+    dfs = []
+    for simulation in sample:
+        df = pd.read_csv(
+            f"results/{simulation}/"
+            f"stellar_migration_abundance_FeH_"
+            f"dist{config['FILE_SUFFIX']}.csv")
+        dfs.append(df)
+    df_concat = pd.concat(dfs)
+    fe_abundance = df_concat.groupby(df_concat.index).median()
+
+    # Oxygen abundance
+    dfs = []
+    for simulation in sample:
+        df = pd.read_csv(
+            f"results/{simulation}/"
+            f"stellar_migration_abundance_OFe_"
+            f"dist{config['FILE_SUFFIX']}.csv")
+        dfs.append(df)
+    df_concat = pd.concat(dfs)
+    o_abundance = df_concat.groupby(df_concat.index).median()
+
+    fig = plt.figure(figsize=(8.0, 6.0))
+    gs = fig.add_gridspec(nrows=3, ncols=4, hspace=0.3, wspace=0.0)
+    axs = gs.subplots(sharex=False, sharey=False)
+
+    for ax in axs.flatten():
+        ax.grid(True, ls=(0, (5, 1)), lw=0.1, c='silver')
+        if ax.get_subplotspec().is_first_col():
+            ax.set_ylabel(f"$f_\star$")
+        else:
+            ax.set_yticklabels([])
+        ax.set_axisbelow(True)
+
+    for ax in axs.flatten():
+        if ax.get_subplotspec().is_first_row():
+            ax.set_xlabel("Stellar Age [Gyr]")
+            ax.set_ylim(0, 0.06)
+            ax.set_xlim(0, 14)
+            ax.set_xticks([2, 4, 6, 8, 10, 12])
+        elif ax.get_subplotspec().is_last_row():
+            ax.set_xlabel("[O/Fe]")
+            ax.set_ylim(0, 0.08)
+            ax.set_xlim(0.1, 0.4)
+            ax.set_xticks([0.1, 0.2, 0.3])
+        else:
+            ax.set_xlabel("[Fe/H]")
+            ax.set_ylim(0, 0.1)
+            ax.set_xlim(-2.5, 1)
+            ax.set_xticks([-2, -1, 0])
+
+    for i, c0 in enumerate(settings.components):
+        s = r"$\textbf{" + settings.component_labels[c0] + r"}$"
+        for _ in range(3):
+            axs[_, i].text(x=0.05, y=0.95, s=s, transform=axs[_, i].transAxes,
+                        ha="left", va="top", size=8.0,
+                        color=settings.component_colors[c0])
+        l1, = axs[0, i].plot(
+            stellar_age["StellarAge_Gyr"],
+            stellar_age[f"StellarMassFraction_{i}"],
+            c='k', ls="-", label="All")
+        l2, = axs[0, i].plot(
+            stellar_age["StellarAge_Gyr"],
+            stellar_age[f"StellarMassFraction_{i}_InSitu"],
+            c='k', ls=(0, (5, 1)), label="In Situ")
+        l3, = axs[0, i].plot(
+            stellar_age["StellarAge_Gyr"],
+            stellar_age[f"StellarMassFraction_{i}_ExSitu"],
+            c='k', ls=(0, (1, 1)), label="Ex Situ")
+        axs[1, i].plot(
+            fe_abundance["Abundance_[Fe/H]"],
+            fe_abundance[f"StellarMassFraction_{i}"],
+            c='k', ls="-")
+        axs[1, i].plot(
+            fe_abundance["Abundance_[Fe/H]"],
+            fe_abundance[f"StellarMassFraction_{i}_InSitu"],
+            c='k', ls=(0, (5, 1)))
+        axs[1, i].plot(
+            fe_abundance["Abundance_[Fe/H]"],
+            fe_abundance[f"StellarMassFraction_{i}_ExSitu"],
+            c='k', ls=(0, (1, 1)))
+        axs[2, i].plot(
+            o_abundance["Abundance_[O/Fe]"],
+            o_abundance[f"StellarMassFraction_{i}"],
+            c='k', ls="-")
+        axs[2, i].plot(
+            o_abundance["Abundance_[O/Fe]"],
+            o_abundance[f"StellarMassFraction_{i}_InSitu"],
+            c='k', ls=(0, (5, 1)))
+        axs[2, i].plot(
+            o_abundance["Abundance_[O/Fe]"],
+            o_abundance[f"StellarMassFraction_{i}_ExSitu"],
+            c='k', ls=(0, (1, 1)))
+
+        if i == 0:
+            axs[0, 0].legend(
+                handles=[l1, l2, l3], loc="center left",
+                fontsize=6.5, framealpha=0)
+
+    fig.savefig(f"images/stellar_migration/statistics/"
+                f"present_day_distribution_median{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
+def plot_origin_distribution_for_sample_median(sample: list, config: dict):
+    settings = Settings()
+
+    # Stellar ages
+    dfs = []
+    for simulation in sample:
+        df = pd.read_csv(
+            f"results/{simulation}/"
+            f"stellar_migration_age_distribution{config['FILE_SUFFIX']}.csv")
+        dfs.append(df)
+    df_concat = pd.concat(dfs)
+    stellar_age = df_concat.groupby(df_concat.index).median()
+
+    # Iron abundance
+    dfs = []
+    for simulation in sample:
+        df = pd.read_csv(
+            f"results/{simulation}/"
+            f"stellar_migration_abundance_FeH_"
+            f"dist{config['FILE_SUFFIX']}.csv")
+        dfs.append(df)
+    df_concat = pd.concat(dfs)
+    fe_abundance = df_concat.groupby(df_concat.index).median()
+
+    # Oxygen abundance
+    dfs = []
+    for simulation in sample:
+        df = pd.read_csv(
+            f"results/{simulation}/"
+            f"stellar_migration_abundance_OFe_"
+            f"dist{config['FILE_SUFFIX']}.csv")
+        dfs.append(df)
+    df_concat = pd.concat(dfs)
+    o_abundance = df_concat.groupby(df_concat.index).median()
+
+    fig = plt.figure(figsize=(8.0, 6.0))
+    gs = fig.add_gridspec(nrows=3, ncols=4, hspace=0.3, wspace=0.0)
+    axs = gs.subplots(sharex=False, sharey=False)
+
+    for ax in axs.flatten():
+        ax.grid(True, ls=(0, (5, 1)), lw=0.1, c='silver')
+        if ax.get_subplotspec().is_first_col():
+            ax.set_ylabel(f"$f_\star$")
+        else:
+            ax.set_yticklabels([])
+        ax.set_axisbelow(True)
+
+    for ax in axs.flatten():
+        if ax.get_subplotspec().is_first_row():
+            ax.set_xlabel("Stellar Age [Gyr]")
+            ax.set_ylim(0, 0.04)
+            ax.set_xlim(0, 14)
+            ax.set_xticks([2, 4, 6, 8, 10, 12])
+        elif ax.get_subplotspec().is_last_row():
+            ax.set_xlabel("[O/Fe]")
+            ax.set_ylim(0, 0.08)
+            ax.set_xlim(0.1, 0.4)
+            ax.set_xticks([0.1, 0.2, 0.3])
+        else:
+            ax.set_xlabel("[Fe/H]")
+            ax.set_ylim(0, 0.1)
+            ax.set_xlim(-2.5, 1)
+            ax.set_xticks([-2, -1, 0])
+
+    for i, c0 in enumerate(settings.components):
+        s = r"$\textbf{" + settings.component_labels[c0] + r"}$"
+        for _ in range(3):
+            axs[_, i].text(x=0.05, y=0.95, s=s, transform=axs[_, i].transAxes,
+                        ha="left", va="top", size=8.0,
+                        color=settings.component_colors[c0])
+        axs[0, i].plot(
+            stellar_age["StellarAge_Gyr"],
+            stellar_age[f"StellarMassFraction_{i}_InSitu"],
+            c='k', ls=(0, (5, 1)))
+        axs[1, i].plot(
+            fe_abundance["Abundance_[Fe/H]"],
+            fe_abundance[f"StellarMassFraction_{i}_InSitu"],
+            c='k', ls=(0, (5, 1)))
+        axs[2, i].plot(
+            o_abundance["Abundance_[O/Fe]"],
+            o_abundance[f"StellarMassFraction_{i}_InSitu"],
+            c='k', ls=(0, (5, 1)))
+        lines = []
+        for j, c1 in enumerate(settings.components):
+            l, = axs[0, i].plot(stellar_age["StellarAge_Gyr"],
+                                stellar_age[f"StellarMassFraction_{j}to{i}"],
+                                ls=(0, (5, 1)),
+                                c=settings.component_colors[c1],
+                                label=settings.component_labels[c1])
+            lines.append(l)
+            axs[1, i].plot(fe_abundance[f"Abundance_[Fe/H]"],
+                           fe_abundance[f"StellarMassFraction_{j}to{i}"],
+                           ls=(0, (5, 1)),
+                           c=settings.component_colors[c1],
+                           label=settings.component_labels[c1])
+            axs[2, i].plot(o_abundance[f"Abundance_[O/Fe]"],
+                           o_abundance[f"StellarMassFraction_{j}to{i}"],
+                           ls=(0, (5, 1)),
+                           c=settings.component_colors[c1],
+                           label=settings.component_labels[c1])
+
+        if i == 0:
+            axs[1, 0].legend(
+                handles=lines, loc="upper right", fontsize=6.5, framealpha=0,
+                title="Origin", title_fontsize=7.0)
+
+    fig.savefig(f"images/stellar_migration/statistics/"
+                f"origin_distribution_median{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
 def main():
     settings = Settings()
     sample=[f"au{i}_or_l4" for i in settings.groups["Included"]]
@@ -458,10 +687,10 @@ def main():
     #     simulation="au6_or_l4", abundance=("Fe", "H"), config=config,
     #     xlim=(-2.5, 1), ylim=(0, 0.12),
     #     xticks=[-2, -1, 0], yticks=[0.02 * i for i in range(6)])
-    plot_abundance_distribution(
-        simulation="au6_or_l4", abundance=("O", "H"), config=config,
-        xlim=(-2, 1.5), ylim=(0, 0.12),
-        xticks=[-2, -1, 0, 1], yticks=[0.02 * i for i in range(6)])
+    # plot_abundance_distribution(
+    #     simulation="au6_or_l4", abundance=("O", "H"), config=config,
+    #     xlim=(-2, 1.5), ylim=(0, 0.12),
+    #     xticks=[-2, -1, 0, 1], yticks=[0.02 * i for i in range(6)])
     # plot_abundance_distribution(
     #     simulation="au6_or_l4", abundance=("O", "Fe"), config=config,
     #     xlim=(0.1, 0.4), ylim=(0, 0.12),
@@ -470,14 +699,19 @@ def main():
     #     sample=sample, abundance=("Fe", "H"), config=config,
     #     xlim=(-2.5, 1), ylim=(0, 0.12),
     #     xticks=[-2, -1, 0], yticks=[0.02 * i for i in range(6)])
-    plot_abundance_distribution_for_sample_median(
-        sample=sample, abundance=("O", "H"), config=config,
-        xlim=(-2, 1.5), ylim=(0, 0.12),
-        xticks=[-2, -1, 0, 1], yticks=[0.02 * i for i in range(6)])
+    # plot_abundance_distribution_for_sample_median(
+    #     sample=sample, abundance=("O", "H"), config=config,
+    #     xlim=(-2, 1.5), ylim=(0, 0.12),
+    #     xticks=[-2, -1, 0, 1], yticks=[0.02 * i for i in range(6)])
     # plot_abundance_distribution_for_sample_median(
     #     sample=sample, abundance=("O", "Fe"), config=config,
     #     xlim=(0.1, 0.4), ylim=(0, 0.12),
         # xticks=[0.1, 0.2, 0.3], yticks=[0.02 * i for i in range(6)])
+    
+    # plot_present_day_distribution_for_sample_median(
+    #     sample=sample, config=config)
+    plot_origin_distribution_for_sample_median(
+        sample=sample, config=config)
 
 
 if __name__ == "__main__":
