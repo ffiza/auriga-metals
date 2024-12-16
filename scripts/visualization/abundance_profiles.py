@@ -121,6 +121,85 @@ def plot_iron_abundance_profile(sample: list, config: dict):
     plt.close(fig)
 
 
+def plot_iron_abundance_profile_one_panel(sample: list, config: dict):
+    settings = Settings()
+
+    # region ReadDiscSize
+    gal_data = pd.read_csv("data/iza_2022.csv")
+    # endregion
+
+    fig = plt.figure(figsize=(3.5, 3.5))
+    gs = fig.add_gridspec(nrows=1, ncols=1, hspace=0.0, wspace=0.0)
+    ax = gs.subplots(sharex=True, sharey=True)
+
+    ax.tick_params(which='both', direction="in")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(-0.45, 0.45)
+    ax.set_xticks([.2, .4, .6, .8])
+    ax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
+    ax.grid(True, ls='-', lw=0.25, c="gainsboro")
+    ax.set_axisbelow(True)
+    ax.set_xlabel(r"$r_{xy} / R_\mathrm{d}$")
+    ax.tick_params(labelbottom=True)
+    ax.set_ylabel("[Fe/H]")
+
+    ax.fill_between(
+        x=[0.2, 1],
+        y1=[ax.get_ylim()[0]] * 2,
+        y2=[ax.get_ylim()[1]] * 2,
+        color="black", zorder=1, alpha=0.05, lw=0)
+
+    for i, simulation in enumerate(sample):
+        galaxy = parse(simulation)[0]
+        df = pd.read_csv(
+            f"results/{simulation}/"
+            f"abundance_profile{config['FILE_SUFFIX']}.csv")
+        disc_radius = gal_data[
+            "DiscRadius_kpc"][gal_data["Galaxy"] == galaxy].values[0]
+
+        if simulation == "au6_or_l4":
+            zorder = 10
+            color = settings.component_colors["CD"]
+            label = "Au6"
+        else:
+            zorder = 5
+            color = "gainsboro"
+            label = None
+
+        ax.plot(df["CylindricalRadius_ckpc"] / disc_radius,
+                df["[Fe/H]_CD_Stars"],
+                lw=1.0, color=color, zorder=zorder, label=label)
+
+        # if simulation == "au6_or_l4":
+        #     ax.plot(df["CylindricalRadius_ckpc"] / disc_radius,
+        #             df["[Fe/H]_CD_Stars"] + df["[Fe/H]_CD_Stars_Std"],
+        #             lw=1.0, color=color, zorder=zorder, ls="--")
+        #     ax.plot(df["CylindricalRadius_ckpc"] / disc_radius,
+        #             df["[Fe/H]_CD_Stars"] - df["[Fe/H]_CD_Stars_Std"],
+        #             lw=1.0, color=color, zorder=zorder, ls="--")
+
+        # region LinearRegression
+        if simulation == "au6_or_l4":
+            with open(f"results/{simulation}/FeH_abundance_profile_stars_"
+                    f"fit{config['FILE_SUFFIX']}.json",
+                    'r') as f:
+                lreg = json.load(f)
+            ax.plot(
+                df["CylindricalRadius_ckpc"] / disc_radius,
+                df["CylindricalRadius_ckpc"] * lreg["slope"] \
+                    + lreg["intercept"],
+                color=settings.component_colors["CD"], ls="--", lw=0.5,
+                label="Regression", zorder=15)
+        # endregion
+
+    ax.legend(loc="upper right", framealpha=0, fontsize=7)
+
+    fig.savefig(
+        f"images/abundance_profiles/"
+        f"FeH_included_onepanel{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
 def plot_oxygen_abundance_profile(sample: list, config: dict):
     settings = Settings()
 
@@ -352,10 +431,11 @@ def main():
 
     # Create figures
     figure_setup()
-    plot_iron_abundance_profile(sample, config)
-    plot_oxygen_abundance_profile(sample, config)
-    plot_fit_stats(sample, config)
-    plot_fit_vs_insideoutparam(sample, config)
+    # plot_iron_abundance_profile(sample, config)
+    plot_iron_abundance_profile_one_panel(sample, config)
+    # plot_oxygen_abundance_profile(sample, config)
+    # plot_fit_stats(sample, config)
+    # plot_fit_vs_insideoutparam(sample, config)
 
 
 if __name__ == "__main__":
