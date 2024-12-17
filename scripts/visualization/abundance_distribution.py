@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import yaml
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import json
 import argparse
 from decimal import Decimal
@@ -54,6 +55,18 @@ def plot_sample_stats(sample: list, config: dict):
             s=r"$\textbf{" + settings.component_labels[c] + "}$",
             c=settings.component_colors[c],
             transform=ax.transAxes)
+        ax.plot([df[f"MedianAbundance_Fe/H_{c}"].mean()] * 2,
+                ax.get_ylim(), ls="--", lw=0.75,
+                color=settings.component_colors[c],
+                zorder=5)
+        r = Rectangle(
+            (df[f"MedianAbundance_Fe/H_{c}"].mean() \
+                - df[f"MedianAbundance_Fe/H_{c}"].std(), ax.get_ylim()[0]),
+            2 * df[f"MedianAbundance_Fe/H_{c}"].std(),
+            np.diff(ax.get_ylim()),
+            fill=True, alpha=0.15, zorder=5, lw=0,
+            color=settings.component_colors[c])
+        ax.add_patch(r)
 
     ax.plot([0] * 2, ax.get_ylim(), ls="--", lw=0.75, color='k', zorder=10)
 
@@ -131,7 +144,7 @@ def main():
     # Create figures
     figure_setup()
     plot_sample_stats(sample, config)
-    plot_sample_stats_coorelation(config)
+    # plot_sample_stats_coorelation(config)
 
 
 if __name__ == "__main__":
