@@ -1,11 +1,13 @@
 import numpy as np
 import pandas as pd
 import yaml
+from functools import partial
 import matplotlib.pyplot as plt
 import json
 import argparse
 from decimal import Decimal
 from scipy.stats import pearsonr
+from scipy.stats import binned_statistic
 
 from auriga.settings import Settings
 from auriga.parser import parse
@@ -45,6 +47,7 @@ def plot_iron_abundance_profile(sample: list, config: dict):
             ax.tick_params(labelbottom=True)
         if ax.get_subplotspec().is_first_col():
             ax.set_ylabel("[Fe/H]")
+
 
     for i, simulation in enumerate(sample):
         galaxy = parse(simulation)[0]
@@ -128,7 +131,7 @@ def plot_iron_abundance_profile_one_panel(sample: list, config: dict):
     gal_data = pd.read_csv("data/iza_2022.csv")
     # endregion
 
-    fig = plt.figure(figsize=(3.5, 3.5))
+    fig = plt.figure(figsize=(2.5, 2.5))
     gs = fig.add_gridspec(nrows=1, ncols=1, hspace=0.0, wspace=0.0)
     ax = gs.subplots(sharex=True, sharey=True)
 
@@ -149,6 +152,7 @@ def plot_iron_abundance_profile_one_panel(sample: list, config: dict):
         y2=[ax.get_ylim()[1]] * 2,
         color="black", zorder=1, alpha=0.05, lw=0)
 
+    sample_x, sample_y = [], []
     for i, simulation in enumerate(sample):
         galaxy = parse(simulation)[0]
         df = pd.read_csv(
@@ -170,6 +174,9 @@ def plot_iron_abundance_profile_one_panel(sample: list, config: dict):
                 df["[Fe/H]_CD_Stars"],
                 lw=1.0, color=color, zorder=zorder, label=label)
 
+        sample_x += list(df["CylindricalRadius_ckpc"].to_numpy() / disc_radius)
+        sample_y += list(df["[Fe/H]_CD_Stars"].to_list())
+
         # if simulation == "au6_or_l4":
         #     ax.plot(df["CylindricalRadius_ckpc"] / disc_radius,
         #             df["[Fe/H]_CD_Stars"] + df["[Fe/H]_CD_Stars_Std"],
@@ -178,7 +185,7 @@ def plot_iron_abundance_profile_one_panel(sample: list, config: dict):
         #             df["[Fe/H]_CD_Stars"] - df["[Fe/H]_CD_Stars_Std"],
         #             lw=1.0, color=color, zorder=zorder, ls="--")
 
-        # region LinearRegression
+        #region LinearRegression
         if simulation == "au6_or_l4":
             with open(f"results/{simulation}/FeH_abundance_profile_stars_"
                     f"fit{config['FILE_SUFFIX']}.json",
@@ -189,10 +196,34 @@ def plot_iron_abundance_profile_one_panel(sample: list, config: dict):
                 df["CylindricalRadius_ckpc"] * lreg["slope"] \
                     + lreg["intercept"],
                 color=settings.component_colors["CD"], ls="--", lw=0.5,
-                label="Regression", zorder=15)
-        # endregion
+                label="Au6 Regression", zorder=15)
+        #endregion
 
-    ax.legend(loc="upper right", framealpha=0, fontsize=7)
+    #region SampleStats
+    median, bin_edges, _ = binned_statistic(
+        x=sample_x, values=sample_y, statistic=np.median, bins=40, range=(0, 1)
+    )
+    bin_centers = bin_edges[1:] - np.diff(bin_edges) / 2
+    ax.plot(
+        bin_centers, median, color="black",
+        ls="-.", lw=0.75, label="Sample Median", zorder=15)
+    low_percentile, _, _ = binned_statistic(
+        x=sample_x, values=sample_y, statistic=partial(np.percentile, q=25),
+        bins=40, range=(0, 1)
+    )
+    ax.plot(
+        bin_centers, low_percentile, color="black",
+        ls=":", lw=0.75, label=r"Sample 25$^\mathrm{th}$ Perc.", zorder=15)
+    high_percentile, _, _ = binned_statistic(
+        x=sample_x, values=sample_y, statistic=partial(np.percentile, q=75),
+        bins=40, range=(0, 1)
+    )
+    ax.plot(
+        bin_centers, high_percentile, color="black",
+        ls=":", lw=0.75, label=r"Sample 75$^\mathrm{th}$ Perc.", zorder=15)
+    #endregion
+
+    ax.legend(loc="upper right", framealpha=0, fontsize=5)
 
     fig.savefig(
         f"images/abundance_profiles/"
