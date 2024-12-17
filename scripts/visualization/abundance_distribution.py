@@ -15,6 +15,65 @@ from auriga.mathematics import round_to_1, get_decimal_places
 from auriga.support import float_to_latex
 
 
+class Helpers:
+    def __init__(self, config: dict):
+        self.config = config
+        self.settings = Settings()
+
+    def get_stellar_masses(self):
+        gal_df = pd.read_csv(
+            f"data/grand_2017.csv",
+            usecols=["Run", "StellarMass_10^10Msun", "VirialMass_10^10Msun"])
+        gal_df[["Galaxy", "Resolution"]] = \
+            gal_df["Run"].str.extract(r'Au(\d+)_L(\d+)')
+        gal_df["Galaxy"] = gal_df["Galaxy"].astype(int)
+        gal_df["Resolution"] = gal_df["Resolution"].astype(int)
+        gal_df = gal_df[gal_df['Galaxy'].isin(
+            self.settings.groups["Included"])]
+        gal_df = gal_df[gal_df["Resolution"] == 4]
+        return gal_df["StellarMass_10^10Msun"].to_numpy()
+    
+    def get_virial_masses(self):
+        gal_df = pd.read_csv(
+            f"data/grand_2017.csv",
+            usecols=["Run", "StellarMass_10^10Msun", "VirialMass_10^10Msun"])
+        gal_df[["Galaxy", "Resolution"]] = \
+            gal_df["Run"].str.extract(r'Au(\d+)_L(\d+)')
+        gal_df["Galaxy"] = gal_df["Galaxy"].astype(int)
+        gal_df["Resolution"] = gal_df["Resolution"].astype(int)
+        gal_df = gal_df[gal_df['Galaxy'].isin(
+            self.settings.groups["Included"])]
+        gal_df = gal_df[gal_df["Resolution"] == 4]
+        return gal_df["VirialMass_10^10Msun"].to_numpy()
+    
+    def get_disc_to_total(self):
+        disc_to_total = pd.read_csv(
+            f"data/iza_2022.csv",
+            usecols=["Galaxy", "DiscToTotal"])
+        disc_to_total = disc_to_total[disc_to_total['Galaxy'].isin(
+            self.settings.groups["Included"])]
+        return disc_to_total["DiscToTotal"].to_numpy()
+
+    def get_abundance_gradients(self):
+        slopes = []
+        for simulation in [
+            f"au{i}_or_l4" for i in self.settings.groups["Included"]]:
+            with open(f"results/{simulation}/FeH_abundance_profile_stars_"
+                                f"fit{self.config['FILE_SUFFIX']}.json",
+                                'r') as f:
+                            lreg = json.load(f)
+            slopes.append(lreg["slope"])
+        return np.array(slopes)
+    
+    def get_stellar_age_df(self):
+        return pd.read_csv(
+            f"results/stellar_age{self.config['FILE_SUFFIX']}.csv")
+    
+    def get_stellar_mass_fraction_df(self):
+        return pd.read_csv(
+            f"results/stellar_mass_fractions{self.config['FILE_SUFFIX']}.csv")
+
+
 def plot_sample_stats(sample: list, config: dict):
     settings = Settings()
 
@@ -81,38 +140,24 @@ def plot_sample_stats_coorelation(config: dict):
 
     fig, ax = plt.subplots(figsize=(3.5, 3.5), ncols=1)
 
-    ax.set_xlim(1.5, 7.5)
+    ax.set_xlim(0, 1)
     ax.set_ylim(-0.9, 0.3)
     ax.set_ylabel(
         r"$\mathrm{[Fe/H]} - \mathrm{[Fe/H]}_\mathrm{CD}$")
-    ax.set_xlabel("Cold Disc Stellar Age [Gyr]")
+    ax.set_xlabel(
+        "B/T")
     ax.grid(True, ls='-', lw=0.25, c='gainsboro')
 
     df = pd.read_csv(
         f"results/abundance_distribution_medians{config['FILE_SUFFIX']}.csv",
         index_col=0)
 
-    gal_df = pd.read_csv(
-        f"data/grand_2017.csv",
-        usecols=["Run", "StellarMass_10^10Msun", "VirialMass_10^10Msun"])
-    gal_df[["Galaxy", "Resolution"]] = \
-        gal_df["Run"].str.extract(r'Au(\d+)_L(\d+)')
-    gal_df["Galaxy"] = gal_df["Galaxy"].astype(int)
-    gal_df["Resolution"] = gal_df["Resolution"].astype(int)
-    gal_df = gal_df[gal_df['Galaxy'].isin(settings.groups["Included"])]
-    gal_df = gal_df[gal_df["Resolution"] == 4]
-
-    disc_to_total = pd.read_csv(
-        f"data/iza_2022.csv",
-        usecols=["Galaxy", "DiscToTotal"])
-    disc_to_total = disc_to_total[disc_to_total['Galaxy'].isin(
-        settings.groups["Included"])]
-
-    mass_df = pd.read_csv("results/stellar_age_02.csv")
+    helpers = Helpers(config)
 
     for j, c in enumerate(["H", "B", "WD"]):
+        x = helpers.get_stellar_mass_fraction_df()["BToTotal"]
         ax.scatter(
-            mass_df["MedianStellarAge_CD_Gyr"],
+            x.to_numpy(),
             df[f"MedianAbundance_Fe/H_{c}"] - df[f"MedianAbundance_Fe/H_CD"],
             color=settings.component_colors[c], s=6, zorder=10,
             marker=settings.component_markers[c])
@@ -143,8 +188,8 @@ def main():
 
     # Create figures
     figure_setup()
-    plot_sample_stats(sample, config)
-    # plot_sample_stats_coorelation(config)
+    # plot_sample_stats(sample, config)
+    plot_sample_stats_coorelation(config)
 
 
 if __name__ == "__main__":
