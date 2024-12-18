@@ -5,14 +5,11 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import json
 import argparse
-from decimal import Decimal
 from scipy.stats import pearsonr
 
 from auriga.settings import Settings
 from auriga.parser import parse
 from auriga.images import figure_setup
-from auriga.mathematics import round_to_1, get_decimal_places
-from auriga.support import float_to_latex
 
 
 class Helpers:
@@ -135,18 +132,22 @@ def plot_sample_stats(sample: list, config: dict):
     plt.close(fig)
 
 
-def plot_sample_stats_coorelation(config: dict):
+def plot_sample_stats_correlation(config: dict):
     settings = Settings()
 
-    fig, ax = plt.subplots(figsize=(3.5, 3.5), ncols=1)
+    fig = plt.figure(figsize=(7.0, 2.0))
+    gs = fig.add_gridspec(nrows=1, ncols=3, hspace=0.0, wspace=0.0)
+    axs = gs.subplots(sharex=True, sharey=True)
 
-    ax.set_xlim(0, 1)
-    ax.set_ylim(-0.9, 0.3)
-    ax.set_ylabel(
-        r"$\mathrm{[Fe/H]} - \mathrm{[Fe/H]}_\mathrm{CD}$")
-    ax.set_xlabel(
-        "B/T")
-    ax.grid(True, ls='-', lw=0.25, c='gainsboro')
+    for ax in axs:
+        ax.set_xlim(0.5, 6.5)
+        ax.set_xticks([1, 2, 3, 4, 5, 6])
+        ax.set_ylim(-0.9, 0.7)
+        ax.set_yticks([-0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6])
+        ax.set_ylabel(
+            r"$\mathrm{[Fe/H]} - \mathrm{[Fe/H]}_\mathrm{CD}$")
+        ax.grid(True, ls='-', lw=0.25, c='gainsboro')
+        ax.label_outer()
 
     df = pd.read_csv(
         f"results/abundance_distribution_medians{config['FILE_SUFFIX']}.csv",
@@ -155,15 +156,34 @@ def plot_sample_stats_coorelation(config: dict):
     helpers = Helpers(config)
 
     for j, c in enumerate(["H", "B", "WD"]):
-        x = helpers.get_stellar_mass_fraction_df()["BToTotal"]
+        ax = axs[j]
+        x = helpers.get_stellar_age_df()[f"MedianStellarAge_{c}_Gyr"] \
+            - helpers.get_stellar_age_df()["MedianStellarAge_CD_Gyr"]
+        y = df[f"MedianAbundance_Fe/H_{c}"] - df[f"MedianAbundance_Fe/H_CD"]
         ax.scatter(
-            x.to_numpy(),
-            df[f"MedianAbundance_Fe/H_{c}"] - df[f"MedianAbundance_Fe/H_CD"],
+            x.to_numpy(), y.to_numpy(),
             color=settings.component_colors[c], s=6, zorder=10,
             marker=settings.component_markers[c])
-    
+        ax.set_xlabel(
+            r"$\mathrm{Stellar~Age}_\mathrm{" + f"{c}" + "} "
+            r"- \mathrm{Stellar~Age}_\mathrm{CD}$", fontsize=9)
         ax.text(
-            x=0.02, y=0.98 - j * 0.04, size=6, ha="left", va="top",
+            x=0.04, y=0.9, size=7, ha="left", va="top",
+            s=r"$r =" + str(np.round(pearsonr(x, y)[0], 2)) + "$",
+            c=settings.component_colors[c],
+            transform=ax.transAxes)
+        if pearsonr(x, y)[1] >= 0.0001:
+            pvalue_text = "=" + str(np.round(pearsonr(x, y)[1], 4))
+        else:
+            pvalue_text = "< 0.0001"
+        ax.text(
+            x=0.04, y=0.85, size=7, ha="left", va="top",
+            s=r"$p\mathrm{-value}" + pvalue_text + "$",
+            c=settings.component_colors[c],
+            transform=ax.transAxes)
+
+        ax.text(
+            x=0.04, y=0.96, size=7, ha="left", va="top",
             s=r"$\textbf{" + settings.component_labels[c] + "}$",
             c=settings.component_colors[c],
             transform=ax.transAxes)
@@ -189,7 +209,7 @@ def main():
     # Create figures
     figure_setup()
     # plot_sample_stats(sample, config)
-    plot_sample_stats_coorelation(config)
+    plot_sample_stats_correlation(config)
 
 
 if __name__ == "__main__":
