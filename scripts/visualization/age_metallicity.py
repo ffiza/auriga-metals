@@ -74,8 +74,6 @@ def make_plot(config: dict):
     axs[0].plot(x, y_mean, ls="-", c="black", zorder=11, lw=1.0)
     axs[0].plot(x, y_mean - y_std, ls="--", c="black", zorder=11, lw=1.0)
     axs[0].plot(x, y_mean + y_std, ls="--", c="black", zorder=11, lw=1.0)
-    axs[0].plot(x, y_mean - 2 * y_std, ls=":", c="black", zorder=11, lw=1.0)
-    axs[0].plot(x, y_mean + 2 * y_std, ls=":", c="black", zorder=11, lw=1.0)
 
     for i, c in enumerate(settings.components):
         ax = axs[i + 1]
@@ -88,8 +86,6 @@ def make_plot(config: dict):
         ax.plot(x, y_mean, ls="-", c=color, zorder=11, lw=1.0)
         ax.plot(x, y_mean + y_std, ls="--", c=color, zorder=11, lw=1.0)
         ax.plot(x, y_mean - y_std, ls="--", c=color, zorder=11, lw=1.0)
-        ax.plot(x, y_mean + 2 * y_std, ls=":", c=color, zorder=11, lw=1.0)
-        ax.plot(x, y_mean - 2 * y_std, ls=":", c=color, zorder=11, lw=1.0)
 
     axs[0].text(
         x=0.05, y=0.05, size=8.0, ha="left", va="bottom",
