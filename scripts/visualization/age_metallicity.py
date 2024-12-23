@@ -19,8 +19,6 @@ from auriga.paths import Paths
 def make_plot(config: dict):
     settings = Settings()
     sample = [f"au{i}_or_l4_s127" for i in settings.groups["Included"]]
-    facts = [1, 2, -1, -2]
-    lss = ["--", ":", '--', ':']
 
     fig = plt.figure(figsize=(8.0, 2.0))
     gs = fig.add_gridspec(nrows=1, ncols=5, hspace=0.0, wspace=0.0)
@@ -38,45 +36,60 @@ def make_plot(config: dict):
 
         ax.tick_params(which='both', direction="in")
         ax.label_outer()
-
+    
+    sample_data = {}
     for simulation in sample:
         galaxy, rerun, resolution, _ = parse(simulation)
         paths = Paths(galaxy, rerun, resolution)
         data = pd.read_csv(
             f"{paths.results}age_metallicity{config['FILE_SUFFIX']}.csv")
-        color = "black" if galaxy == 6 else "silver"
-        zorder = 11 if galaxy == 6 else 10
 
         axs[0].plot(data["StellarAge_BinCenters_Gyr"], data["[Fe/H]_Median"],
-                    ls="-", c=color, zorder=zorder, lw=1.0)
-        if galaxy == 6:
-            for i in range(len(facts)):
-                axs[0].plot(data["StellarAge_BinCenters_Gyr"],
-                            data["[Fe/H]_Median"] \
-                                + facts[i] * data["[Fe/H]_MAD"],
-                            ls=lss[i], c=color, zorder=zorder, lw=1.0)
+                    ls="-", c="silver", zorder=10, lw=1.0)
+        
+        if "StellarAge_BinCenters_Gyr" not in sample_data.keys():
+            sample_data["StellarAge_BinCenters_Gyr"] = \
+                data["StellarAge_BinCenters_Gyr"].to_numpy()
+        sample_data[f"[Fe/H]_Au{galaxy}_Median"] = \
+            data["[Fe/H]_Median"].to_numpy()
 
         for i in range(len(settings.components)):
             component = settings.components[i]
             ax = axs[i + 1]
-            if galaxy == 6:
-                color = list(settings.component_colors.values())[i]
-                zorder = 11
-            else:
-                color = "silver"
-                zorder = 10
 
             ax.plot(data["StellarAge_BinCenters_Gyr"],
                     data[f"[Fe/H]_Median_{component}"],
-                    ls="-", c=color, zorder=zorder, lw=1.0)
-            if galaxy == 6:
-                for i in range(len(facts)):
-                    ax.plot(
-                        data["StellarAge_BinCenters_Gyr"],
-                        data[f"[Fe/H]_Median_{component}"] \
-                            + facts[i] * data[f"[Fe/H]_MAD_{component}"],
-                        ls=lss[i], c=color, zorder=zorder, lw=1.0)
+                    ls="-", c="silver", zorder=10, lw=1.0)
+            sample_data[f"[Fe/H]_Au{galaxy}_Median_{component}"] = \
+                data[f"[Fe/H]_Median_{component}"].to_numpy()
 
+    sample_data = pd.DataFrame(sample_data)
+
+    galaxies = [i for i in settings.groups["Included"]]
+    x = sample_data["StellarAge_BinCenters_Gyr"]
+    y_mean = sample_data[
+        [f"[Fe/H]_Au{i}_Median" for i in galaxies]].median(axis=1)
+    y_std = sample_data[
+        [f"[Fe/H]_Au{i}_Median" for i in galaxies]].std(axis=1)
+    axs[0].plot(x, y_mean, ls="-", c="black", zorder=11, lw=1.0)
+    axs[0].plot(x, y_mean - y_std, ls="--", c="black", zorder=11, lw=1.0)
+    axs[0].plot(x, y_mean + y_std, ls="--", c="black", zorder=11, lw=1.0)
+    axs[0].plot(x, y_mean - 2 * y_std, ls=":", c="black", zorder=11, lw=1.0)
+    axs[0].plot(x, y_mean + 2 * y_std, ls=":", c="black", zorder=11, lw=1.0)
+
+    for i, c in enumerate(settings.components):
+        ax = axs[i + 1]
+        color = settings.component_colors[c]
+        x = sample_data["StellarAge_BinCenters_Gyr"]
+        y_mean = sample_data[
+            [f"[Fe/H]_Au{i}_Median_{c}" for i in galaxies]].mean(axis=1)
+        y_std = sample_data[
+            [f"[Fe/H]_Au{i}_Median_{c}" for i in galaxies]].std(axis=1)
+        ax.plot(x, y_mean, ls="-", c=color, zorder=11, lw=1.0)
+        ax.plot(x, y_mean + y_std, ls="--", c=color, zorder=11, lw=1.0)
+        ax.plot(x, y_mean - y_std, ls="--", c=color, zorder=11, lw=1.0)
+        ax.plot(x, y_mean + 2 * y_std, ls=":", c=color, zorder=11, lw=1.0)
+        ax.plot(x, y_mean - 2 * y_std, ls=":", c=color, zorder=11, lw=1.0)
 
     axs[0].text(
         x=0.05, y=0.05, size=8.0, ha="left", va="bottom",
