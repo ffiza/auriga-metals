@@ -71,16 +71,21 @@ class Helpers:
             f"results/stellar_mass_fractions{self.config['FILE_SUFFIX']}.csv")
 
 
-def plot_sample_stats(sample: list, config: dict):
+def plot_sample_stats(sample: list, of: str, to: str, config: dict,
+                      xlim: tuple):
     settings = Settings()
+
+    xlabel = r"$\mathrm{[" + f"{of}/{to}" \
+        + r"]} - \mathrm{[" + f"{of}/{to}" + r"]}_\mathrm{CD}$"
 
     fig, ax = plt.subplots(figsize=(3.5, 4.5), ncols=1)
 
-    ax.set_xlim(-1.0, 0.4)
-    ax.set_ylim(-0.12, 0.02)
-    ax.set_xlabel(r"$\mathrm{[Fe/H]} - \mathrm{[Fe/H]}_\mathrm{CD}$")
-    ax.set_yticks([- i * 0.02 for i in range(24)])
-    ax.set_yticklabels([])
+    ax.set_xlim(xlim)
+    ax.set_ylim(-0.46, 0.02)
+    ax.set_xlabel(xlabel)
+    ax.set_yticks([- i * 0.02 for i in range(23)])
+    galaxies = [parse(simulation)[0] for simulation in sample]
+    ax.set_yticklabels([f"Au{i}" for i in galaxies])
     ax.grid(True, ls='-', lw=0.25, c='gainsboro')
 
     df = pd.read_csv(
@@ -91,19 +96,20 @@ def plot_sample_stats(sample: list, config: dict):
         galaxy, _, _ = parse(simulation)
         for j, c in enumerate(["H", "B", "WD"]):
             ax.scatter(
-                df.loc[f"Au{galaxy}"][f"MedianAbundance_Fe/H_{c}"] \
-                    - df.loc[f"Au{galaxy}"][f"MedianAbundance_Fe/H_CD"],
+                df.loc[f"Au{galaxy}"][f"MedianAbundance_{of}/{to}_{c}"] \
+                    - df.loc[f"Au{galaxy}"][f"MedianAbundance_{of}/{to}_CD"],
                 0 - 0.02 * i,
                 color=settings.component_colors[c],
                 marker='o', s=6, zorder=10)
-        galaxy = parse(sample[i])[0]
-        ax.text(
-            x=-1.05, y=0 - 0.02 * i, size=6.0, color="gray",
-            ha="right", va="center", s=f"Au{galaxy}")
+        # galaxy = parse(sample[i])[0]
+        # ax.text(
+        #     x=ax.get_xlim()[0] - 0.01, y=0 - 0.02 * i, size=6.0, color="gray",
+        #     ha="right", va="center", s=f"Au{galaxy}")
     
     for j, c in enumerate(["H", "B", "WD"]):
-        ax.plot(df[f"MedianAbundance_Fe/H_{c}"].to_numpy() \
-                    - df[f"MedianAbundance_Fe/H_CD"].to_numpy(),
+        abundance_diff = df[f"MedianAbundance_{of}/{to}_{c}"].to_numpy() \
+            - df[f"MedianAbundance_{of}/{to}_CD"].to_numpy()
+        ax.plot(abundance_diff,
                 [0 - 0.02 * i for i in range(len(sample))],
                 lw=0.5, color=settings.component_colors[c])
         ax.text(
@@ -111,14 +117,13 @@ def plot_sample_stats(sample: list, config: dict):
             s=r"$\textbf{" + settings.component_labels[c] + "}$",
             c=settings.component_colors[c],
             transform=ax.transAxes)
-        ax.plot([df[f"MedianAbundance_Fe/H_{c}"].mean()] * 2,
+        ax.plot([abundance_diff.mean()] * 2,
                 ax.get_ylim(), ls="--", lw=0.75,
                 color=settings.component_colors[c],
                 zorder=5)
         r = Rectangle(
-            (df[f"MedianAbundance_Fe/H_{c}"].mean() \
-                - df[f"MedianAbundance_Fe/H_{c}"].std(), ax.get_ylim()[0]),
-            2 * df[f"MedianAbundance_Fe/H_{c}"].std(),
+            (abundance_diff.mean() - abundance_diff.std(), ax.get_ylim()[0]),
+            2 * abundance_diff.std(),
             np.diff(ax.get_ylim()),
             fill=True, alpha=0.15, zorder=5, lw=0,
             color=settings.component_colors[c])
@@ -127,7 +132,7 @@ def plot_sample_stats(sample: list, config: dict):
     ax.plot([0] * 2, ax.get_ylim(), ls="--", lw=0.75, color='k', zorder=10)
 
     fig.savefig(
-        f"images/metal_abundance_distribution/Fe_H/"
+        f"images/metal_abundance_distribution/{of}_{to}/"
         f"sample_component_comparison{config['FILE_SUFFIX']}.pdf")
     plt.close(fig)
 
@@ -208,8 +213,11 @@ def main():
 
     # Create figures
     figure_setup()
-    # plot_sample_stats(sample, config)
-    plot_sample_stats_correlation(config)
+    plot_sample_stats(sample=sample, of="Fe", to="H", config=config,
+                      xlim=(-1.0, 0.4))
+    plot_sample_stats(sample=sample, of="O", to="Fe", config=config,
+                      xlim=(-0.025, 0.085))
+    # plot_sample_stats_correlation(config)
 
 
 if __name__ == "__main__":
