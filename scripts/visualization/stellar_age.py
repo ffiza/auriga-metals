@@ -83,6 +83,64 @@ def plot_sample_stats(sample: list, config: dict):
     plt.close(fig)
 
 
+def plot_sample_ordered_stellar_age(sample: list, config: dict) -> None:
+
+    settings = Settings()
+    helpers = Helpers(config=config)
+
+    xlabel = r"Stellar Age [Gyr]"
+
+    fig, ax = plt.subplots(figsize=(3.5, 4.5), ncols=1)
+
+    ax.set_xlim(1, 12)
+    ax.set_ylim(-0.46, 0.02)
+    ax.set_xlabel(xlabel)
+    ax.set_yticks([- i * 0.02 for i in range(23)])
+    galaxies = [parse(simulation)[0] for simulation in sample]
+    ax.set_yticklabels([f"Au{i}" for i in galaxies])
+    ax.grid(True, ls='-', lw=0.25, c='gainsboro')
+
+    df = helpers.get_stellar_age_df()
+
+    for i, simulation in enumerate(sample):
+        galaxy, _, _ = parse(simulation)
+        for j, c in enumerate(settings.components):
+            ax.scatter(
+                df.loc[f"Au{galaxy}"][f"MedianStellarAge_{c}_Gyr"],
+                0 - 0.02 * i,
+                color=settings.component_colors[c],
+                marker='o', s=6, zorder=10)
+    
+    for j, c in enumerate(settings.components):
+        age = df[f"MedianStellarAge_{c}_Gyr"].to_numpy()
+        ax.plot(age,
+                [0 - 0.02 * i for i in range(len(sample))],
+                lw=0.5, color=settings.component_colors[c])
+        ax.text(
+            x=0.05, y=0.14 - j * 0.03, size=6, ha="left", va="top",
+            s=r"$\textbf{" + settings.component_labels[c] + "}$",
+            c=settings.component_colors[c],
+            transform=ax.transAxes)
+        ax.plot([age.mean()] * 2,
+                ax.get_ylim(), ls="--", lw=0.75,
+                color=settings.component_colors[c],
+                zorder=5)
+        r = Rectangle(
+            (age.mean() - age.std(), ax.get_ylim()[0]),
+            2 * age.std(),
+            np.diff(ax.get_ylim()),
+            fill=True, alpha=0.15, zorder=5, lw=0,
+            color=settings.component_colors[c])
+        ax.add_patch(r)
+
+    ax.plot([0] * 2, ax.get_ylim(), ls="--", lw=0.75, color='k', zorder=10)
+
+    fig.savefig(
+        f"images/stellar_formation_time/"
+        f"sample_ordered_stellar_age{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
 def main():
     settings = Settings()
     sample = [f"au{i}_or_l4" for i in settings.groups["Included"]]
@@ -97,7 +155,8 @@ def main():
 
     # Create figures
     figure_setup()
-    plot_sample_stats(sample=sample, config=config)
+    # plot_sample_stats(sample=sample, config=config)
+    plot_sample_ordered_stellar_age(sample=sample, config=config)
 
 
 if __name__ == "__main__":

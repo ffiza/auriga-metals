@@ -137,6 +137,65 @@ def plot_sample_stats(sample: list, of: str, to: str, config: dict,
     plt.close(fig)
 
 
+def plot_sample_ordered_abundance(
+        sample: list, of: str, to: str, config: dict, xlim: tuple) -> None:
+    settings = Settings()
+
+    xlabel = r"$\mathrm{[" + f"{of}/{to}" + r"]}$"
+
+    fig, ax = plt.subplots(figsize=(3.5, 4.5), ncols=1)
+
+    ax.set_xlim(xlim)
+    ax.set_ylim(-0.46, 0.02)
+    ax.set_xlabel(xlabel)
+    ax.set_yticks([- i * 0.02 for i in range(23)])
+    galaxies = [parse(simulation)[0] for simulation in sample]
+    ax.set_yticklabels([f"Au{i}" for i in galaxies])
+    ax.grid(True, ls='-', lw=0.25, c='gainsboro')
+
+    df = pd.read_csv(
+        f"results/abundance_distribution_medians{config['FILE_SUFFIX']}.csv",
+        index_col=0)
+
+    for i, simulation in enumerate(sample):
+        galaxy, _, _ = parse(simulation)
+        for j, c in enumerate(settings.components):
+            ax.scatter(
+                df.loc[f"Au{galaxy}"][f"MedianAbundance_{of}/{to}_{c}"],
+                0 - 0.02 * i,
+                color=settings.component_colors[c],
+                marker='o', s=6, zorder=10)
+    
+    for j, c in enumerate(settings.components):
+        abundance = df[f"MedianAbundance_{of}/{to}_{c}"]
+        ax.plot(abundance,
+                [0 - 0.02 * i for i in range(len(sample))],
+                lw=0.5, color=settings.component_colors[c])
+        ax.text(
+            x=0.02, y=0.96 - j * 0.03, size=6, ha="left", va="top",
+            s=r"$\textbf{" + settings.component_labels[c] + "}$",
+            c=settings.component_colors[c],
+            transform=ax.transAxes)
+        ax.plot([abundance.mean()] * 2,
+                ax.get_ylim(), ls="--", lw=0.75,
+                color=settings.component_colors[c],
+                zorder=5)
+        r = Rectangle(
+            (abundance.mean() - abundance.std(), ax.get_ylim()[0]),
+            2 * abundance.std(),
+            np.diff(ax.get_ylim()),
+            fill=True, alpha=0.15, zorder=5, lw=0,
+            color=settings.component_colors[c])
+        ax.add_patch(r)
+
+    ax.plot([0] * 2, ax.get_ylim(), ls="--", lw=0.75, color='k', zorder=10)
+
+    fig.savefig(
+        f"images/metal_abundance_distribution/{of}_{to}/"
+        f"sample_ordered_abundance{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
 def plot_sample_stats_correlation(config: dict):
     settings = Settings()
 
@@ -213,11 +272,17 @@ def main():
 
     # Create figures
     figure_setup()
-    plot_sample_stats(sample=sample, of="Fe", to="H", config=config,
-                      xlim=(-1.0, 0.4))
-    plot_sample_stats(sample=sample, of="O", to="Fe", config=config,
-                      xlim=(-0.025, 0.085))
+    # plot_sample_stats(sample=sample, of="Fe", to="H", config=config,
+    #                   xlim=(-1.0, 0.4))
+    # plot_sample_stats(sample=sample, of="O", to="Fe", config=config,
+    #                   xlim=(-0.025, 0.085))
     # plot_sample_stats_correlation(config)
+    plot_sample_ordered_abundance(sample=sample, of="Fe", to="H",
+                                  config=config, xlim=(-1.0, 0.4))
+    plot_sample_ordered_abundance(sample=sample, of="O", to="H",
+                                  config=config, xlim=(-0.6, 0.6))
+    plot_sample_ordered_abundance(sample=sample, of="O", to="Fe",
+                                  config=config, xlim=(0.2, 0.3))
 
 
 if __name__ == "__main__":
