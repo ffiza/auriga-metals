@@ -448,6 +448,51 @@ def plot_fit_vs_barfraction(sample: list, config: dict):
     plt.close(fig)
 
 
+def plot_fit_vs_disc_radius(sample: list, config: dict):
+    fig, ax = plt.subplots(figsize=(3, 3), ncols=1)
+
+    ax.grid(True, ls='-', lw=0.25, c='gainsboro')
+    ax.set_axisbelow(True)
+    ax.set_xlim(-0.04, 0.01)
+    ax.set_ylim(0, 40)
+    ax.set_xlabel(r"$\nabla \mathrm{[Fe/H]}$ [dex/ckpc]")
+    ax.set_ylabel(r"$R_\mathrm{d}$ [kpc]")
+
+    data = np.nan * np.ones((len(sample), 4))
+
+    for i, simulation in enumerate(sample):
+        galaxy = parse(simulation)[0]
+        with open(f"results/{simulation}/"
+                  f"FeH_abundance_profile_stars_fit{config['FILE_SUFFIX']}"
+                  f".json",
+                  'r') as f:
+            d = json.load(f)
+            data[i, 0] = d["slope"]
+            data[i, 1] = d["stderr"]
+        
+        df = pd.read_csv("data/iza_2022.csv", index_col="Galaxy")
+        data[i, 2] = df["DiscRadius_kpc"][galaxy]
+
+    ax.scatter(data[:, 0], data[:, 2],
+               edgecolor="white", color="black",
+               marker='o', s=15, lw=0, zorder=10)
+
+    corr = pearsonr(data[:, 0], data[:, 2])
+    ax.text(x=0.05, y=0.95, size=8.0, color="black",
+            ha="left", va="center", s=r"$r$: " \
+                + str(np.round(corr[0], 2)),
+            transform=ax.transAxes)
+    ax.text(x=0.05, y=0.9, size=8.0, color="black",
+            ha="left", va="center", s=r"$p$-value: " \
+                + str(np.round(corr[1], 3)),
+            transform=ax.transAxes)
+
+    fig.savefig(
+        f"images/abundance_profiles/"
+        f"gradients_vs_disc_radius{config['FILE_SUFFIX']}.pdf")
+    plt.close(fig)
+
+
 def main():
     settings = Settings()
     sample = [f"au{i}_or_l4" for i in settings.groups["Included"]]
@@ -463,10 +508,11 @@ def main():
     # Create figures
     figure_setup()
     # plot_iron_abundance_profile(sample, config)
-    plot_iron_abundance_profile_one_panel(sample, config)
+    # plot_iron_abundance_profile_one_panel(sample, config)
     # plot_oxygen_abundance_profile(sample, config)
     # plot_fit_stats(sample, config)
     # plot_fit_vs_insideoutparam(sample, config)
+    plot_fit_vs_disc_radius(sample, config)
 
 
 if __name__ == "__main__":
