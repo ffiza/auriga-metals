@@ -17,9 +17,10 @@ from auriga.support import float_to_latex
 
 REF_PATHS = ["data/lemasle_2007.json",
              "data/lemasle_2008.json",
+             "data/luck_2011.json",
              "data/genovali_2014.json",
              "data/lemasle_2018.json"]
-REF_COLORS = ["orange", "green", "purple", "blue"]
+REF_COLORS = ["orange", "green", "red", "purple", "blue"]
 
 
 def plot_iron_abundance_profile(sample: list, config: dict):
@@ -510,9 +511,9 @@ def main():
     # plot_iron_abundance_profile(sample, config)
     # plot_iron_abundance_profile_one_panel(sample, config)
     # plot_oxygen_abundance_profile(sample, config)
-    # plot_fit_stats(sample, config)
+    plot_fit_stats(sample, config)
     # plot_fit_vs_insideoutparam(sample, config)
-    plot_fit_vs_disc_radius(sample, config)
+    # plot_fit_vs_disc_radius(sample, config)
 
 
 if __name__ == "__main__":
