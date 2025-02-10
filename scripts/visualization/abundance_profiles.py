@@ -17,9 +17,10 @@ from auriga.support import float_to_latex
 
 REF_PATHS = ["data/lemasle_2007.json",
              "data/lemasle_2008.json",
+             "data/luck_2011.json",
              "data/genovali_2014.json",
              "data/lemasle_2018.json"]
-REF_COLORS = ["orange", "green", "purple", "blue"]
+REF_COLORS = ["orange", "green", "red", "purple", "blue"]
 
 
 def plot_iron_abundance_profile(sample: list, config: dict):
@@ -284,13 +285,14 @@ def plot_oxygen_abundance_profile(sample: list, config: dict):
 def plot_fit_stats(sample: list, config: dict):
     fig, ax = plt.subplots(figsize=(3.5, 4.5), ncols=1)
 
-    ax.set_xlim(-0.1, 0.02)
-    ax.set_ylim(-0.53, 0.02)
+    ax.set_xlim(-0.09, 0)
+    ax.set_ylim(-0.56, 0.02)
     ax.set_xlabel(r"$\nabla \mathrm{[Fe/H]}$ [dex/ckpc]")
     ax.set_yticks([- i * 0.02 for i in range(28)])
     ax.set_yticklabels([])
     ax.grid(True, ls='-', lw=0.25, c='gainsboro')
 
+    sample_slopes = []
     for i, simulation in enumerate(sample):
         with open(f"results/{simulation}/"
                   f"FeH_abundance_profile_stars_fit{config['FILE_SUFFIX']}"
@@ -304,26 +306,33 @@ def plot_fit_stats(sample: list, config: dict):
                 marker='o', markersize=4, linestyle='none', zorder=10)
             galaxy = parse(sample[i])[0]
             ax.text(
-                x=-0.105, y=0 - 0.02 * i, size=6.0, color="gray",
+                x=-0.0925, y=0 - 0.02 * i, size=6.0, color="gray",
                 ha="right", va="center", s=f"Au{galaxy}")
-            ax.annotate('', xy=(0.02, 0 - 0.02 * i),
+            ax.annotate('', xy=(0, 0 - 0.02 * i),
                         xytext=(0.08, 0 - 0.02 * i),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
             slope_err = str(Decimal(str(round_to_1(lreg["stderr"]))))
             slope_val = np.round(lreg["slope"], get_decimal_places(slope_err))
-            ax.text(x=0.04, y=0 - 0.02 * i, size=6.0, color="black",
+            ax.text(x=0.02, y=0 - 0.02 * i, size=6.0, color="black",
                     ha="center", va="bottom",
                     s=r"$-$" + f"{np.abs(slope_val)}" + " $\pm$ " \
                         + f"{slope_err}")
             pvalue_str = str(np.round(lreg["pvalue"], 2)) \
                 if lreg["pvalue"] >= 0.001 else r"$<0.001$"
-            ax.text(x=0.07, y=0 - 0.02 * i, size=6.0, color="black",
+            ax.text(x=0.05, y=0 - 0.02 * i, size=6.0, color="black",
                     ha="center", va="bottom", s=pvalue_str)
+            sample_slopes.append(lreg["slope"])
+    ax.plot([np.median(sample_slopes)] * 2, ax.get_ylim(), ls="--",
+            lw=0.75, color='gray', zorder=10)
+    median_str = str(np.abs(np.round(np.median(sample_slopes), 4)))
+    ax.text(x=-0.011, y=-0.555, size=6.0, color="gray",
+            ha="left", va="bottom", rotation=90,
+            s=r"$-$" + median_str + " dex/ckpc")
 
-    ax.text(x=0.04, y=0.02, size=6.0, color="black",
+    ax.text(x=0.02, y=0.02, size=6.0, color="black",
             ha="center", va="bottom", s="Slope [dex/ckpc]")
-    ax.text(x=0.07, y=0.02, size=6.0, color="black",
+    ax.text(x=0.05, y=0.02, size=6.0, color="black",
             ha="center", va="bottom", s=f"$p$-value")
 
     # region LiteratureFits
@@ -337,19 +346,17 @@ def plot_fit_stats(sample: list, config: dict):
                 xerr=reg["SlopeErrValue"], markeredgecolor="white", capsize=2,
                 capthick=1, color=ref_color, marker='o', markersize=4,
                 linestyle='none', zorder=10)
-            ax.text(x=-0.105, y=- 0.02 * (23 + i), size=6.0, color=ref_color,
+            ax.text(x=-0.0925, y=- 0.02 * (23 + i), size=6.0, color=ref_color,
                     ha="right", va="center", s=reg["Label"])
-            ax.annotate('', xy=(0.02, - 0.02 * (23 + i)),
+            ax.annotate('', xy=(0, - 0.02 * (23 + i)),
                         xytext=(0.08, - 0.02 * (23 + i)),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
             slope_str = float_to_latex(reg["SlopeValue"]) + " $\pm$ " \
                         + str(reg["SlopeErrValue"])
-            ax.text(x=0.04, y=- 0.02 * (23 + i), size=6.0, color=ref_color,
+            ax.text(x=0.02, y=- 0.02 * (23 + i), size=6.0, color=ref_color,
                     ha="center", va="bottom", s=slope_str)
     # endregion
-
-    ax.plot([0] * 2, ax.get_ylim(), ls="--", lw=0.75, color='k', zorder=10)
 
     fig.savefig(
         f"images/abundance_profiles/gradients{config['FILE_SUFFIX']}.pdf")
@@ -510,9 +517,9 @@ def main():
     # plot_iron_abundance_profile(sample, config)
     # plot_iron_abundance_profile_one_panel(sample, config)
     # plot_oxygen_abundance_profile(sample, config)
-    # plot_fit_stats(sample, config)
+    plot_fit_stats(sample, config)
     # plot_fit_vs_insideoutparam(sample, config)
-    plot_fit_vs_disc_radius(sample, config)
+    # plot_fit_vs_disc_radius(sample, config)
 
 
 if __name__ == "__main__":
