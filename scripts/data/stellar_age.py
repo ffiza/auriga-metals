@@ -90,30 +90,29 @@ def main():
     # Load configuration file
     config = yaml.safe_load(open(f"configs/{args.config}.yml"))
 
-    # # Run the analysis
-    # args = [(f"au{i}_or_l4_s127", config) for i in settings.groups["Included"]]
-    # data = Pool(8).starmap(calculate_values_for_galaxy, args)
-    # columns = ["MedianStellarAge_Gyr"]
-    # for c in settings.components:
-    #     columns.append(f"MedianStellarAge_{c}_Gyr")
-    # columns.append("MeanStellarAge_Gyr")
-    # for c in settings.components:
-    #     columns.append(f"MeanStellarAge_{c}_Gyr")
+    sample = [(
+        f"au{i}_or_l4_s127", config) for i in settings.groups["Included"]]
+
+    # Run the analysis
+    data = Pool(8).starmap(calculate_values_for_galaxy, sample)
+    columns = ["MedianStellarAge_Gyr"]
+    for c in settings.components:
+        columns.append(f"MedianStellarAge_{c}_Gyr")
+    columns.append("MeanStellarAge_Gyr")
+    for c in settings.components:
+        columns.append(f"MeanStellarAge_{c}_Gyr")
+    data = pd.DataFrame(data=data,
+                        index=[f"Au{i}" for i in settings.groups["Included"]],
+                        columns=columns)
+    data.to_csv(f"results/stellar_age{config['FILE_SUFFIX']}.csv")
+    
+    # data = Pool(8).starmap(calculate_late_sf_fraction, sample)
+    # columns = [f"FractionOfStarsYoungerThan{i}Gyr" for i in [5, 4, 3, 2, 1]]
     # data = pd.DataFrame(data=data,
     #                     index=[f"Au{i}" for i in settings.groups["Included"]],
     #                     columns=columns)
     # data.to_csv(f"results/"
-    #             f"stellar_age{config['FILE_SUFFIX']}.csv")
-    
-    args = [(
-        f"au{i}_or_l4_s127", config) for i in settings.groups["Included"]]
-    data = Pool(8).starmap(calculate_late_sf_fraction, args)
-    columns = [f"FractionOfStarsYoungerThan{i}Gyr" for i in [5, 4, 3, 2, 1]]
-    data = pd.DataFrame(data=data,
-                        index=[f"Au{i}" for i in settings.groups["Included"]],
-                        columns=columns)
-    data.to_csv(f"results/"
-                f"fraction_of_young_stars{config['FILE_SUFFIX']}.csv")
+    #             f"fraction_of_young_stars{config['FILE_SUFFIX']}.csv")
 
 
 if __name__ == "__main__":

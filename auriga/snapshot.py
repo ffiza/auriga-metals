@@ -116,6 +116,8 @@ class Snapshot:
         self.temperature: np.ndarray = None
         self.h_number_density: np.ndarray = None
 
+        self.normalized_specific_energy = None
+
         paths = Paths(galaxy=galaxy, rerun=rerun, resolution=resolution)
 
         sf, sb = read_raw_snapshot(simulation=simulation,
@@ -340,6 +342,25 @@ class Snapshot:
 
         self._has_referenced_pot = True
 
+    def add_normalized_specific_energy(self) -> None:
+        """
+        This method calculates the normalized total specific
+        energy using the maximum absolute value of the stellar particles
+        in the main halo/subhalo.
+        """
+        is_main_obj = (self.halo == self.halo_idx) \
+            & (self.subhalo == self.subhalo_idx)
+        is_real_star = (self.type == 4) & (self.stellar_formation_time > 0)
+
+        if not self._has_referenced_pot:
+            self.add_reference_to_potential()
+        vel_squared = np.linalg.norm(self.vel, axis=1)**2
+        specific_energy = 0.5 * vel_squared + self.potential
+        abs_max_specific_energy = np.abs(
+            specific_energy[is_real_star & is_main_obj]).max()
+        self.normalized_specific_energy = specific_energy \
+            / abs_max_specific_energy
+
     def add_extra_coordinates(self):
         """
         This method calculates the radii of particles in cylindrical and
@@ -461,6 +482,8 @@ class Snapshot:
             self.add_reference_to_potential()
         if not self._has_normalized_potential:
             self.add_normalized_potential()
+        if not self.normalized_specific_energy:
+            self.add_normalized_specific_energy()
 
         region_tag = -1 * np.ones(self.mass.shape[0], dtype=np.int8)
 
@@ -471,7 +494,7 @@ class Snapshot:
 
         # Tag bulge particles
         region_tag[
-            (self.normalized_potential <= bulge_max_specific_energy)
+            (self.normalized_specific_energy <= bulge_max_specific_energy)
             & (self.circularity < disc_min_circ)
             & (self.halo == self.halo_idx)
             & (self.subhalo == self.subhalo_idx)] = 1

@@ -137,7 +137,7 @@ def main():
 
     # Create figures
     figure_setup()
-    # create_figure_all_panels(config)
+    create_figure_all_panels(config)
     create_figure_panels_by_component(config)
 
 

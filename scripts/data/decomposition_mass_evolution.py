@@ -105,8 +105,11 @@ def main():
     config = yaml.safe_load(open(f"configs/{args.config}.yml"))
 
     # Run the analysis
-    for simulation in [f"au{i}_or_l4" for i in settings.groups["Included"]]:
-        calculate_evolution(simulation, config)
+    # for simulation in [f"au{i}_or_l4" for i in settings.groups["Included"]]:
+            # calculate_evolution(simulation, config)
+    for i in settings.groups["Included"]:
+        if i >= 21:
+            calculate_evolution(f"au{i}_or_l4", config)
 
 
 if __name__ == "__main__":

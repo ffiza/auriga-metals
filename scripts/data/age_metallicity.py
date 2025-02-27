@@ -122,24 +122,29 @@ def get_stats_of_df(df: pd.DataFrame, config: dict) -> pd.DataFrame:
 
 
 def main():
+    settings = Settings()
+
     # Get arguments from user
     parser = argparse.ArgumentParser()
-    parser.add_argument("--simulation", type=str, required=True)
     parser.add_argument("--config", type=str, required=True)
     args = parser.parse_args()
 
     # Load configuration file
     config = yaml.safe_load(open(f"configs/{args.config}.yml"))
 
-    # Run the analysis
-    data = read_data(simulation=args.simulation, config=config)
-    stats = get_stats_of_df(df=data, config=config)
-    stats = stats.round(config["AGE_METALLICITY_RELATION"]["DECIMALS"])
+    for i in settings.groups["Included"]:
+        simulation = f"au{i}_or_l4_s127 "
+        
+        # Run the analysis
+        data = read_data(simulation=simulation, config=config)
+        stats = get_stats_of_df(df=data, config=config)
+        stats = stats.round(config["AGE_METALLICITY_RELATION"]["DECIMALS"])
 
-    # Save data
-    galaxy, rerun, resolution, _ = parse(args.simulation)
-    paths = Paths(galaxy, rerun, resolution)
-    stats.to_csv(f"{paths.results}/age_metallicity{config['FILE_SUFFIX']}.csv")
+        # Save data
+        galaxy, rerun, resolution, _ = parse(simulation)
+        paths = Paths(galaxy, rerun, resolution)
+        stats.to_csv(
+            f"{paths.results}/age_metallicity{config['FILE_SUFFIX']}.csv")
 
 
 if __name__ == "__main__":

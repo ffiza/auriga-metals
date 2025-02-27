@@ -708,8 +708,8 @@ def main():
     #     xlim=(0.1, 0.4), ylim=(0, 0.12),
         # xticks=[0.1, 0.2, 0.3], yticks=[0.02 * i for i in range(6)])
     
-    # plot_present_day_distribution_for_sample_median(
-    #     sample=sample, config=config)
+    plot_present_day_distribution_for_sample_median(
+        sample=sample, config=config)
     plot_origin_distribution_for_sample_median(
         sample=sample, config=config)
 
