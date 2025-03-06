@@ -1,0 +1,31 @@
+RUN_NAME:                     "10"
+FILE_SUFFIX:                  "_10"
+DISC_MIN_CIRC:                0.4
+DISC_STD_CIRC:                1.0
+COLD_DISC_DELTA_CIRC:         0.25
+BULGE_MAX_SPECIFIC_ENERGY:    -0.7
+ABUNDANCE_MAPS:
+  N_BINS:                     200
+  MIN_PART_COUNT:             1
+  MAX_PART_COUNT:             1000
+ABUNDANCE_DISTRIBUTION:
+  N_BINS:                     50
+AGE_METALLICITY_RELATION:
+  N_BINS_AGE:                 14
+  N_BINS_MAP:                 200
+  MAP_VMIN:                   1.0
+  MAP_VMAX:                   1000.0
+  AGE_MIN:                    0.0
+  AGE_MAX:                    14.0
+  DECIMALS:                   6
+ABUNDANCE_PROFILES:
+  N_BINS:                     100
+  MIN_RADIUS_CKPC:            0.0
+  MAX_RADIUS_CKPC:            50.0
+ABUNDANCE_PROFILE_FIT:
+  MIN_DISC_RADIUS_FRAC:       0.2
+  MAX_DISC_RADIUS_FRAC:       1.0
+DENSITY_PROFILES:
+  N_BINS:                     100
+  MIN_RADIUS_CKPC:            0.0
+  MAX_RADIUS_CKPC:            50.0
