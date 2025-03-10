@@ -3,6 +3,7 @@ import pandas as pd
 import yaml
 from functools import partial
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import json
 import argparse
 from decimal import Decimal
@@ -301,7 +302,7 @@ def plot_fit_stats(sample: list, config: dict):
             lreg = json.load(f)
             ax.errorbar(
                 lreg["slope"], 0 - 0.02 * i,
-                xerr=lreg["stderr"], color="gray",
+                xerr=lreg["stderr"], color="gray", markeredgewidth=0.75,
                 markeredgecolor="white", capsize=2, capthick=1,
                 marker='o', markersize=4, linestyle='none', zorder=10)
             galaxy = parse(sample[i])[0]
@@ -309,7 +310,7 @@ def plot_fit_stats(sample: list, config: dict):
                 x=-0.0925, y=0 - 0.02 * i, size=6.0, color="gray",
                 ha="right", va="center", s=f"Au{galaxy}")
             ax.annotate('', xy=(0, 0 - 0.02 * i),
-                        xytext=(0.08, 0 - 0.02 * i),
+                        xytext=(0.06, 0 - 0.02 * i),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
             slope_err = str(Decimal(str(round_to_1(lreg["stderr"]))))
@@ -323,12 +324,18 @@ def plot_fit_stats(sample: list, config: dict):
             ax.text(x=0.05, y=0 - 0.02 * i, size=6.0, color="black",
                     ha="center", va="bottom", s=pvalue_str)
             sample_slopes.append(lreg["slope"])
-    ax.plot([np.median(sample_slopes)] * 2, ax.get_ylim(), ls="--",
+    ax.plot([np.mean(sample_slopes)] * 2, ax.get_ylim(), ls="--",
             lw=0.75, color='gray', zorder=10)
-    median_str = str(np.abs(np.round(np.median(sample_slopes), 4)))
+    r = Rectangle((np.mean(sample_slopes) - np.std(sample_slopes),
+                   ax.get_ylim()[0]),
+                  2 * np.std(sample_slopes),
+                  np.diff(ax.get_ylim()),
+                  color="black", alpha=0.075, zorder=-10, lw=0)
+    ax.add_patch(r)
+    stat_str = str(np.abs(np.round(np.mean(sample_slopes), 4)))
     ax.text(x=-0.011, y=-0.555, size=6.0, color="gray",
             ha="left", va="bottom", rotation=90,
-            s=r"$-$" + median_str + " dex/ckpc")
+            s=r"$-$" + stat_str + " dex/ckpc")
 
     ax.text(x=0.02, y=0.02, size=6.0, color="black",
             ha="center", va="bottom", s="Slope [dex/ckpc]")
@@ -345,11 +352,11 @@ def plot_fit_stats(sample: list, config: dict):
                 reg["SlopeValue"], - 0.02 * (23 + i),
                 xerr=reg["SlopeErrValue"], markeredgecolor="white", capsize=2,
                 capthick=1, color=ref_color, marker='o', markersize=4,
-                linestyle='none', zorder=10)
+                linestyle='none', zorder=10, markeredgewidth=0.75)
             ax.text(x=-0.0925, y=- 0.02 * (23 + i), size=6.0, color=ref_color,
                     ha="right", va="center", s=reg["Label"])
             ax.annotate('', xy=(0, - 0.02 * (23 + i)),
-                        xytext=(0.08, - 0.02 * (23 + i)),
+                        xytext=(0.06, - 0.02 * (23 + i)),
                         arrowprops=dict(
                             arrowstyle="-", color='gainsboro', lw=0.25))
             slope_str = float_to_latex(reg["SlopeValue"]) + " $\pm$ " \
