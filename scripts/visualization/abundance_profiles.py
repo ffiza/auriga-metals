@@ -16,12 +16,13 @@ from auriga.images import figure_setup
 from auriga.mathematics import round_to_1, get_decimal_places
 from auriga.support import float_to_latex
 
-REF_PATHS = ["data/lemasle_2007.json",
-             "data/lemasle_2008.json",
+REF_PATHS = ["data/lemasle_2008.json",
              "data/luck_2011.json",
              "data/genovali_2014.json",
-             "data/lemasle_2018.json"]
-REF_COLORS = ["orange", "green", "red", "purple", "blue"]
+             "data/lemasle_2018.json",
+             "data/gaia_2023.json",
+             "data/yang_2025.json"]
+REF_COLORS = ["orange", "green", "red", "purple", "blue", "magenta"]
 
 
 def plot_iron_abundance_profile(sample: list, config: dict):
@@ -285,9 +286,9 @@ def plot_fit_stats(sample: list, config: dict):
     fig, ax = plt.subplots(figsize=(3.5, 4.5), ncols=1)
 
     ax.set_xlim(-0.09, 0)
-    ax.set_ylim(-0.56, 0.02)
+    ax.set_ylim(-0.58, 0.02)
     ax.set_xlabel(r"$\nabla \mathrm{[Fe/H]}$ [dex/ckpc]")
-    ax.set_yticks([- i * 0.02 for i in range(28)])
+    ax.set_yticks([- i * 0.02 for i in range(29)])
     ax.set_yticklabels([])
     ax.grid(True, ls='-', lw=0.25, c='gainsboro')
 
