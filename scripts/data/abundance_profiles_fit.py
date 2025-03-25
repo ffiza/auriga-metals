@@ -31,6 +31,7 @@ def read_data(simulation: str, config: dict) -> pd.DataFrame:
     s.add_metal_abundance(of="Fe", to="H")
     s.add_metal_abundance(of="O", to="H")
     s.add_metal_abundance(of="O", to="Fe")
+    s.add_stellar_age()
     s.tag_particles_by_region(
         disc_std_circ=config["DISC_STD_CIRC"],
         disc_min_circ=config["DISC_MIN_CIRC"],
@@ -46,7 +47,8 @@ def read_data(simulation: str, config: dict) -> pd.DataFrame:
         "[Fe/H]": s.metal_abundance["Fe/H"][mask],
         "[O/H]": s.metal_abundance["O/H"][mask],
         "[O/Fe]": s.metal_abundance["O/Fe"][mask],
-        "ComponentTag": s.region_tag[mask]}
+        "ComponentTag": s.region_tag[mask],
+        "StellarAge_Gyr": s.stellar_age[mask]}
 
     df = pd.DataFrame(props)
     df[~np.isfinite(df)] = np.nan
@@ -64,13 +66,16 @@ def fit_profiles(simulation: str, config: dict):
     disc_radius = gal_data["DiscRadius_kpc"][gal_data["Galaxy"] == galaxy]
     disc_radius = disc_radius.values[0]
 
-    min_radius = config[
-        "ABUNDANCE_PROFILE_FIT"]["MIN_DISC_RADIUS_FRAC"] * disc_radius
-    max_radius = config[
-        "ABUNDANCE_PROFILE_FIT"]["MAX_DISC_RADIUS_FRAC"] * disc_radius
+    min_radius = config["AB_PROF_FIT_MIN_DSC_RAD_FRAC"] * disc_radius
+    max_radius = config["AB_PROF_FIT_MAX_DSC_RAD_FRAC"] * disc_radius
+    min_age = config["AB_PROF_MIN_STELL_AGE_GYR"]
+    max_age = config["AB_PROF_MAX_STELL_AGE_GYR"]
+
     mask = (df["CylindricalRadius_ckpc"] <= max_radius) & \
         (df["CylindricalRadius_ckpc"] >= min_radius) & \
-            (df["ComponentTag"] == settings.component_tags["CD"])
+            (df["ComponentTag"] == settings.component_tags["CD"]) & \
+                (df["StellarAge_Gyr"] <= max_age) & \
+                    (df["StellarAge_Gyr"] >= min_age)
     x = df["CylindricalRadius_ckpc"][mask]
     y = df["[Fe/H]"][mask]
     lreg = linregress(x=x, y=y)

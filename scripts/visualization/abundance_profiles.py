@@ -59,10 +59,8 @@ def plot_iron_abundance_profile(sample: list, config: dict):
         ax = axs.flatten()[i]
         disc_radius = gal_data[
             "DiscRadius_kpc"][gal_data["Galaxy"] == galaxy].values[0]
-        min_radius_frac = config[
-            "ABUNDANCE_PROFILE_FIT"]["MIN_DISC_RADIUS_FRAC"]
-        max_radius_frac = config[
-            "ABUNDANCE_PROFILE_FIT"]["MAX_DISC_RADIUS_FRAC"]
+        min_radius_frac = config["AB_PROF_FIT_MIN_DSC_RAD_FRAC"]
+        max_radius_frac = config["AB_PROF_FIT_MAX_DSC_RAD_FRAC"]
 
         ax.plot(df["CylindricalRadius_ckpc"] / disc_radius,
                 df["[Fe/H]_CD_Stars"],

@@ -31,6 +31,7 @@ def read_data(simulation: str, config: dict) -> pd.DataFrame:
     s.add_metal_abundance(of="Fe", to="H")
     s.add_metal_abundance(of="O", to="H")
     s.add_metal_abundance(of="O", to="Fe")
+    s.add_stellar_age()
     s.tag_particles_by_region(
         disc_std_circ=config["DISC_STD_CIRC"],
         disc_min_circ=config["DISC_MIN_CIRC"],
@@ -49,7 +50,8 @@ def read_data(simulation: str, config: dict) -> pd.DataFrame:
         "[O/Fe]": s.metal_abundance["O/Fe"][mask],
         "ComponentTag": s.region_tag[mask],
         "Circularity": s.circularity[mask],
-        "NormalizedPotential": s.normalized_potential[mask]}
+        "NormalizedPotential": s.normalized_potential[mask],
+        "StellarAge_Gyr": s.stellar_age[mask]}
 
     df = pd.DataFrame(props)
     df[~np.isfinite(df)] = np.nan
@@ -69,45 +71,48 @@ def calculate_profile(simulation: str, config: dict):
     data = {}
 
     is_star = df["ParticleType"] == 4
+    is_age = (df["StellarAge_Gyr"] <= config["AB_PROF_MAX_STELL_AGE_GYR"]) \
+        & (df["StellarAge_Gyr"] >= config["AB_PROF_MIN_STELL_AGE_GYR"])
+
     for of, to in abundances:
         binned_stat, bin_edges, _ = binned_statistic(
-            x=df["CylindricalRadius_ckpc"][is_star],
-            values=df[f"[{of}/{to}]"][is_star],
+            x=df["CylindricalRadius_ckpc"][is_star & is_age],
+            values=df[f"[{of}/{to}]"][is_star & is_age],
             statistic=np.nanmean,
-            bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
-            range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
-                config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))
+            bins=config["AB_PROF_N_BINS"],
+            range=(config["AB_PROF_MIN_RADIUS_CKPC"],
+                   config["AB_PROF_MAX_RADIUS_CKPC"]))
         bin_centers = bin_edges[1:] - np.diff(bin_edges)[0] / 2
         data["CylindricalRadius_ckpc"] = bin_centers
         data[f"[{of}/{to}]_Stars"] = binned_stat
         data[f"[{of}/{to}]_Stars_Std"] = binned_statistic(
-            x=df["CylindricalRadius_ckpc"][is_star],
-            values=df[f"[{of}/{to}]"][is_star],
+            x=df["CylindricalRadius_ckpc"][is_star & is_age],
+            values=df[f"[{of}/{to}]"][is_star & is_age],
             statistic=np.nanstd,
-            bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
-            range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
-                config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
+            bins=config["AB_PROF_N_BINS"],
+            range=(config["AB_PROF_MIN_RADIUS_CKPC"],
+                config["AB_PROF_MAX_RADIUS_CKPC"]))[0]
         for i, c in enumerate(settings.components):
             is_component = df["ComponentTag"] == i
             is_finite = np.isfinite(df[f"[{of}/{to}]"])
             data[f"[{of}/{to}]_{c}_Stars"] = binned_statistic(
                 x=df["CylindricalRadius_ckpc"][
-                    is_star & is_component & is_finite],
+                    is_star & is_age & is_component & is_finite],
                 values=df[f"[{of}/{to}]"][
-                    is_star & is_component & is_finite],
+                    is_star & is_age & is_component & is_finite],
                 statistic=np.nanmean,
-                bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
-                range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
-                    config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
+                bins=config["AB_PROF_N_BINS"],
+                range=(config["AB_PROF_MIN_RADIUS_CKPC"],
+                    config["AB_PROF_MAX_RADIUS_CKPC"]))[0]
             data[f"[{of}/{to}]_{c}_Stars_Std"] = binned_statistic(
                 x=df["CylindricalRadius_ckpc"][
-                    is_star & is_component & is_finite],
+                    is_star & is_age & is_component & is_finite],
                 values=df[f"[{of}/{to}]"][
-                    is_star & is_component & is_finite],
+                    is_star & is_age & is_component & is_finite],
                 statistic=np.nanstd,
-                bins=config["ABUNDANCE_PROFILES"]["N_BINS"],
-                range=(config["ABUNDANCE_PROFILES"]["MIN_RADIUS_CKPC"],
-                    config["ABUNDANCE_PROFILES"]["MAX_RADIUS_CKPC"]))[0]
+                bins=config["AB_PROF_N_BINS"],
+                range=(config["AB_PROF_MIN_RADIUS_CKPC"],
+                    config["AB_PROF_MAX_RADIUS_CKPC"]))[0]
 
     data = pd.DataFrame(data)
     data = data.round(6)
