@@ -1,0 +1,10 @@
+{
+    "DOI": "10.3847/1538-3881/adba45",
+    "ADSURL": "https://ui.adsabs.harvard.edu/abs/2025AJ....169..214Y",
+    "Label": "Yang et al. (2025)",
+    "SlopeValue": -0.048,
+    "SlopeErrValue": 0.008,
+    "SlopeUnit": "dex/kpc",
+    "SlopeErrUnit": "dex/kpc",
+    "Notes": ["Stars in 5 kpc <= R_G <= 12 kpc)."]
+}
