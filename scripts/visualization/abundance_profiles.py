@@ -331,15 +331,34 @@ def plot_fit_stats(sample: list, config: dict):
                   np.diff(ax.get_ylim()),
                   color="black", alpha=0.075, zorder=-10, lw=0)
     ax.add_patch(r)
-    stat_str = str(np.abs(np.round(np.mean(sample_slopes), 4)))
-    ax.text(x=-0.011, y=-0.555, size=6.0, color="gray",
+    stat = np.round(np.mean(sample_slopes), 4)
+    stat_str = str(np.abs(stat))
+    ax.text(x=stat + 0.002, y=-0.565, size=6.0, color="gray",
             ha="left", va="bottom", rotation=90,
-            s=r"$-$" + stat_str + " dex/ckpc")
+            s=r"$-$" + stat_str + " dex/ckpc", zorder=20)
 
     ax.text(x=0.02, y=0.02, size=6.0, color="black",
             ha="center", va="bottom", s="Slope [dex/ckpc]")
     ax.text(x=0.05, y=0.02, size=6.0, color="black",
             ha="center", va="bottom", s=f"$p$-value")
+
+    # region Young Stars Average Gradient
+    slopes = []
+    for i, simulation in enumerate(sample):
+        with open(
+            f"results/{simulation}/FeH_abundance_profile_stars_fit_51.json",
+            'r') as f:
+            lreg = json.load(f)
+            slopes.append(lreg["slope"])
+    mean_slope = np.mean(slopes)
+    ax.plot([mean_slope] * 2, ax.get_ylim(), ls="--", lw=0.75,
+            color='lightseagreen', zorder=10)
+    stat = np.round(mean_slope, 4)
+    ax.text(x=stat + 0.002, y=-0.565, size=6.0, color="lightseagreen",
+            ha="left", va="bottom", rotation=90,
+            s=r"$-$" + str(np.abs(stat)) \
+                + " dex/ckpc (Stars younger than 1 Gyr)", zorder=20)
+    # endregion
 
     # region LiteratureFits
     for i in range(len(REF_PATHS)):
