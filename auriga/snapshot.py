@@ -360,6 +360,24 @@ class Snapshot:
                 self.vel[:, 0], self.vel[:, 1], self.vel[:, 2]
             )
 
+    def get_specific_angular_momentum(self) -> np.ndarray:
+        """
+        This method calculates the specific angular momentum of the
+        particles in the snapshot.
+        
+        Returns
+        -------
+        j : np.ndarray
+            The result is a NumPy array with the specific angular momentum of
+            each particle in kpc km/s.
+        """
+
+        if self.pos is None or self.vel is None:
+            raise ValueError("Position and velocity data not found.")
+
+        j = np.cross(self.pos, self.vel) * self.expansion_factor
+        return j
+
     def add_circularity(self) -> None:
         """
         This method calculates the circularity parameter for the stellar
