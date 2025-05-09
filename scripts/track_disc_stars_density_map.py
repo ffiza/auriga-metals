@@ -29,8 +29,8 @@ def read_data(simulation: str, config: dict,
     props = {
         "ID": s.ids[is_target],
         "ComponentTag": s.region_tag[is_target],
-        "yPosition_ckpc": s.pos[is_target, 1],
-        "zPosition_ckpc": s.pos[is_target, 2],
+        "yPosition_kpc": s.pos[is_target, 1],
+        "zPosition_kpc": s.pos[is_target, 2],
         "Circularity": s.circularity[is_target],
         "Mass_Msun": s.mass[is_target],
         "zAngularMomentum_kpckm/s": s.get_specific_angular_momentum()[
@@ -46,6 +46,7 @@ def read_data(simulation: str, config: dict,
     df.simulation = simulation
     df.time = s.time
     df.redshift = s.redshift
+    df.expansion_factor = s.expansion_factor
 
     return df
 
@@ -84,7 +85,6 @@ def get_user_input() -> dict:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True)
     parser.add_argument("--simulation", type=str, required=True)
-    parser.add_argument("--recalculate", action="store_true")
     args = parser.parse_args()
     return args
 
@@ -120,15 +120,15 @@ def create_figures(simulation: str, config: dict) -> None:
             continue
 
         # Create new dataframe with the properties need to create the figure
-        y_pos = this_df["yPosition_ckpc"].to_numpy()[idx]
+        y_pos = this_df["yPosition_kpc"].to_numpy()[idx]
         y_pos[idx == -1] = np.nan
-        z_pos = this_df["zPosition_ckpc"].to_numpy()[idx]
+        z_pos = this_df["zPosition_kpc"].to_numpy()[idx]
         z_pos[idx == -1] = np.nan
         mass = this_df["Mass_Msun"].to_numpy()[idx]
         mass[idx == -1] = np.nan
         data = pd.DataFrame({
-            "yPosition_ckpc": y_pos,
-            "zPosition_ckpc": z_pos,
+            "yPosition_kpc": y_pos * this_df.expansion_factor,
+            "zPosition_kpc": z_pos * this_df.expansion_factor,
             "Mass_Msun": mass,
             "ComponentAtBirth": component_tag_at_birth,
         })
@@ -190,7 +190,7 @@ def plot_density_map(data: pd.DataFrame) -> None:
                              boxstyle='round,pad=0.3', alpha=0.75))
 
     axbig.hist2d(
-        data["yPosition_ckpc"], data["zPosition_ckpc"],
+        data["yPosition_kpc"], data["zPosition_kpc"],
         weights=data["Mass_Msun"],
         bins=N_BINS, range=[[-BOX_SIZE / 2, BOX_SIZE / 2],
                             [-BOX_SIZE / 2, BOX_SIZE / 2]],
@@ -200,9 +200,9 @@ def plot_density_map(data: pd.DataFrame) -> None:
     component_axs = {"H": (2, 0), "B": (2, 1), "CD": (0, 2), "WD": (1, 2)}
     for c in settings.components:
         axs[component_axs[c]].hist2d(
-            data["yPosition_ckpc"][
+            data["yPosition_kpc"][
                 data["ComponentAtBirth"] == settings.component_tags[c]],
-            data["zPosition_ckpc"][
+            data["zPosition_kpc"][
                 data["ComponentAtBirth"] == settings.component_tags[c]],
             weights=data["Mass_Msun"][
                 data["ComponentAtBirth"] == settings.component_tags[c]],
@@ -221,7 +221,7 @@ def plot_density_map(data: pd.DataFrame) -> None:
                      transform=axs[-1, -2].transAxes)
     axs[-1, -2].text(s=f"Galaxy: Au{parse(data.simulation)[0]}", x=1.05, y=0.6,
                      ha="left", va="center", transform=axs[-1, -2].transAxes)
-    axs[-1, -2].text(s="Box: $100^3 \, \mathrm{ckpc}^3$", x=1.05, y=0.5,
+    axs[-1, -2].text(s="Box: $100^3 \, \mathrm{kpc}^3$", x=1.05, y=0.5,
                      ha="left", va="center", transform=axs[-1, -2].transAxes)
 
     fig.savefig(
