@@ -15,6 +15,7 @@ from auriga.images import figure_setup
 
 def read_data(simulation: str, config: dict,
               tag_in_situ: bool = False) -> tuple:
+    settings = Settings()
     s = Snapshot(simulation=simulation, loadonlytype=[0, 1, 2, 3, 4, 5])
     s.tag_particles_by_region(
         disc_std_circ=config["DISC_STD_CIRC"],
@@ -47,6 +48,13 @@ def read_data(simulation: str, config: dict,
     df.time = s.time
     df.redshift = s.redshift
     df.expansion_factor = s.expansion_factor
+
+    # Add additional data: vertical heights of cold disc
+    df.z80 = np.percentile(
+        np.abs(df["zPosition_kpc"][
+            df["ComponentTag"] == settings.component_tags["CD"]]),
+        80
+    )
 
     return df
 
@@ -136,6 +144,7 @@ def create_figures(simulation: str, config: dict) -> None:
         data.simulation = this_df.simulation
         data.redshift = this_df.redshift
         data.snapshot = i
+        data.z80 = this_df.z80
 
         # Create figure for this snapshot
         plot_density_map(data)
@@ -196,6 +205,13 @@ def plot_density_map(data: pd.DataFrame) -> None:
                             [-BOX_SIZE / 2, BOX_SIZE / 2]],
         cmap="viridis", zorder=-10,
         norm=mcolors.LogNorm(vmin=1E4, vmax=1E9))
+    
+    # Draw cold disc data
+    axbig.plot(axbig.get_xlim(), [data.z80] * 2, ls="--", lw=0.5, c="k")
+    axbig.plot(axbig.get_xlim(), [-data.z80] * 2, ls="--", lw=0.5, c="k")
+    for ax in axs.flatten():
+        ax.plot(ax.get_xlim(), [data.z80] * 2, ls="--", lw=0.5, c="k")
+        ax.plot(ax.get_xlim(), [-data.z80] * 2, ls="--", lw=0.5, c="k")
 
     component_axs = {"H": (2, 0), "B": (2, 1), "CD": (0, 2), "WD": (1, 2)}
     for c in settings.components:
@@ -221,7 +237,7 @@ def plot_density_map(data: pd.DataFrame) -> None:
                      transform=axs[-1, -2].transAxes)
     axs[-1, -2].text(s=f"Galaxy: Au{parse(data.simulation)[0]}", x=1.05, y=0.6,
                      ha="left", va="center", transform=axs[-1, -2].transAxes)
-    axs[-1, -2].text(s="Box: $100^3 \, \mathrm{kpc}^3$", x=1.05, y=0.5,
+    axs[-1, -2].text(s="Box [$\mathrm{kpc}^3$]: $100^3$", x=1.05, y=0.5,
                      ha="left", va="center", transform=axs[-1, -2].transAxes)
 
     fig.savefig(
