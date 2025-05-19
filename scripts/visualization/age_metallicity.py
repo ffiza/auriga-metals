@@ -8,6 +8,7 @@ Usage:          `python scripts/visualization/age_metalllicity.py --config 20`
 from matplotlib import pyplot as plt
 import pandas as pd
 import yaml
+import numpy as np
 import argparse
 
 from auriga.images import figure_setup
@@ -75,6 +76,7 @@ def make_plot(config: dict):
     axs[0].plot(x, y_mean - y_std, ls="--", c="black", zorder=11, lw=1.0)
     axs[0].plot(x, y_mean + y_std, ls="--", c="black", zorder=11, lw=1.0)
 
+    print("\n== Average Standard Deviation by Component ==")
     for i, c in enumerate(settings.components):
         ax = axs[i + 1]
         color = settings.component_colors[c]
@@ -86,6 +88,8 @@ def make_plot(config: dict):
         ax.plot(x, y_mean, ls="-", c=color, zorder=11, lw=1.0)
         ax.plot(x, y_mean + y_std, ls="--", c=color, zorder=11, lw=1.0)
         ax.plot(x, y_mean - y_std, ls="--", c=color, zorder=11, lw=1.0)
+        print(c.rjust(5) + ": " + str(np.round(np.mean(y_std), 3)))
+    print()
 
     axs[0].text(
         x=0.05, y=0.05, size=8.0, ha="left", va="bottom",
