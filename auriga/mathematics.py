@@ -3,6 +3,45 @@ from math import log10, floor
 from decimal import Decimal
 
 
+def weighted_percentile(data: np.ndarray, weights: np.ndarray,
+                        percentile: float) -> float:
+    """
+    This function performs a weighted percentile calculation using linear
+    interpolation. It assumes that all input arrays are 1D and of equal length.
+
+    Parameters
+    ----------
+    data: np.ndarray
+        1D array of values (e.g., positions of particles).
+    weights: np.ndarray
+        1D array of weights (e.g., masses of particles), same shape as `data`.
+    percentile: float
+        Percentile to compute, must be in the range [0, 100].
+
+    Returns
+    -------
+    float
+        The value below which the specified percentage of the weighted
+        data lies.
+    """
+    if data.shape != weights.shape:
+        raise ValueError("`data` and `weights` must be the same shape.")
+    if data.ndim != 1:
+        raise ValueError("`data` and `weights` must be 1D arrays.")
+    if not (0 <= percentile <= 100):
+        raise ValueError("`percentile` must be between 0 and 100.")
+
+    sorted_indices = np.argsort(data)
+    sorted_data = data[sorted_indices]
+    sorted_weights = weights[sorted_indices]
+
+    cumulative_weights = np.cumsum(sorted_weights)
+    total_weight = cumulative_weights[-1]
+    normalized_cumsum = cumulative_weights / total_weight
+
+    return np.interp(percentile / 100, normalized_cumsum, sorted_data)
+
+
 def linear(x: np.array, slope: float, intercept: float) -> np.array:
     """
     This method returns a linear function with the given data and parameters.
