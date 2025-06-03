@@ -479,13 +479,15 @@ def main() -> None:
                             "Circularity"],
             config=config)
 
-        with open(f"results/{args['simulation']}/wd_track_trajectories.json",
-                "w") as f:
+        with open(f"results/{args['simulation']}/"
+                  f"wd_track_trajectories{config['FILE_SUFFIX']}.json",
+                  "w") as f:
             json.dump(track_props , f)
     #endregion
 
     #region Plotting
-    with open(f"results/{args['simulation']}/wd_track_trajectories.json") as f:
+    with open(f"results/{args['simulation']}/"
+              f"wd_track_trajectories{config['FILE_SUFFIX']}.json") as f:
         track_props = json.load(f)
     for pid in list(track_props.keys())[2:]:
         plot_trajectories(time=track_props["Time_Gyr"],
