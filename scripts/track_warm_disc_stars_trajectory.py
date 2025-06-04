@@ -495,18 +495,22 @@ def main() -> None:
     #endregion
 
     #region Plotting
+    BIRTH_COMPONENT: str = "CD"
+    TODAY_COMPONENT: str = "CD"
     with open(f"results/{args['simulation']}/"
-              f"wd_track_trajectories{config['FILE_SUFFIX']}.json") as f:
+              f"wd_track_trajectories_{BIRTH_COMPONENT}_to_"
+              f"{TODAY_COMPONENT}{config['FILE_SUFFIX']}.json") as f:
         track_props = json.load(f)
-    for pid in list(track_props.keys())[2:]:
-        plot_trajectories(time=track_props["Time_Gyr"],
-                          df=pd.DataFrame(track_props[pid]),
-                          config=config, simulation=args["simulation"],
-                          file_label=pid)
-    plot_all_temporal_evolution(
-        df=track_props,
-        config=config,
-        simulation=args["simulation"])
+    for pid in list(track_props.keys())[2:-4]:
+        plot_trajectories(
+            time=track_props["Time_Gyr"],
+            df=pd.DataFrame(track_props[pid]),
+            config=config, simulation=args["simulation"],
+            file_label=f"{BIRTH_COMPONENT}_to_{TODAY_COMPONENT}_{pid}")
+    # plot_all_temporal_evolution(
+    #     df=track_props,
+    #     config=config,
+    #     simulation=args["simulation"])
     #endregion
 
 
