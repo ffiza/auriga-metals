@@ -456,14 +456,16 @@ def main() -> None:
 
         # Select some N_TRACK IDs but given circularity delta condition
         N_TRACK: int = 10
-        BIRTH_COMPONENT: int = settings.component_tags["CD"]
-        TODAY_COMPONENT: str = settings.component_tags["WD"]
+        BIRTH_COMPONENT: str = "CD"
+        TODAY_COMPONENT: str = "WD"
         CIRCULARITY_DELTA_RANGE: tuple = (-0.4, -0.35)
         AGE_RANGE_GYR: tuple = (10.0, 11.1)
+        BIRTH_COMPONENT_TAG: int = settings.component_tags[BIRTH_COMPONENT]
+        TODAY_COMPONENT_TAG: str = settings.component_tags[TODAY_COMPONENT]
         ids_to_track = np.random.choice(
             df["ID"][
-                (df["ComponentTagAtBirth"] == BIRTH_COMPONENT) \
-                    & (df["ComponentTag"] == TODAY_COMPONENT) \
+                (df["ComponentTagAtBirth"] == BIRTH_COMPONENT_TAG) \
+                    & (df["ComponentTag"] == TODAY_COMPONENT_TAG) \
                     & (df["CircularityDelta"] > CIRCULARITY_DELTA_RANGE[0]) \
                     & (df["CircularityDelta"] < CIRCULARITY_DELTA_RANGE[1]) \
                     & (df["StellarAge_Gyr"] > AGE_RANGE_GYR[0]) \
@@ -479,8 +481,15 @@ def main() -> None:
                             "Circularity"],
             config=config)
 
+        # Add metadata to dictionary
+        track_props["BirthComponent"] = BIRTH_COMPONENT
+        track_props["TodayComponent"] = TODAY_COMPONENT
+        track_props["CircularityDeltaRange"] = CIRCULARITY_DELTA_RANGE
+        track_props["AgeRange_Gyr"] = AGE_RANGE_GYR
+
         with open(f"results/{args['simulation']}/"
-                  f"wd_track_trajectories{config['FILE_SUFFIX']}.json",
+                  f"wd_track_trajectories_{BIRTH_COMPONENT}_to_"
+                  f"{TODAY_COMPONENT}{config['FILE_SUFFIX']}.json",
                   "w") as f:
             json.dump(track_props , f)
     #endregion
