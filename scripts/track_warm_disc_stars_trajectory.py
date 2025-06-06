@@ -334,105 +334,6 @@ def plot_trajectories(time: np.ndarray, df: pd.DataFrame, config: dict,
     plt.close(fig)
 
 
-def plot_all_temporal_evolution(
-        df: dict,
-        config: dict,
-        simulation: str) -> None:
-    
-    def plot_lines_with_average(
-            ax: plt.Axes,
-            x: np.ndarray,
-            ys: list) -> None:
-        for y in ys:
-            ax.plot(x, y, lw=1, color="gainsboro", zorder=10)
-        ax.plot(x[x >= 4.0],
-                np.nanmedian(ys, axis=0)[x >= 4.0],
-                lw=1, color="black", zorder=12)
-
-    pids = list(df.keys())[2:]
-
-    fig = plt.figure(figsize=(7, 4.5))
-    gs = fig.add_gridspec(nrows=2, ncols=3, hspace=0.35, wspace=0.4)
-    axs = gs.subplots(sharex=False, sharey=False)
-
-    axs[0, 0].set_xlabel("Time [Gyr]")
-    axs[0, 0].set_ylabel(r"$r_{xy}$ [kpc]")
-    axs[0, 0].set_xlim(0, 14)
-    axs[0, 0].set_ylim(0, 20)
-    axs[0, 0].set_xticks([0, 2, 4, 6, 8, 10, 12, 14])
-    axs[0, 0].set_yticks([0, 5, 10, 15, 20])
-    plot_lines_with_average(
-        ax=axs[0, 0],
-        x=np.array(df["Time_Gyr"]),
-        ys=[windowed_average(
-                x=np.array(df["Time_Gyr"]),
-                y=np.sqrt(np.array(df[pid]["xPosition_kpc"])**2 \
-                    + np.array(df[pid]["yPosition_kpc"])**2),
-                window_length=1.0) for pid in pids]
-    )
-    axs[0, 0].text(
-        0.05, 0.95,
-        r"$\texttt{Au" + str(parse(simulation)[0]) + "}$",
-        transform=axs[0, 0].transAxes, size=6.0, ha='left',
-        va='top')
-
-    axs[0, 1].set_xlabel("Time [Gyr]")
-    axs[0, 1].set_ylabel(r"$\left| z \right|$ [kpc]")
-    axs[0, 1].set_xlim(0, 14)
-    axs[0, 1].set_ylim(0, 10)
-    axs[0, 1].set_xticks([0, 2, 4, 6, 8, 10, 12, 14])
-    axs[0, 1].set_yticks([0, 2, 4, 6, 8, 10])
-    plot_lines_with_average(
-        ax=axs[0, 1],
-        x=np.array(df["Time_Gyr"]),
-        ys=[windowed_average(
-                x=np.array(df["Time_Gyr"]),
-                y=np.abs(df[pid]["zPosition_kpc"]),
-                window_length=1.0) for pid in pids]
-    )
-    
-    axs[0, 2].set_xlabel("Time [Gyr]")
-    axs[0, 2].set_ylabel(r"$j_z / \left| \mathbf{j} \right|$")
-    axs[0, 2].set_xlim(0, 14)
-    axs[0, 2].set_ylim(-1, 1)
-    axs[0, 2].set_xticks([0, 2, 4, 6, 8, 10, 12, 14])
-    axs[0, 2].set_yticks([-1, -0.5, 0, 0.5, 1])
-    plot_lines_with_average(
-        ax=axs[0, 2],
-        x=np.array(df["Time_Gyr"]),
-        ys=[windowed_average(
-                x=np.array(df["Time_Gyr"]),
-                y=np.array(df[pid]["zAngularMomentumFraction"]),
-                window_length=1.0) for pid in pids]
-    )
-    
-    axs[1, 0].set_xlabel("Time [Gyr]")
-    axs[1, 0].set_ylabel(r"$\epsilon$")
-    axs[1, 0].set_xlim(0, 14)
-    axs[1, 0].set_ylim(-1.5, 1.5)
-    axs[1, 0].set_xticks([0, 2, 4, 6, 8, 10, 12, 14])
-    axs[1, 0].set_yticks([-1.5, -1, -0.5, 0, 0.5, 1, 1.5])
-    plot_lines_with_average(
-        ax=axs[1, 0],
-        x=np.array(df["Time_Gyr"]),
-        ys=[windowed_average(
-                x=np.array(df["Time_Gyr"]),
-                y=np.array(df[pid]["Circularity"]),
-                window_length=1.0) for pid in pids]
-    )
-    
-    axs[1, 1].axis("off")
-    axs[1, 2].axis("off")
-    
-    for ax in axs.flatten():  # Make all plots square
-        ax.set_aspect(np.diff(ax.get_xlim() / np.diff(ax.get_ylim())))
-
-    fig.savefig(
-        f"images/warm_disc_star_tracking_trajectory/{simulation}/"
-        f"temporal_evolution{config['FILE_SUFFIX']}.pdf")
-    plt.close(fig)
-
-
 def main() -> None:
     settings = Settings()
     figure_setup()
@@ -507,10 +408,6 @@ def main() -> None:
             df=pd.DataFrame(track_props[pid]),
             config=config, simulation=args["simulation"],
             file_label=f"{BIRTH_COMPONENT}_to_{TODAY_COMPONENT}_{pid}")
-    # plot_all_temporal_evolution(
-    #     df=track_props,
-    #     config=config,
-    #     simulation=args["simulation"])
     #endregion
 
 
