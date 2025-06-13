@@ -4,7 +4,6 @@ import yaml
 import argparse
 import warnings
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 
 from auriga.snapshot import Snapshot
 from auriga.support import find_indices
@@ -31,7 +30,7 @@ def read_data(simulation: str,
     props = {
         "ID": s.ids[is_target],
         "ComponentTag": s.region_tag[is_target],
-        "zPosition_ckpc": s.pos[is_target, 2],
+        "zPosition_kpc": s.pos[is_target, 2] * s.expansion_factor,
         "Circularity": s.circularity[is_target],
         "zAngularMomentumFraction": \
             s.get_specific_angular_momentum()[is_target, 2] \
@@ -108,12 +107,12 @@ def calculate_stats(simulation: str, config: dict) -> None:
     prop_names = [
         "Time_Gyr",
         "ExpansionFactor",
-        "zPositionMedian_ckpc",
-        "zPosition16thPercentile_ckpc",
-        "zPosition84thPercentile_ckpc",
-        "zPositionAbsMedian_ckpc",
-        "zPositionAbs16thPercentile_ckpc",
-        "zPositionAbs84thPercentile_ckpc",
+        "zPositionMedian_kpc",
+        "zPosition16thPercentile_kpc",
+        "zPosition84thPercentile_kpc",
+        "zPositionAbsMedian_kpc",
+        "zPositionAbs16thPercentile_kpc",
+        "zPositionAbs84thPercentile_kpc",
         "zAngularMomFracMedian",
         "zAngularMomFrac16thPercentile",
         "zAngularMomFrac84thPercentile",
@@ -148,21 +147,21 @@ def calculate_stats(simulation: str, config: dict) -> None:
 
             stats[key]["Time_Gyr"][i] = this_df.time
             stats[key]["ExpansionFactor"][i] = this_df.expansion_factor
-            stats[key]["zPositionMedian_ckpc"][i] = \
-                np.nanmedian(this_df["zPosition_ckpc"].to_numpy()[idx])
-            stats[key]["zPosition16thPercentile_ckpc"][i] = \
-                np.nanpercentile(this_df["zPosition_ckpc"].to_numpy()[idx], 16)
-            stats[key]["zPosition84thPercentile_ckpc"][i] = \
-                np.nanpercentile(this_df["zPosition_ckpc"].to_numpy()[idx], 84)
-            stats[key]["zPositionAbsMedian_ckpc"][i] = \
+            stats[key]["zPositionMedian_kpc"][i] = \
+                np.nanmedian(this_df["zPosition_kpc"].to_numpy()[idx])
+            stats[key]["zPosition16thPercentile_kpc"][i] = \
+                np.nanpercentile(this_df["zPosition_kpc"].to_numpy()[idx], 16)
+            stats[key]["zPosition84thPercentile_kpc"][i] = \
+                np.nanpercentile(this_df["zPosition_kpc"].to_numpy()[idx], 84)
+            stats[key]["zPositionAbsMedian_kpc"][i] = \
                 np.nanmedian(np.abs(
-                    this_df["zPosition_ckpc"].to_numpy())[idx])
-            stats[key]["zPositionAbs16thPercentile_ckpc"][i] = \
+                    this_df["zPosition_kpc"].to_numpy())[idx])
+            stats[key]["zPositionAbs16thPercentile_kpc"][i] = \
                 np.nanpercentile(np.abs(
-                    this_df["zPosition_ckpc"].to_numpy())[idx], 16)
-            stats[key]["zPositionAbs84thPercentile_ckpc"][i] = \
+                    this_df["zPosition_kpc"].to_numpy())[idx], 16)
+            stats[key]["zPositionAbs84thPercentile_kpc"][i] = \
                 np.nanpercentile(np.abs(
-                    this_df["zPosition_ckpc"].to_numpy())[idx], 84)
+                    this_df["zPosition_kpc"].to_numpy())[idx], 84)
             stats[key]["zAngularMomFracMedian"][i] = \
                 np.nanmedian(
                     this_df["zAngularMomentumFraction"].to_numpy()[idx])
@@ -192,13 +191,13 @@ def create_figure(dfs: list, config: dict, simulation: str,
     axs = gs.subplots(sharex=False, sharey=False)
 
     axs[0, 0].set_xlabel("Time [Gyr]")
-    axs[0, 0].set_ylabel(r"$\left| z \right|$ [ckpc]")
+    axs[0, 0].set_ylabel(r"$\left| z \right|$ [kpc]")
     axs[0, 0].set_xlim(0, 14)
     axs[0, 0].set_ylim(0, 5)
     for i, df in enumerate(dfs):
         axs[0, 0].plot(
             df["Time_Gyr"],
-            df["zPositionAbsMedian_ckpc"],
+            df["zPositionAbsMedian_kpc"],
             ls="-", lw=1.0, color=df_colors[i],
         )
     axs[0, 0].text(
@@ -206,13 +205,13 @@ def create_figure(dfs: list, config: dict, simulation: str,
         size=7, transform=axs[0, 0].transAxes, ha='right', va='top')
     
     axs[0, 1].set_xlabel("Time [Gyr]")
-    axs[0, 1].set_ylabel(r"$z$ [ckpc]")
+    axs[0, 1].set_ylabel(r"$z$ [kpc]")
     axs[0, 1].set_xlim(0, 14)
     axs[0, 1].set_ylim(-1, 1)
     for i, df in enumerate(dfs):
         axs[0, 1].plot(
             df["Time_Gyr"],
-            df["zPositionMedian_ckpc"],
+            df["zPositionMedian_kpc"],
             ls="-", lw=1.0, color=df_colors[i], label=df_labels[i]
         )
     axs[0, 1].legend(loc="lower right", fontsize=6, framealpha=0)
@@ -249,6 +248,10 @@ def create_figure(dfs: list, config: dict, simulation: str,
 
 
 def main() -> None:
+    BLUE = "\033[94m"
+    UNDERLINE = "\033[4m"
+    RESET = "\033[0m"
+
     figure_setup()
     args = get_user_input()
     config = yaml.safe_load(open(f"configs/{args['config']}.yml"))
@@ -261,10 +264,13 @@ def main() -> None:
                       "script to take effect.")
 
     if args["recalculate"]:
-        print("\n> Calculating statistics...")
+        s = f"Au{parse(args['simulation'])[0]}".rjust(4)
+        print(f"{BLUE}> Processing {UNDERLINE}{s}{RESET}{BLUE}... {BLUE}",
+              end="", flush=True)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
             calculate_stats(simulation=args["simulation"], config=config)
+        print(f"{BLUE}Done.{BLUE}", flush=True)
 
     if args["plot"]:
         dfs = [
@@ -273,7 +279,7 @@ def main() -> None:
             pd.read_csv(f"{paths.results}track_results_CD_to_WD"
                         f"{config['FILE_SUFFIX']}.csv"),
         ]
-        df_labels = [r"CD $\to$ CD", r"WD $\to$ WD"]
+        df_labels = [r"CD $\to$ CD", r"CD $\to$ WD"]
         df_colors = ["tab:red", "tab:orange"]
         create_figure(dfs, config, args["simulation"], df_labels, df_colors)
 
