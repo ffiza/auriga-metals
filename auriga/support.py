@@ -56,11 +56,15 @@ def timer(method: Callable) -> Callable:
         A wrapper.
     """
     def wrapper(*args, **kw):
-        start_time = int(round(time.time()))
+        BLUE = "\033[94m"
+        RESET = "\033[0m"
+        start_time = time.time()
         result = method(*args, **kw)
-        end_time = int(round(time.time()))
+        end_time = time.time()
+        delta_time = int((end_time - start_time) / 60)
+        delta_time_str = str(delta_time).rjust(3)
 
-        stdout.write(f"Timer: {end_time-start_time} s. ")
+        stdout.write(f"{BLUE}Timer: {delta_time_str} min. {RESET}")
         return result
 
     return wrapper
