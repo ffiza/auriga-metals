@@ -11,6 +11,7 @@ from auriga.parser import parse
 from auriga.paths import Paths
 from auriga.settings import Settings
 from auriga.images import figure_setup
+from auriga.support import timer
 
 
 def read_data(simulation: str,
@@ -102,6 +103,7 @@ def get_user_input() -> dict:
     return vars(args)
 
 
+@timer
 def calculate_stats(simulation: str, config: dict) -> None:
     track_ids = get_track_ids(simulation, config)
     prop_names = [
@@ -265,7 +267,7 @@ def main() -> None:
 
     if args["recalculate"]:
         s = f"Au{parse(args['simulation'])[0]}".rjust(4)
-        print(f"{BLUE}> Processing {UNDERLINE}{s}{RESET}{BLUE}... {BLUE}",
+        print(f"{BLUE}Processing {UNDERLINE}{s}{RESET}{BLUE}... {BLUE}",
               end="", flush=True)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
