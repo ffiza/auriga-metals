@@ -273,8 +273,15 @@ def plot_property(df_prop: str, config: dict,
             idx = gals.index(parse(simulation)[0])
             bar_formation_time = Cosmology().present_time \
                 - bar_data["Data"][idx]["t_bar"]
-            ax.plot([bar_formation_time] * 2,
-                    ax.get_ylim(), color="tab:purple", ls=(0, (5, 1)))
+            idx_min = np.nanargmin(
+                np.abs(dfs[1]["Time_Gyr"].to_numpy() - bar_formation_time))
+            ax.annotate("",
+                        xytext=(bar_formation_time,
+                                dfs[1][df_prop].to_numpy()[idx_min] \
+                                    - 0.15 * np.diff(ax.get_ylim())[0]),
+                        xy=(bar_formation_time,
+                            dfs[1][df_prop].to_numpy()[idx_min]),
+                        arrowprops=dict(arrowstyle="->", color="black"))
 
         ax.text(x=0.95, y=0.05,
                 s=r"$\texttt{" + label + "}$",
