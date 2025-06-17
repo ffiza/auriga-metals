@@ -4,6 +4,7 @@ import yaml
 import argparse
 import warnings
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 from auriga.snapshot import Snapshot
 from auriga.support import find_indices
@@ -51,6 +52,12 @@ def read_data(simulation: str,
     df.expansion_factor = s.expansion_factor
 
     return df
+
+
+def read_merger_data(simulation):
+    mergers = np.load(f'data/iza_2022/{simulation}/subhaloes.npy')
+    r200 = np.load(f'data/iza_2022/{simulation}/R200.npy')
+    return mergers, r200
 
 
 def get_track_ids(simulation: str, config: dict) -> dict:
@@ -192,9 +199,13 @@ def calculate_stats(simulation: str, config: dict) -> None:
 
 
 def plot_property(df_prop: str, config: dict,
-                     ylim: tuple, yticks: list, ylabel: str,
-                     filename: str) -> None:
+                  ylim: tuple, yticks: list, ylabel: str,
+                  filename: str) -> None:
     settings = Settings()
+
+    DISTANCE_FRAC = 0.3
+    FS_MIN = 0.01
+
     fig = plt.figure(figsize=(7, 8))
     gs = fig.add_gridspec(nrows=6, ncols=4, hspace=0.0, wspace=0.0)
     axs = gs.subplots(sharex=True, sharey=True)
@@ -236,6 +247,18 @@ def plot_property(df_prop: str, config: dict,
                 df[df_prop].to_numpy()[is_finite],
                 ls="-", lw=1.0, color=df_colors[i],
             )
+
+        # Indicate mergers
+        mergers, r200 = read_merger_data(simulation)
+        for merger in mergers:
+            if merger[2] < DISTANCE_FRAC * r200[int(merger[1]-15), 2] \
+                and merger[4] > FS_MIN and merger[0] > 0:
+                rect = patches.Rectangle((merger[0], ax.get_ylim()[0]),
+                                         0.2, np.diff(ax.get_ylim())[0],
+                                         linewidth=1, edgecolor='none',
+                                         facecolor='#dbdbdb', zorder=-1)
+                ax.add_patch(rect)
+
         ax.text(x=0.95, y=0.05,
                 s=r"$\texttt{" + label + "}$",
                 size=6.0, transform=ax.transAxes,
