@@ -4,7 +4,7 @@
   "Label": "López et al. (2025)",
   "Data": [
     {
-      "Galaxy": "Au09",
+      "Galaxy": 9,
       "t_bar": 6.50,
       "t_bp_vw_1": null,
       "t_bp_vw_2": null,
@@ -12,7 +12,7 @@
       "t_bp_c": 5.38
     },
     {
-      "Galaxy": "Au10",
+      "Galaxy": 10,
       "t_bar": 6.17,
       "t_bp_vw_1": null,
       "t_bp_vw_2": null,
@@ -20,7 +20,7 @@
       "t_bp_c": 4.58
     },
     {
-      "Galaxy": "Au11",
+      "Galaxy": 11,
       "t_bar": 3.96,
       "t_bp_vw_1": null,
       "t_bp_vw_2": null,
@@ -28,7 +28,7 @@
       "t_bp_c": 1.98
     },
     {
-      "Galaxy": "Au13",
+      "Galaxy": 13,
       "t_bar": 3.27,
       "t_bp_vw_1": 2.48,
       "t_bp_vw_2": null,
@@ -36,7 +36,7 @@
       "t_bp_c": 1.66
     },
     {
-      "Galaxy": "Au17",
+      "Galaxy": 17,
       "t_bar": 9.16,
       "t_bp_vw_1": null,
       "t_bp_vw_2": null,
@@ -44,7 +44,7 @@
       "t_bp_c": 7.90
     },
     {
-      "Galaxy": "Au18",
+      "Galaxy": 18,
       "t_bar": 7.90,
       "t_bp_vw_1": 4.08,
       "t_bp_vw_2": 6.99,
@@ -52,7 +52,7 @@
       "t_bp_c": 0.81
     },
     {
-      "Galaxy": "Au22",
+      "Galaxy": 22,
       "t_bar": 7.62,
       "t_bp_vw_1": null,
       "t_bp_vw_2": null,
@@ -60,7 +60,7 @@
       "t_bp_c": 5.73
     },
     {
-      "Galaxy": "Au23",
+      "Galaxy": 23,
       "t_bar": 4.42,
       "t_bp_vw_1": null,
       "t_bp_vw_2": null,
@@ -68,7 +68,7 @@
       "t_bp_c": 2.79
     },
     {
-      "Galaxy": "Au26",
+      "Galaxy": 26,
       "t_bar": 3.62,
       "t_bp_vw_1": null,
       "t_bp_vw_2": null,
