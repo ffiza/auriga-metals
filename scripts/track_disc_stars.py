@@ -251,8 +251,11 @@ def plot_property(df_prop: str, config: dict,
             ax.plot(
                 df["Time_Gyr"].to_numpy()[is_finite],
                 df[df_prop].to_numpy()[is_finite],
-                ls="-", lw=1.0, color=df_colors[i],
+                ls="-", lw=1.0, color=df_colors[i], label=df_labels[i],
             )
+        
+        if galaxy == 16:
+            ax.legend(loc="lower left", framealpha=0, fontsize=5)
 
         # Indicate mergers
         mergers, r200 = read_merger_data(simulation)
