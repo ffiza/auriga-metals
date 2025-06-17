@@ -96,10 +96,15 @@ def get_track_ids(simulation: str, config: dict) -> dict:
 def get_user_input() -> dict:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True)
-    parser.add_argument("--simulation", type=str, required=True)
+    parser.add_argument("--simulation", type=str, required=False)
     parser.add_argument("--recalculate", action="store_true")
     parser.add_argument("--plot", action="store_true")
     args = parser.parse_args()
+
+    if args.recalculate and args.simulation is None:
+        parser.error("--simulation is required when --"
+                     "recalculate is specified.")
+
     return vars(args)
 
 
@@ -186,66 +191,61 @@ def calculate_stats(simulation: str, config: dict) -> None:
             f"{paths.results}track_results_{key}{config['FILE_SUFFIX']}.csv")
 
 
-def create_figure(dfs: list, config: dict, simulation: str,
-                  df_labels: list, df_colors: list) -> None:
-    fig = plt.figure(figsize=(5, 5))
-    gs = fig.add_gridspec(nrows=2, ncols=2, hspace=0.35, wspace=0.35)
-    axs = gs.subplots(sharex=False, sharey=False)
+def plot_property(df_prop: str, config: dict,
+                     ylim: tuple, yticks: list, ylabel: str,
+                     filename: str) -> None:
+    settings = Settings()
+    fig = plt.figure(figsize=(7, 8))
+    gs = fig.add_gridspec(nrows=6, ncols=4, hspace=0.0, wspace=0.0)
+    axs = gs.subplots(sharex=True, sharey=True)
 
-    axs[0, 0].set_xlabel("Time [Gyr]")
-    axs[0, 0].set_ylabel(r"$\left| z \right|$ [kpc]")
-    axs[0, 0].set_xlim(0, 14)
-    axs[0, 0].set_ylim(0, 5)
-    for i, df in enumerate(dfs):
-        axs[0, 0].plot(
-            df["Time_Gyr"],
-            df["zPositionAbsMedian_kpc"],
-            ls="-", lw=1.0, color=df_colors[i],
-        )
-    axs[0, 0].text(
-        x=0.95, y=0.95, s=r"$\texttt{Au" + str(parse(simulation)[0]) + "}$",
-        size=7, transform=axs[0, 0].transAxes, ha='right', va='top')
-    
-    axs[0, 1].set_xlabel("Time [Gyr]")
-    axs[0, 1].set_ylabel(r"$z$ [kpc]")
-    axs[0, 1].set_xlim(0, 14)
-    axs[0, 1].set_ylim(-1, 1)
-    for i, df in enumerate(dfs):
-        axs[0, 1].plot(
-            df["Time_Gyr"],
-            df["zPositionMedian_kpc"],
-            ls="-", lw=1.0, color=df_colors[i], label=df_labels[i]
-        )
-    axs[0, 1].legend(loc="lower right", fontsize=6, framealpha=0)
-    
-    axs[1, 0].set_xlabel("Time [Gyr]")
-    axs[1, 0].set_ylabel(r"$\epsilon = j_z / j_\mathrm{circ}$")
-    axs[1, 0].set_xlim(0, 14)
-    axs[1, 0].set_ylim(-1.2, 1.2)
-    for i, df in enumerate(dfs):
-        axs[1, 0].plot(
-            df["Time_Gyr"],
-            df["CircularityMedian"],
-            ls="-", lw=1.0, color=df_colors[i],
-        )
+    for ax in axs.flatten():
+        ax.tick_params(which='both', direction="in")
+        if ax == axs[-1, -1]: ax.axis("off")
+        ax.set_xlim(0, 14)
+        ax.set_xticks([2, 4, 6, 8, 10, 12])
+        ax.set_ylim(ylim)
+        ax.set_yticks(yticks)
+        ax.set_axisbelow(True)
+        if ax.get_subplotspec().is_last_row() or ax == axs[-2, -1]:
+            ax.set_xlabel(r'Time [Gyr]')
+            ax.tick_params(labelbottom=True)
+        if ax.get_subplotspec().is_first_col():
+            ax.set_ylabel(ylabel)
 
-    axs[1, 1].set_xlabel("Time [Gyr]")
-    axs[1, 1].set_ylabel(r"$j_z / \left| \mathbf{j} \right|$")
-    axs[1, 1].set_xlim(0, 14)
-    axs[1, 1].set_ylim(-1, 1)
-    for i, df in enumerate(dfs):
-        axs[1, 1].plot(
-            df["Time_Gyr"],
-            df["zAngularMomFracMedian"],
-            ls="-", lw=1.0, color=df_colors[i],
-        )
-
-    for ax in axs.flatten():  # Make all panels square
-        ax.set_aspect(np.diff(ax.get_xlim() / np.diff(ax.get_ylim())))
+    for i in range(len(settings.groups["Included"])):
+        ax = axs.flatten()[i]
+        galaxy = settings.groups["Included"][i]
+        simulation = f"au{galaxy}_or_l4"
+        paths = Paths(parse(simulation)[0],
+                      parse(simulation)[1],
+                      parse(simulation)[2])
+        label = f"Au{galaxy}"
+        dfs = [
+            pd.read_csv(f"{paths.results}track_results_CD_to_CD"
+                        f"{config['FILE_SUFFIX']}.csv"),
+            pd.read_csv(f"{paths.results}track_results_CD_to_WD"
+                        f"{config['FILE_SUFFIX']}.csv"),
+        ]
+        df_labels = [r"CD $\to$ CD", r"CD $\to$ WD"]
+        df_colors = ["tab:red", "tab:orange"]
+        for i, df in enumerate(dfs):
+            is_finite = np.isfinite(df["CircularityMedian"].to_numpy())
+            ax.plot(
+                df["Time_Gyr"].to_numpy()[is_finite],
+                df[df_prop].to_numpy()[is_finite],
+                ls="-", lw=1.0, color=df_colors[i],
+            )
+        ax.text(x=0.95, y=0.05,
+                s=r"$\texttt{" + label + "}$",
+                size=6.0, transform=ax.transAxes,
+                ha='right', va='bottom',
+                )
 
     fig.savefig(
-        f"images/warm_disc_star_tracking/{simulation}/"
-        f"temporal_evolution{config['FILE_SUFFIX']}.pdf")
+        "images/warm_disc_star_tracking/"
+        f"{filename}{config['FILE_SUFFIX']}.pdf")
+
     plt.close(fig)
 
 
@@ -257,9 +257,6 @@ def main() -> None:
     figure_setup()
     args = get_user_input()
     config = yaml.safe_load(open(f"configs/{args['config']}.yml"))
-    paths = paths = Paths(parse(args["simulation"])[0],
-                          parse(args["simulation"])[1],
-                          parse(args["simulation"])[2])
 
     if not args["recalculate"] and not args["plot"]:
         warnings.warn("Either pass --recalculate and/or --plot for this "
@@ -275,15 +272,22 @@ def main() -> None:
         print(f"{BLUE}Done.{BLUE}", flush=True)
 
     if args["plot"]:
-        dfs = [
-            pd.read_csv(f"{paths.results}track_results_CD_to_CD"
-                        f"{config['FILE_SUFFIX']}.csv"),
-            pd.read_csv(f"{paths.results}track_results_CD_to_WD"
-                        f"{config['FILE_SUFFIX']}.csv"),
-        ]
-        df_labels = [r"CD $\to$ CD", r"CD $\to$ WD"]
-        df_colors = ["tab:red", "tab:orange"]
-        create_figure(dfs, config, args["simulation"], df_labels, df_colors)
+        plot_property(df_prop="CircularityMedian", config=config,
+                         ylim=(-1.5, 1.5), yticks=[-1, -0.5, 0, 0.5, 1],
+                         ylabel=r'$\epsilon = j_z \, j_\mathrm{circ}^{-1}$',
+                         filename="circularity")
+        plot_property(df_prop="zPositionAbsMedian_kpc", config=config,
+                         ylim=(0, 3), yticks=[0.5, 1, 1.5, 2, 2.5],
+                         ylabel=r'$\left| z \right|$ [kpc]',
+                         filename="zabs")
+        plot_property(df_prop="zPositionMedian_kpc", config=config,
+                         ylim=(-1, 1), yticks=[-0.5, 0, 0.5],
+                         ylabel=r'$z$ [kpc]',
+                         filename="z")
+        plot_property(df_prop="zAngularMomFracMedian", config=config,
+                         ylim=(-1.1, 1.1), yticks=[-1, -0.5, 0, 0.5, 1],
+                         ylabel=r'$j_z / \left| \mathbf{j} \right|$',
+                         filename="jzfrac")
 
 
 if __name__ == "__main__":
