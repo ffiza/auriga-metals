@@ -3,6 +3,7 @@ import pandas as pd
 import yaml
 import argparse
 import warnings
+import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
@@ -13,6 +14,7 @@ from auriga.paths import Paths
 from auriga.settings import Settings
 from auriga.images import figure_setup
 from auriga.support import timer
+from auriga.cosmology import Cosmology
 
 
 def read_data(simulation: str,
@@ -206,6 +208,10 @@ def plot_property(df_prop: str, config: dict,
     DISTANCE_FRAC = 0.3
     FS_MIN = 0.01
 
+    with open('data/lopez_et_al_2025.json', 'r') as file:
+        bar_data = json.load(file)
+    gals = [d["Galaxy"] for d in bar_data["Data"]]
+
     fig = plt.figure(figsize=(7, 8))
     gs = fig.add_gridspec(nrows=6, ncols=4, hspace=0.0, wspace=0.0)
     axs = gs.subplots(sharex=True, sharey=True)
@@ -258,6 +264,14 @@ def plot_property(df_prop: str, config: dict,
                                          linewidth=1, edgecolor='none',
                                          facecolor='#dbdbdb', zorder=-1)
                 ax.add_patch(rect)
+
+        # Indicate bar formation times
+        if parse(simulation)[0] in gals:
+            idx = gals.index(parse(simulation)[0])
+            bar_formation_time = Cosmology().present_time \
+                - bar_data["Data"][idx]["t_bar"]
+            ax.plot([bar_formation_time] * 2,
+                    ax.get_ylim(), color="tab:purple", ls=(0, (5, 1)))
 
         ax.text(x=0.95, y=0.05,
                 s=r"$\texttt{" + label + "}$",
