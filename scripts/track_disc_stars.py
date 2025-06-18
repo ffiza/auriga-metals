@@ -296,6 +296,64 @@ def plot_property(df_prop: str, config: dict,
     plt.close(fig)
 
 
+def plot_circularity_change_vs_mass_change(config: dict) -> None:
+    settings = Settings()
+
+    fig = plt.figure(figsize=(7, 8))
+    gs = fig.add_gridspec(nrows=6, ncols=4, hspace=0.0, wspace=0.0)
+    axs = gs.subplots(sharex=True, sharey=True)
+
+    for ax in axs.flatten():
+        ax.tick_params(which='both', direction="in")
+        if ax == axs[-1, -1]: ax.axis("off")
+        ax.set_xlim(-0.25, 0.25)
+        ax.set_xticks([-0.2, -0.1, 0, 0.1, 0.2])
+        ax.set_ylim(-2, 2)
+        ax.set_yticks([-1.5, -1, -0.5, 0, 0.5, 1, 1.5])
+        ax.set_axisbelow(True)
+        if ax.get_subplotspec().is_last_row() or ax == axs[-2, -1]:
+            ax.set_xlabel(r'$\Delta \epsilon$')
+            ax.tick_params(labelbottom=True)
+        if ax.get_subplotspec().is_first_col():
+            ax.set_ylabel(r"$\Delta M ~ \mathrm{[10^{9} \, M_\odot]}$")
+
+    for i in range(len(settings.groups["Included"])):
+        ax = axs.flatten()[i]
+        galaxy = settings.groups["Included"][i]
+        simulation = f"au{galaxy}_or_l4"
+        paths = Paths(parse(simulation)[0],
+                      parse(simulation)[1],
+                      parse(simulation)[2])
+        label = f"Au{galaxy}"
+        df_circularity = pd.read_csv(
+            f"{paths.results}track_results_CD_to_WD"
+            f"{config['FILE_SUFFIX']}.csv")
+        df_mass = pd.read_csv(
+            f"{paths.results}mass_in_virial_radius.csv")
+
+        is_time_range = (df_circularity["Time_Gyr"] >= 4.0)
+        ax.scatter(
+            np.diff(df_circularity["CircularityMedian"][
+                is_time_range].to_numpy()),
+            np.diff(df_mass["StellarMassIn0.5R200_Msun"][
+                is_time_range].to_numpy()) / 1E9,
+            c=df_circularity["Time_Gyr"].to_numpy()[is_time_range][1:],
+            cmap="plasma", s=10, edgecolor="none", vmin=0, vmax=14,
+        )
+        
+        ax.text(x=0.95, y=0.05,
+                s=r"$\texttt{" + label + "}$",
+                size=6.0, transform=ax.transAxes,
+                ha='right', va='bottom',
+                )
+
+    fig.savefig(
+        "images/warm_disc_star_tracking/"
+        f"circ_change_vs_mass_change{config['FILE_SUFFIX']}.pdf")
+
+    plt.close(fig)
+
+
 def main() -> None:
     BLUE = "\033[94m"
     UNDERLINE = "\033[4m"
@@ -335,6 +393,7 @@ def main() -> None:
                          ylim=(-1.1, 1.1), yticks=[-1, -0.5, 0, 0.5, 1],
                          ylabel=r'$j_z / \left| \mathbf{j} \right|$',
                          filename="jzfrac")
+        plot_circularity_change_vs_mass_change(config=config)
 
 
 if __name__ == "__main__":
