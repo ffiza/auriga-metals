@@ -205,12 +205,12 @@ def plot_property(df_prop: str, config: dict,
                   filename: str) -> None:
     settings = Settings()
 
-    DISTANCE_FRAC = 0.3
+    DISTANCE_FRAC = 0.5
     FS_MIN = 0.01
 
     with open('data/lopez_et_al_2025.json', 'r') as file:
-        bar_data = json.load(file)
-    gals = [d["Galaxy"] for d in bar_data["Data"]]
+        bar_data_lopez = json.load(file)
+    bar_data_fragkoudi = pd.read_csv("data/fragkoudi_et_al_2025.csv")
 
     fig = plt.figure(figsize=(7, 8))
     gs = fig.add_gridspec(nrows=6, ncols=4, hspace=0.0, wspace=0.0)
@@ -247,13 +247,15 @@ def plot_property(df_prop: str, config: dict,
         df_labels = [r"CD $\to$ CD", r"CD $\to$ WD"]
         df_colors = ["tab:red", "tab:orange"]
         for i, df in enumerate(dfs):
-            is_finite = np.isfinite(df["CircularityMedian"].to_numpy())
+            is_finite = np.isfinite(df[df_prop].to_numpy())
+            prop = df[df_prop].to_numpy()[is_finite]
+            prop[-1] = np.mean(prop[-3:])
             ax.plot(
                 df["Time_Gyr"].to_numpy()[is_finite],
-                df[df_prop].to_numpy()[is_finite],
+                prop,
                 ls="-", lw=1.0, color=df_colors[i], label=df_labels[i],
             )
-        
+
         if galaxy == 16:
             ax.legend(loc="lower left", framealpha=0, fontsize=5)
 
@@ -268,11 +270,12 @@ def plot_property(df_prop: str, config: dict,
                                          facecolor='#dbdbdb', zorder=-1)
                 ax.add_patch(rect)
 
-        # Indicate bar formation times
+        # Indicate bar formation times from López et al. (2025)
+        gals = [d["Galaxy"] for d in bar_data_lopez["Data"]]
         if parse(simulation)[0] in gals:
             idx = gals.index(parse(simulation)[0])
             bar_formation_time = Cosmology().present_time \
-                - bar_data["Data"][idx]["t_bar"]
+                - bar_data_lopez["Data"][idx]["t_bar"]
             idx_min = np.nanargmin(
                 np.abs(dfs[1]["Time_Gyr"].to_numpy() - bar_formation_time))
             ax.annotate("",
@@ -281,7 +284,37 @@ def plot_property(df_prop: str, config: dict,
                                     - 0.15 * np.diff(ax.get_ylim())[0]),
                         xy=(bar_formation_time,
                             dfs[1][df_prop].to_numpy()[idx_min]),
-                        arrowprops=dict(arrowstyle="->", color="black"))
+                        arrowprops=dict(arrowstyle="->", color="tab:purple"))
+
+        # Indicate bar formation times from Fragkoudi et al. (2025)
+        gals = list(bar_data_fragkoudi["Halo"].unique())
+        if parse(simulation)[0] in gals:
+            idx = gals.index(parse(simulation)[0])
+            if np.isfinite(bar_data_fragkoudi["tlookback_bf_Gyr"].iloc[idx]):
+                bar_formation_time = Cosmology().present_time \
+                    - float(bar_data_fragkoudi["tlookback_bf_Gyr"].iloc[idx])
+                idx_min = np.nanargmin(
+                    np.abs(dfs[0]["Time_Gyr"].to_numpy() - bar_formation_time))
+                ax.annotate("",
+                            xytext=(bar_formation_time,
+                                    dfs[0][df_prop].to_numpy()[idx_min] \
+                                        + 0.15 * np.diff(ax.get_ylim())[0]),
+                            xy=(bar_formation_time,
+                                dfs[0][df_prop].to_numpy()[idx_min]),
+                            arrowprops=dict(arrowstyle="->",
+                            color="tab:green"))
+
+        if parse(simulation)[0] == 17:
+            ax.text(x=0.05, y=0.08,
+                    s="López et al. (2025)",
+                    size=6.0, transform=ax.transAxes,
+                    ha='left', va='center',
+                    color="tab:purple")
+            ax.text(x=0.05, y=0.16,
+                    s="Fragkoudi et al. (2025)",
+                    size=6.0, transform=ax.transAxes,
+                    ha='left', va='center',
+                    color="tab:green")
 
         ax.text(x=0.95, y=0.05,
                 s=r"$\texttt{" + label + "}$",
@@ -378,21 +411,21 @@ def main() -> None:
 
     if args["plot"]:
         plot_property(df_prop="CircularityMedian", config=config,
-                         ylim=(-1.5, 1.5), yticks=[-1, -0.5, 0, 0.5, 1],
-                         ylabel=r'$\epsilon = j_z \, j_\mathrm{circ}^{-1}$',
-                         filename="circularity")
+                      ylim=(-1.5, 1.5), yticks=[-1, -0.5, 0, 0.5, 1],
+                      ylabel=r'$\epsilon = j_z \, j_\mathrm{circ}^{-1}$',
+                      filename="circularity")
         plot_property(df_prop="zPositionAbsMedian_kpc", config=config,
-                         ylim=(0, 3), yticks=[0.5, 1, 1.5, 2, 2.5],
-                         ylabel=r'$\left| z \right|$ [kpc]',
-                         filename="zabs")
+                      ylim=(0, 3), yticks=[0.5, 1, 1.5, 2, 2.5],
+                      ylabel=r'$\left| z \right|$ [kpc]',
+                      filename="zabs")
         plot_property(df_prop="zPositionMedian_kpc", config=config,
-                         ylim=(-1, 1), yticks=[-0.5, 0, 0.5],
-                         ylabel=r'$z$ [kpc]',
-                         filename="z")
+                      ylim=(-1, 1), yticks=[-0.5, 0, 0.5],
+                      ylabel=r'$z$ [kpc]',
+                      filename="z")
         plot_property(df_prop="zAngularMomFracMedian", config=config,
-                         ylim=(-1.1, 1.1), yticks=[-1, -0.5, 0, 0.5, 1],
-                         ylabel=r'$j_z / \left| \mathbf{j} \right|$',
-                         filename="jzfrac")
+                      ylim=(-1.1, 1.1), yticks=[-1, -0.5, 0, 0.5, 1],
+                      ylabel=r'$j_z / \left| \mathbf{j} \right|$',
+                      filename="jzfrac")
         plot_circularity_change_vs_mass_change(config=config)
 
 
