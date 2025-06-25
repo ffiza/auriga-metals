@@ -256,9 +256,6 @@ def plot_property(df_prop: str, config: dict,
                 ls="-", lw=1.0, color=df_colors[i], label=df_labels[i],
             )
 
-        if galaxy == 16:
-            ax.legend(loc="lower left", framealpha=0, fontsize=5)
-
         # Indicate mergers
         mergers, r200 = read_merger_data(simulation)
         for merger in mergers:
@@ -305,12 +302,12 @@ def plot_property(df_prop: str, config: dict,
                             color="tab:green"))
 
         if parse(simulation)[0] == 17:
-            ax.text(x=0.05, y=0.08,
+            ax.text(x=0.05, y=0.10,
                     s="López et al. (2025)",
                     size=6.0, transform=ax.transAxes,
                     ha='left', va='center',
                     color="tab:purple")
-            ax.text(x=0.05, y=0.16,
+            ax.text(x=0.05, y=0.19,
                     s="Fragkoudi et al. (2025)",
                     size=6.0, transform=ax.transAxes,
                     ha='left', va='center',
@@ -321,6 +318,8 @@ def plot_property(df_prop: str, config: dict,
                 size=6.0, transform=ax.transAxes,
                 ha='right', va='bottom',
                 )
+
+    axs[3, 0].legend(loc="lower left", framealpha=0, fontsize=5)
 
     fig.savefig(
         "images/warm_disc_star_tracking/"
