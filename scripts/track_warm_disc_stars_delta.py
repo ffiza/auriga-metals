@@ -194,7 +194,7 @@ def get_user_input() -> dict:
     parser.add_argument("--config", type=str, required=True)
     parser.add_argument("--simulation", type=str, required=True)
     args = parser.parse_args()
-    return args
+    return vars(args)
 
 
 def get_arr_from_idx(idx: np.ndarray, s: pd.Series) -> np.ndarray:
@@ -266,7 +266,7 @@ def plot_scatter(df: pd.DataFrame,
         ax.set_yticks(y_ticks)
         ax.grid(True, ls="-", lw=0.25, color="gainsboro")
         ax.label_outer()
-        ax.set_aspect("equal")
+        # ax.set_aspect("equal")
 
     for i, c in enumerate(settings.components):
         axs[i].scatter(
@@ -293,10 +293,10 @@ def plot_scatter(df: pd.DataFrame,
 def main() -> None:
     figure_setup()
     args = get_user_input()
-    config = yaml.safe_load(open(f"configs/{args.config}.yml"))
+    config = yaml.safe_load(open(f"configs/{args['config']}.yml"))
 
     #region Data Processing
-    df = read_data(args.simulation + "_s127", config, tag_in_situ=True)
+    df = read_data(args["simulation"] + "_s127", config, tag_in_situ=True)
     component_at_birth, r_at_birth, rxy_at_birth, \
         z_at_birth, circularity_at_birth, jz_at_birth, jz_frac_at_birth, \
             j_at_birth = compute_properties_at_birth(df, config)
@@ -316,6 +316,9 @@ def main() -> None:
             / df["CylindricalRadiusAtBirth_kpc"]
     df["zPositionDeltaNorm"] = (df["zPosition_kpc"] \
         - df["zPositionAtBirth_kpc"]) / df["zPositionAtBirth_kpc"]
+    df["zPositionAbsDeltaNorm"] = (np.abs(df["zPosition_kpc"]) \
+        - np.abs(df["zPositionAtBirth_kpc"])) \
+            / np.abs(df["zPositionAtBirth_kpc"])
     df["zPositionDelta"] = df["zPosition_kpc"] - df["zPositionAtBirth_kpc"]
     df["CircularityDeltaNorm"] = (df["Circularity"] \
         - df["CircularityAtBirth"]) / df["CircularityAtBirth"]
@@ -329,7 +332,7 @@ def main() -> None:
         - df["AngularMomentumMagnitudeAtBirth_kpckm/s"]
 
     df = df[df["IsInSitu"] == 1]
-    df.simulation = args.simulation
+    df.simulation = args["simulation"]
     #endregion
 
     #region Plotting
@@ -348,6 +351,14 @@ def main() -> None:
         x_range=(-15, 15),
         y_range=(0, 0.6),
         filename="rxy_delta_norm",
+        )
+    plot_distribution(
+        df=df,
+        prop="zPositionAbsDeltaNorm",
+        x_label=r'$\Delta \left| z \right| / \left| z^\mathrm{birth} \right|$',
+        x_range=(-1, 15),
+        y_range=(0, 0.5),
+        filename="zabs_delta_norm",
         )
     plot_distribution(
         df=df,
@@ -429,6 +440,18 @@ def main() -> None:
         y_ticks=[-1, 0, 1],
         filename="jz_delta_vs_j_delta",
         x_scale_factor=1E3, y_scale_factor=1E3,
+        )
+    plot_scatter(
+        df=df,
+        x_prop="zPositionDeltaNorm",
+        x_label=r"$\Delta z / z^\mathrm{birth}$",
+        x_range=(-15, 15),
+        x_ticks=[-10, -5, 0, 5, 10],
+        y_prop="zPositionAtBirth_kpc",
+        y_label=r"$z^\mathrm{birth}$ [kpc]",
+        y_range=(-5, 5),
+        y_ticks=[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
+        filename="z_birth_vs_z_delta_norm",
         )
     #endregion
 
