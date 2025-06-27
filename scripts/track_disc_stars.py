@@ -1,20 +1,21 @@
-import numpy as np
-import pandas as pd
 import yaml
+import json
 import argparse
 import warnings
-import json
+import numpy as np
+import pandas as pd
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-from auriga.snapshot import Snapshot
-from auriga.support import find_indices
-from auriga.parser import parse
 from auriga.paths import Paths
-from auriga.settings import Settings
-from auriga.images import figure_setup
+from auriga.parser import parse
 from auriga.support import timer
+from auriga.snapshot import Snapshot
+from auriga.settings import Settings
 from auriga.cosmology import Cosmology
+from auriga.images import figure_setup
+from auriga.support import find_indices
 
 
 def read_data(simulation: str,
@@ -200,13 +201,25 @@ def calculate_stats(simulation: str, config: dict) -> None:
             f"{paths.results}track_results_{key}{config['FILE_SUFFIX']}.csv")
 
 
+def add_merger_indication_to_ax(simulation: str, ax: plt.Axes,
+                                distance_frac: float, fs_min: float,
+                                color: str) -> None:
+    mergers, r200 = read_merger_data(simulation)
+    for merger in mergers:
+        if merger[2] < distance_frac * r200[int(merger[1]-15), 2] \
+            and merger[4] > fs_min and merger[0] > 0:
+            rect = patches.Rectangle(
+                (merger[0], ax.get_ylim()[0]),
+                0.2, np.diff(ax.get_ylim())[0],
+                linewidth=1, edgecolor='none',
+                facecolor=color, zorder=-1)
+            ax.add_patch(rect)
+
+
 def plot_property(df_prop: str, config: dict,
                   ylim: tuple, yticks: list, ylabel: str,
                   filename: str) -> None:
     settings = Settings()
-
-    DISTANCE_FRAC = 0.5
-    FS_MIN = 0.01
 
     with open('data/lopez_et_al_2025.json', 'r') as file:
         bar_data_lopez = json.load(file)
@@ -257,15 +270,12 @@ def plot_property(df_prop: str, config: dict,
             )
 
         # Indicate mergers
-        mergers, r200 = read_merger_data(simulation)
-        for merger in mergers:
-            if merger[2] < DISTANCE_FRAC * r200[int(merger[1]-15), 2] \
-                and merger[4] > FS_MIN and merger[0] > 0:
-                rect = patches.Rectangle((merger[0], ax.get_ylim()[0]),
-                                         0.2, np.diff(ax.get_ylim())[0],
-                                         linewidth=1, edgecolor='none',
-                                         facecolor='#dbdbdb', zorder=-1)
-                ax.add_patch(rect)
+        add_merger_indication_to_ax(simulation=simulation, ax=ax,
+                                    distance_frac=0.5, fs_min=0.03,
+                                    color='#dbdbdb')
+        add_merger_indication_to_ax(simulation=simulation, ax=ax,
+                                    distance_frac=0.3, fs_min=0.03,
+                                    color='#b3b3b3')
 
         # Indicate bar formation times from López et al. (2025)
         gals = [d["Galaxy"] for d in bar_data_lopez["Data"]]
